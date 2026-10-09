@@ -1,0 +1,317 @@
+<title>R-Type Engine Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an inventory ledger — status summary, filter bar, then five tables (interfaces, classes, types, entry points, patterns) and the open items. Same tokens as the other architecture pages. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --sunk: #e8ecf2;
+  --fg: #172030;
+  --muted: #5a6577;
+  --line: #c9d1dd;
+  --accent: #0d6b8a;
+  --accent-soft: #d7eef5;
+  --locked: #1f7a4d;
+  --locked-bg: #dcf1e5;
+  --review: #7a4bb0;
+  --review-bg: #ece2f8;
+  --sketch: #a3620a;
+  --sketch-bg: #fbecd2;
+  --todo: #6b7486;
+  --todo-bg: #eceff4;
+  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141c; --surface: #161d28; --sunk: #1c2533; --fg: #e3e8f0; --muted: #98a3b5; --line: #2c3748;
+    --accent: #5cc3e0; --accent-soft: #143642;
+    --locked: #6fd39d; --locked-bg: #15372a; --review: #c6a2f2; --review-bg: #2e2144;
+    --sketch: #f0b357; --sketch-bg: #3a2a10; --todo: #9aa3b3; --todo-bg: #222a37;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141c; --surface: #161d28; --sunk: #1c2533; --fg: #e3e8f0; --muted: #98a3b5; --line: #2c3748;
+  --accent: #5cc3e0; --accent-soft: #143642;
+  --locked: #6fd39d; --locked-bg: #15372a; --review: #c6a2f2; --review-bg: #2e2144;
+  --sketch: #f0b357; --sketch-bg: #3a2a10; --todo: #9aa3b3; --todo-bg: #222a37;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; padding: 0 16px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: 0.01em; }
+h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; }
+h2 { font-size: 22px; font-weight: 600; }
+h3 { font-size: 14px; font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+p { margin: 0; max-width: 72ch; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+a { color: var(--accent); }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--muted); }
+header, section { display: grid; gap: 14px; min-width: 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.st-locked { color: var(--locked); background: var(--locked-bg); }
+.st-review { color: var(--review); background: var(--review-bg); }
+.st-sketch { color: var(--sketch); background: var(--sketch-bg); }
+.st-todo { color: var(--todo); background: var(--todo-bg); }
+
+.tally { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tally div { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 6px; }
+.tally b { font-family: var(--font-display); font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.tally small { color: var(--muted); font-size: 12.5px; }
+@media (max-width: 680px) { .tally { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); padding-block: 10px; z-index: 2; border-bottom: 1px solid var(--line); }
+.filters span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-right: 4px; }
+.filters button { font: 500 12.5px var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--sunk); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.n { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
+td.s { white-space: nowrap; }
+tr.group td { background: var(--sunk); font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); padding-block: 6px; }
+.open { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .open { grid-template-columns: minmax(0, 1fr); } }
+.open div { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--review); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.open b { font-weight: 600; }
+.open.done div { border-left-color: var(--locked); }
+.open span { font-size: 13.5px; color: var(--muted); }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+
+/* shared navigation between the three R-Type architecture pages */
+.suite { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.suite-label { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); align-self: center; margin-right: 6px; }
+.suite a { display: grid; gap: 1px; text-decoration: none; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 14px; min-width: 0; }
+.suite a b { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+.suite a span { font-size: 12px; color: var(--muted); }
+.suite a:hover { border-color: var(--accent); }
+.suite a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.suite a[aria-current="page"] { border-color: var(--accent); background: var(--accent-soft); }
+.suite a[aria-current="page"] b { color: var(--accent); }
+</style>
+
+<div class="wrap">
+
+<nav class="suite" aria-label="R-Type architecture pages">
+  <span class="suite-label">R-Type engine</span>
+  <a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener"><b>Architecture</b><span>Layers, loop, decisions</span></a>
+  <a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener"><b>Classes</b><span>Signatures and diagram</span></a>
+  <a href="https://claude.ai/artifact/FGAmyXhSoPrJycMsLXsoUA" target="_blank" rel="noopener" aria-current="page"><b>Inventory</b><span>Everything, with status</span></a>
+</nav>
+
+<header>
+  <div class="eyebrow">R-Type · Architecture · Engine inventory</div>
+  <h1>R-Type Engine Inventory</h1>
+  <p class="muted">Everything the engine contains: interfaces, classes, data types, entry points and design patterns. The whole engine architecture is locked; full signatures are in <code>docs/engine/reference/</code>, the usage guide in <code>docs/engine/guide/</code>, the tasks in the Notion board.</p>
+  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-09</span><span>round 8 · engine architecture locked</span><span><a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener">class reference</a></span><span><a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener">architecture snapshot</a></span></div>
+  <div class="tally" id="tally"></div>
+</header>
+
+<div class="filters" role="group" aria-label="Filter rows by status">
+  <span>Show</span>
+  <button type="button" id="f-all" data-filter="all" aria-pressed="true">All</button>
+  <button type="button" id="f-locked" data-filter="locked" aria-pressed="false">Locked</button>
+  <button type="button" id="f-review" data-filter="review" aria-pressed="false">In review</button>
+  <button type="button" id="f-sketch" data-filter="sketch" aria-pressed="false">Sketched</button>
+  <button type="button" id="f-todo" data-filter="todo" aria-pressed="false">To design</button>
+</div>
+
+<section>
+  <h3>1 · Interfaces</h3>
+  <h2>Contracts, prefixed with I</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Interface</th><th>Role</th><th>Implemented by</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr data-status="locked"><td class="n">IGameModule</td><td>The contract between a game and the engine</td><td>RTypeModule, PongModule</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">IStorage</td><td>Type-erased component storage, so the registry can hold components a game invented</td><td>SparseSet&lt;T&gt;</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">IPlugin</td><td>Common base of every plugin: API version, name</td><td>every plugin</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">IPlatform</td><td>Window, raw keyboard and gamepad events, access to the renderer</td><td>SfmlPlatform, RaylibPlatform, NullPlatform</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">IRenderer</td><td>Receives the frame's draw list and draws it</td><td>SfmlRenderer, RaylibRenderer, NullRenderer</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">IAudio</td><td>Plays sounds and music</td><td>MiniaudioAudio, NullAudio</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">INetwork</td><td>Engine-side networking (generic server role, E-13)</td><td>AsioNetwork</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">IScripting</td><td>Scripting language for the content layer (Track 3)</td><td>scripting_lua first; own language optional (ADR 0019)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h3>2 · Classes</h3>
+  <h2>Concrete types of the engine</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Class</th><th>Role</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr class="group"><td colspan="3">Core and lifecycle</td></tr>
+      <tr data-status="locked"><td class="n">Engine</td><td>Owns everything, runs boot → load → loop → shutdown</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Context</td><td>The door game code receives: world, time, actions, audio…</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Clock</td><td>Measures real time for the loop's accumulator</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr class="group"><td colspan="3">Modules and plugins</td></tr>
+      <tr data-status="locked"><td class="n">ModuleManager</td><td>Loads plugins and the game, keeps them open until the very end</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">DynamicLibrary</td><td>Opens a .so / .dll and finds a function in it; the only OS-specific loading code</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">NullPlatform · NullRenderer · NullAudio</td><td>Do-nothing versions for the server and for tests</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr class="group"><td colspan="3">ECS</td></tr>
+      <tr data-status="locked"><td class="n">Registry</td><td>Entities and their components, one per scene</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">SparseSet&lt;T&gt;</td><td>Packed storage for one component type</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Commands</td><td>Spawns and destroys to apply at the end of a stage</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">View&lt;Ts...&gt;</td><td>What view&lt;Position, Velocity&gt;() returns to iterate entities</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr class="group"><td colspan="3">Subsystems</td></tr>
+      <tr data-status="locked"><td class="n">TypeRegistry</td><td>Dictionary of component types: name to type, fields, YAML reading</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Scheduler</td><td>The timetable of systems, by stage</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">EventBus</td><td>Publish and listen to events</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">InputMap · ActionState</td><td>Keys to actions (MoveUp, Fire), rebinding</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">RenderQueue</td><td>The frame's draw list</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">SceneManager</td><td>Load and switch scenes</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">AssetManager</td><td>Load each image or sound once, hand out handles</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Logger</td><td>Write messages; passed to modules, never a singleton</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">CVars · Console</td><td>Console variables and developer console</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h3>3 · Data types</h3>
+  <h2>Structs, enums and simple types</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Type</th><th>Content</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr data-status="locked"><td class="n">Entity</td><td><code>{ uint32 index, uint32 generation }</code></td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Role</td><td>Client, Server, Editor</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">EngineConfig</td><td>role, game, platform, audio, network, tickRate, root</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Time</td><td>fixedDelta, tick, alpha, total</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Stage</td><td>FixedUpdate, LateUpdate, Render</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">System</td><td><code>std::function&lt;void(Context&amp;)&gt;</code></td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">DrawCmd · Feature</td><td>One draw command; the optional 3D capability</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Vec2 · Rect · Color · Key · handles</td><td>The engine's own vocabulary; no backend type leaves its plugin</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Engine components</td><td>Position, Velocity, Sprite, Collider, Name, Uuid, Parent, Children, Tags</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h3>4 · Entry points</h3>
+  <h2>Functions, macros and CMake helpers</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Element</th><th>Role</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr data-status="locked"><td class="n">main() · engine_add_launcher</td><td>The launcher shipped by the engine; games write no main() and no loop</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">create_game · destroy_game</td><td>A game's <code>extern "C"</code> entry point</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">create_plugin · destroy_plugin</td><td>A plugin's <code>extern "C"</code> entry point</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">ENGINE_GAME_MODULE · ENGINE_PLUGIN</td><td>Generate the entry points for both linking modes (ADR 0020)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">engine_add_game_module</td><td>Builds a game as a module, shared or static (ADR 0020)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h3>5 · Design patterns</h3>
+  <h2>Each pattern and where it lives</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Pattern</th><th>Where in the engine</th><th>Problem it solves</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr data-status="locked"><td class="n">Entity-Component-System</td><td>Registry, components, systems</td><td>Inheritance trees explode</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Layers</td><td>content / game / engine / plugins</td><td>Everything depends on everything</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Microkernel (plugins)</td><td>core + plugins + game module</td><td>Interchangeable backends</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Composition root</td><td>Engine</td><td>One place creates and wires everything</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Template Method</td><td>Engine::run() + IGameModule hooks</td><td>The game fills steps without changing their order</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">RAII</td><td>Engine member order, DynamicLibrary</td><td>Shutdown in the right order, without crashes</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Facade</td><td>Context</td><td>The game does not juggle ten subsystems</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Dependency Injection</td><td>Context, services passed to modules</td><td>No singleton duplicated per .so</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Null Object</td><td>NullAudio, NullRenderer, NullPlatform</td><td>No nullptr on the server</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Abstract Factory</td><td>create_game, create_plugin</td><td>Create without knowing the exact type</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Game Loop</td><td>Engine::loop()</td><td>Time independent of CPU speed (E-04)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Update Method, as systems</td><td>Scheduler + systems</td><td>Advance everything every tick</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Double Buffer</td><td>previous/current state, RenderQueue</td><td>Interpolation, rendering</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Object Pool</td><td>reused slots + generation (Entity)</td><td>Thousands of missiles</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Data Locality</td><td>SparseSet&lt;T&gt;</td><td>Fast iteration</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Command</td><td>Commands, DrawCmd, input actions</td><td>Separate deciding from executing</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Event Queue</td><td>Commands applied at end of stage, deferred EventBus</td><td>No half-updated world</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Mediator · Observer</td><td>EventBus, Registry hooks</td><td>Systems do not know each other</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Registry</td><td>TypeRegistry, ECS Registry</td><td>Store and find, never decide</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Prototype</td><td>prefabs</td><td>Spawn 50 identical Bydos</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Type Object</td><td>enemy kinds in YAML</td><td>No class per enemy</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Bridge · Strategy</td><td>IRenderer to SFML / raylib</td><td>Swap the backend</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Adapter</td><td>every plugin, DynamicLibrary</td><td>Translate a library to the engine vocabulary</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Flyweight</td><td>asset handles</td><td>One texture shared by 300 Bydos</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">State · Spatial Partition · Dirty Flag · Bytecode</td><td>boss phases, collisions, hierarchy, scripts</td><td>Later blocks</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h3>6 · Decided on 2026-10-09</h3>
+  <h2>Language, data and tooling</h2>
+  <div class="open done">
+    <div><b>C++23 with an allow-list</b><span>C++20 except modules, plus std::expected, move_only_function, print, deducing this. Fallback tl::expected. ADR 0017.</span></div>
+    <div><b>Data in YAML, behaviour in scripts</b><span>Config, scenes, prefabs in YAML; waves, boss phases, special AI in scripts. ADR 0018.</span></div>
+    <div><b>Lua first</b><span>scripting_lua is the first IScripting plugin; your own language stays optional. ADR 0019.</span></div>
+    <div><b>Game module helpers</b><span>ENGINE_GAME_MODULE, ENGINE_PLUGIN, engine_add_game_module. ADR 0020.</span></div>
+  </div>
+  <h3>Also locked: block 1</h3>
+  <div class="open done">
+    <div><b>Engine and lifecycle</b><span>Composition root, member order is shutdown order. ADR 0021.</span></div>
+    <div><b>Context</b><span>The only door from game code into the engine. ADR 0022.</span></div>
+    <div><b>Null Objects</b><span>For absent services on the server and in tests. ADR 0023.</span></div>
+    <div><b>Error handling</b><span>Exit codes per boot stage, failing systems disabled on the server. ADR 0024.</span></div>
+  </div>
+  <h3>Also locked: blocks 2 to 12</h3>
+  <div class="open done">
+    <div><b>Modules, ECS API, reflection</b><span>ADRs 0025, 0026, 0027.</span></div>
+    <div><b>Scheduler, events, input</b><span>ADRs 0028, 0029, 0030.</span></div>
+    <div><b>Rendering, audio, engine networking</b><span>ADRs 0031, 0032, 0033 (NetworkId settles E-03).</span></div>
+    <div><b>Scenes and assets, services and scripting</b><span>ADRs 0034, 0035.</span></div>
+  </div>
+  <h3>Next</h3>
+  <div class="open">
+    <div><b>Engine tasks</b><span>59 tasks derived from the folder tree, self-assign in Notion.</span></div>
+    <div><b>Server part</b><span>Lobby, rooms, game module split (E-12), then the protocol.</span></div>
+  </div>
+</section>
+
+<footer>All engine items are locked (ADRs 0001–0035). The other filters stay for later parts of the architecture (server, network, game).</footer>
+
+</div>
+
+<script>
+(function () {
+  var rows = Array.prototype.slice.call(document.querySelectorAll('tr[data-status]'));
+  var counts = { locked: 0, review: 0, sketch: 0, todo: 0 };
+  rows.forEach(function (r) { var s = r.getAttribute('data-status'); if (counts[s] !== undefined) counts[s]++; });
+  var labels = { locked: ['Locked', 'st-locked'], review: ['In review', 'st-review'], sketch: ['Sketched', 'st-sketch'], todo: ['To design', 'st-todo'] };
+  var tally = document.getElementById('tally');
+  Object.keys(labels).forEach(function (k) {
+    var d = document.createElement('div');
+    d.innerHTML = '<b>' + counts[k] + '</b><span class="chip ' + labels[k][1] + '">' + labels[k][0] + '</span><small>items</small>';
+    tally.appendChild(d);
+  });
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.filters button'));
+  function apply(f) {
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === f)); });
+    rows.forEach(function (r) { r.hidden = !(f === 'all' || r.getAttribute('data-status') === f); });
+    document.querySelectorAll('tbody').forEach(function (tb) {
+      var groups = Array.prototype.slice.call(tb.querySelectorAll('tr.group'));
+      groups.forEach(function (g) {
+        var n = g.nextElementSibling, any = false;
+        while (n && !n.classList.contains('group')) { if (!n.hidden) any = true; n = n.nextElementSibling; }
+        g.hidden = !any;
+      });
+    });
+    try { localStorage.setItem('rtype-inventory-filter', f); } catch (e) {}
+  }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { apply(b.getAttribute('data-filter')); }); });
+  var saved = 'all';
+  try { saved = localStorage.getItem('rtype-inventory-filter') || 'all'; } catch (e) {}
+  apply(saved);
+})();
+</script>

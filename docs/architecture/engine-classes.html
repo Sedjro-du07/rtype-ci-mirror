@@ -1,0 +1,767 @@
+<title>R-Type Engine Classes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: class reference — status strip, filter bar, relationship diagram, then one section per engine block with a card per type. Same token system as the architecture snapshot. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --sunk: #e8ecf2;
+  --fg: #172030;
+  --muted: #5a6577;
+  --line: #c9d1dd;
+  --accent: #0d6b8a;
+  --accent-soft: #d7eef5;
+  --locked: #1f7a4d;
+  --locked-bg: #dcf1e5;
+  --review: #7a4bb0;
+  --review-bg: #ece2f8;
+  --sketch: #a3620a;
+  --sketch-bg: #fbecd2;
+  --todo: #6b7486;
+  --todo-bg: #eceff4;
+  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141c; --surface: #161d28; --sunk: #1c2533; --fg: #e3e8f0; --muted: #98a3b5; --line: #2c3748;
+    --accent: #5cc3e0; --accent-soft: #143642;
+    --locked: #6fd39d; --locked-bg: #15372a; --review: #c6a2f2; --review-bg: #2e2144;
+    --sketch: #f0b357; --sketch-bg: #3a2a10; --todo: #9aa3b3; --todo-bg: #222a37;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141c; --surface: #161d28; --sunk: #1c2533; --fg: #e3e8f0; --muted: #98a3b5; --line: #2c3748;
+  --accent: #5cc3e0; --accent-soft: #143642;
+  --locked: #6fd39d; --locked-bg: #15372a; --review: #c6a2f2; --review-bg: #2e2144;
+  --sketch: #f0b357; --sketch-bg: #3a2a10; --todo: #9aa3b3; --todo-bg: #222a37;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; padding: 0 16px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: 0.01em; }
+h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; }
+h2 { font-size: 22px; font-weight: 600; }
+p { margin: 0; max-width: 72ch; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+a { color: var(--accent); }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--muted); }
+header, section { display: grid; gap: 14px; min-width: 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.st-locked { color: var(--locked); background: var(--locked-bg); }
+.st-review { color: var(--review); background: var(--review-bg); }
+.st-sketch { color: var(--sketch); background: var(--sketch-bg); }
+.st-todo { color: var(--todo); background: var(--todo-bg); }
+
+.tally { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tally div { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 6px; }
+.tally b { font-family: var(--font-display); font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.tally small { color: var(--muted); font-size: 12.5px; }
+@media (max-width: 680px) { .tally { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); padding-block: 10px; z-index: 2; border-bottom: 1px solid var(--line); }
+.filters span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-right: 4px; }
+.filters button { font: 500 12.5px var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; background: transparent; border: 0; padding: 0; min-width: 720px; }
+
+.block { display: grid; gap: 14px; }
+.block-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.block-head h2 { font-size: 20px; }
+.block-head .k { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .cards { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 6px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.card[data-status="locked"] { border-left-color: var(--locked); }
+.card[data-status="locked"] { border-left-color: var(--review); }
+.card[data-status="locked"] { border-left-color: var(--sketch); }
+.card[data-status="locked"] { border-left-color: var(--todo); border-left-style: dotted; }
+.card.wide { grid-column: 1 / -1; }
+.card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.kind { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 1px 6px; }
+.name { font-family: var(--font-mono); font-size: 15px; font-weight: 500; overflow-wrap: anywhere; }
+.card p { font-size: 14px; }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--muted); }
+.facts b { color: var(--fg); font-weight: 500; }
+pre { margin: 0; background: var(--sunk); border: 1px solid var(--line); border-radius: 5px; padding: 12px 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--fg); }
+.legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; font-size: 13px; color: var(--muted); }
+@media (max-width: 760px) { .legend { grid-template-columns: minmax(0, 1fr); } }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+
+/* shared navigation between the three R-Type architecture pages */
+.suite { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.suite-label { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); align-self: center; margin-right: 6px; }
+.suite a { display: grid; gap: 1px; text-decoration: none; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 14px; min-width: 0; }
+.suite a b { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+.suite a span { font-size: 12px; color: var(--muted); }
+.suite a:hover { border-color: var(--accent); }
+.suite a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.suite a[aria-current="page"] { border-color: var(--accent); background: var(--accent-soft); }
+.suite a[aria-current="page"] b { color: var(--accent); }
+</style>
+
+<div class="wrap">
+
+<nav class="suite" aria-label="R-Type architecture pages">
+  <span class="suite-label">R-Type engine</span>
+  <a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener"><b>Architecture</b><span>Layers, loop, decisions</span></a>
+  <a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener" aria-current="page"><b>Classes</b><span>Signatures and diagram</span></a>
+  <a href="https://claude.ai/artifact/FGAmyXhSoPrJycMsLXsoUA" target="_blank" rel="noopener"><b>Inventory</b><span>Everything, with status</span></a>
+</nav>
+
+<header>
+  <div class="eyebrow">R-Type · Architecture · Engine API</div>
+  <h1>R-Type Engine Classes</h1>
+  <p class="muted">Every class, interface, struct and function of the engine, all locked. These cards summarise each type; the complete signatures with every method and what it does are in <code>docs/engine/reference/</code> (one page per block).</p>
+  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-09</span><span>round 8 · engine architecture locked</span><span>companion page: <a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener">R-Type Engine Architecture</a></span></div>
+  <div class="tally" id="tally"></div>
+  <div class="legend">
+    <div><span class="chip st-locked">Locked</span><br>Shape decided by a locked decision.</div>
+    <div><span class="chip st-locked">Locked</span><br>Detailed in block 1, waiting for team validation.</div>
+    <div><span class="chip st-locked">Locked</span><br>Named and used in examples, signatures provisional.</div>
+    <div><span class="chip st-locked">Locked</span><br>Known to exist, not designed yet.</div>
+  </div>
+</header>
+
+<div class="filters" role="group" aria-label="Filter by status">
+  <span>Show</span>
+  <button type="button" id="f-all" data-filter="all" aria-pressed="true">All</button>
+  <button type="button" id="f-locked" data-filter="locked" aria-pressed="false">Locked</button>
+  <button type="button" id="f-review" data-filter="review" aria-pressed="false">In review</button>
+  <button type="button" id="f-sketch" data-filter="sketch" aria-pressed="false">Sketched</button>
+  <button type="button" id="f-todo" data-filter="todo" aria-pressed="false">To design</button>
+</div>
+
+<section>
+  <div class="eyebrow">Relationships</div>
+  <h2>Who owns, uses and implements what</h2>
+  <p class="muted">Filled diamonds mean ownership (destroyed with the owner). Hollow triangles mean "implements". Dashed arrows mean "uses through a reference".</p>
+  <div class="diagram">
+<pre class="mermaid">
+classDiagram
+  direction LR
+  class Engine {
+    +run() int
+    +requestQuit()
+    -boot()
+    -load()
+    -loop()
+    -shutdown()
+  }
+  class Context {
+    +world() Registry
+    +commands() Commands
+    +scenes() SceneManager
+    +events() EventBus
+    +input() ActionState
+    +render() RenderQueue
+    +audio() IAudio
+    +time() Time
+  }
+  class IGameModule {
+    <<interface>>
+    +registerTypes(TypeRegistry)
+    +registerSystems(Role, Scheduler)
+    +firstScene() string_view
+  }
+  class IPlugin {
+    <<interface>>
+    +apiVersion()
+  }
+  class IPlatform {
+    <<interface>>
+    +pollEvents()
+    +renderer()
+  }
+  class IRenderer {
+    <<interface>>
+    +submit(DrawCmds)
+    +supports(Feature)
+  }
+  class IAudio {
+    <<interface>>
+    +play()
+    +playMusic()
+  }
+  class INetwork {
+    <<interface>>
+  }
+  class IStorage {
+    <<interface>>
+    +has()
+    +remove()
+    +size()
+  }
+  Engine *-- ModuleManager
+  Engine *-- TypeRegistry
+  Engine *-- EventBus
+  Engine *-- AssetManager
+  Engine *-- InputMap
+  Engine *-- Scheduler
+  Engine *-- SceneManager
+  Engine *-- RenderQueue
+  Engine ..> Context : creates
+  ModuleManager *-- DynamicLibrary
+  ModuleManager ..> IGameModule : loads
+  ModuleManager ..> IPlugin : loads
+  IPlugin <|-- IPlatform
+  IPlugin <|-- IAudio
+  IPlugin <|-- INetwork
+  IPlatform ..> IRenderer
+  IAudio <|.. NullAudio
+  IRenderer <|.. NullRenderer
+  IPlatform <|.. NullPlatform
+  SceneManager *-- Registry : one per scene
+  Registry *-- IStorage
+  IStorage <|.. SparseSet
+  Context ..> Registry
+  Context ..> Scheduler
+  IGameModule ..> TypeRegistry
+  IGameModule ..> Scheduler
+</pre>
+  </div>
+</section>
+
+<!-- BLOCK 1 -->
+<section class="block" id="b1">
+  <div class="block-head"><h2>1 · Engine, lifecycle and launcher</h2><span class="k">engine/core · E-04, E-06, E-13 · round 8</span></div>
+  <div class="cards">
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">function + CMake</span><span class="name">launcher main()</span><span class="chip st-locked">Locked</span></div>
+      <p>The engine ships one generic <code>main()</code>. Games write no <code>main()</code> and no loop; CMake builds the launcher once per executable name.</p>
+      <div class="facts"><span><b>Pattern</b> inversion of control</span><span><b>Decision</b> E-06</span></div>
+<pre>// engine/launcher/main.cpp  (engine code, written once)
+int main(int argc, char** argv) {
+    return engine::Engine(
+        engine::EngineConfig::load(ENGINE_DEFAULT_CONFIG, argc, argv)).run();
+}
+
+# a game's CMakeLists.txt
+engine_add_launcher(r-type_client CONFIG client.yaml)
+engine_add_launcher(r-type_server CONFIG server.yaml)</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">enum class</span><span class="name">Role</span><span class="chip st-locked">Locked</span></div>
+      <p>The role of the process. Decides which plugins load and which systems a game registers.</p>
+<pre>enum class Role { Client, Server, Editor };</pre>
+      <div class="card-top"><span class="kind">struct</span><span class="name">EngineConfig</span><span class="chip st-locked">Locked</span></div>
+      <p>Read at startup from a file, overridden by command-line options. Plugin names resolve to files: <code>platform: sfml</code> loads <code>plugins/libplatform_sfml.so</code>.</p>
+<pre>struct EngineConfig {
+    Role role;
+    std::string game;        // "rtype"
+    std::string platform;    // "sfml" | "raylib"   (client only)
+    std::string audio;       // "miniaudio"          (client only)
+    std::string network;     // "asio"
+    double tickRate = 60.0;  // simulation steps per second
+    std::filesystem::path root;
+    static EngineConfig load(const std::filesystem::path& file, int argc, char** argv);
+};</pre>
+    </article>
+
+    <article class="card wide" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Engine</span><span class="chip st-locked">Locked</span></div>
+      <p>The composition root: owns every subsystem, runs the lifecycle, loads plugins and the game. The game never sees it. Member order is an architecture decision: members are destroyed bottom to top, so scenes die before the game module is unloaded and the logger outlives everyone who writes to it.</p>
+      <div class="facts"><span><b>Patterns</b> composition root, Template Method (<code>run()</code>), RAII</span><span><b>Decisions</b> E-04, E-06</span></div>
+<pre>class Engine {
+public:
+    explicit Engine(EngineConfig config);
+    int  run();                    // boot → load → loop → shutdown, returns exit code
+    void requestQuit() noexcept;   // thread-safe: signal, window close, console
+
+private:
+    void boot();                   // logger, plugins of the role, game module, registerTypes
+    void load();                   // registerSystems, first scene, assets, onStart
+    void loop();                   // THE game loop (fixed step + interpolation)
+    void shutdown();               // onShutdown, clear scenes, then RAII does the rest
+
+    EngineConfig     config_;
+    Logger           logger_;      // destroyed after the modules (they log on unload)
+    ModuleManager    modules_;     // owns the .so/.dll: destroyed last among subsystems
+    TypeRegistry     types_;
+    EventBus         events_;
+    AssetManager     assets_;
+    InputMap         input_;
+    Scheduler        scheduler_;   // holds game systems: destroyed before modules_
+    SceneManager     scenes_;      // holds game components: destroyed before modules_
+    RenderQueue      renderQueue_;
+    Clock            clock_;
+    std::atomic_bool running_{false};
+};</pre>
+    </article>
+
+    <article class="card wide" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Context</span><span class="chip st-locked">Locked</span></div>
+      <p>The only door from game code into the engine. A non-owning view passed to every system and to the game hooks. References, never pointers: a missing service is a Null Object, so no call can hit <code>nullptr</code>. Used on the loop thread only.</p>
+      <div class="facts"><span><b>Patterns</b> Facade, Dependency Injection</span><span><b>Network access</b> added in the network block</span></div>
+<pre>class Context {
+public:
+    Registry&          world();          // registry of the ACTIVE scene (changes on switch)
+    Commands&          commands();       // deferred spawn / destroy / add / remove (ECS-4)
+    SceneManager&      scenes();         // switchTo("scenes/level1.yaml")
+    EventBus&          events();
+    const ActionState& input() const;    // actions (MoveUp, Fire), never keys
+    AssetManager&      assets();
+    RenderQueue&       render();         // E-07
+    IAudio&            audio();          // NullAudio on the server
+    const Time&        time() const;
+    Logger&            log();
+    Role               role() const;
+    void               requestQuit();    // a request; the frame finishes cleanly
+
+private:
+    friend class Engine;                 // only the engine builds a Context
+    explicit Context(Engine& e);
+    Engine* engine_;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">struct</span><span class="name">Time</span><span class="chip st-locked">Locked</span></div>
+      <p>Read-only timing given to systems through <code>ctx.time()</code>.</p>
+<pre>struct Time {
+    double   fixedDelta;   // 1 / tickRate, the dt of every FixedUpdate
+    uint64_t tick;         // number of fixed steps since start
+    double   alpha;        // 0..1, interpolation between the last two ticks
+    double   total;        // seconds since start
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Clock</span><span class="chip st-locked">Locked</span></div>
+      <p>Measures real elapsed time for the loop's accumulator.</p>
+<pre>class Clock {
+public:
+    double restart();      // seconds since last restart, then resets
+};</pre>
+    </article>
+
+  </div>
+</section>
+
+<!-- BLOCK 2 -->
+<section class="block" id="b2">
+  <div class="block-head"><h2>2 · Modules and plugins</h2><span class="k">engine/modules · E-02, E-05, E-06, E-10</span></div>
+  <div class="cards">
+
+    <article class="card wide" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IGameModule</span><span class="chip st-locked">Locked</span></div>
+      <p>The contract every game implements. Three questions the engine asks at startup, plus two notifications. Replaces the earlier <code>registerServer</code> / <code>registerClient</code> pair, so a new role (Editor) never changes the interface.</p>
+      <div class="facts"><span><b>Patterns</b> Template Method hooks, Abstract Factory entry point</span><span><b>Naming</b> interfaces start with <code>I</code></span></div>
+<pre>class IGameModule {
+public:
+    virtual ~IGameModule() = default;
+    virtual void registerTypes(TypeRegistry& types) = 0;            // "which components did you invent?"
+    virtual void registerSystems(Role role, Scheduler& s) = 0;      // "what logic runs, and when?"
+    virtual std::string_view firstScene() const = 0;                // "where do I start?"
+    virtual void onStart(Context& ctx) {}                           // once, before the loop
+    virtual void onShutdown(Context& ctx) {}                        // once, world still alive
+};
+
+extern "C" EXPORT IGameModule* create_game();       // never throws: returns nullptr on failure
+extern "C" EXPORT void destroy_game(IGameModule*);  // freed by the module that allocated it</pre>
+    </article>
+
+    <article class="card wide" data-status="locked">
+      <div class="card-top"><span class="kind">macro + CMake</span><span class="name">ENGINE_GAME_MODULE · engine_add_game_module</span><span class="chip st-locked">Locked</span></div>
+      <p>What a game author writes to plug a game in. The macro generates the two <code>extern "C"</code> functions with the Windows export and the mandatory <code>try/catch</code>, so no game writes that boilerplate by hand. The CMake function builds the module as a shared library or statically, following <code>ENGINE_DYNAMIC_MODULES</code> (E-10).</p>
+      <div class="facts"><span><b>Precedent</b> Unreal <code>IMPLEMENT_PRIMARY_GAME_MODULE</code></span></div>
+<pre>// src/PongModule.cpp
+class PongModule : public engine::IGameModule { /* registerTypes, registerSystems, firstScene */ };
+ENGINE_GAME_MODULE(PongModule)      // → create_game() / destroy_game()
+
+# CMakeLists.txt
+find_package(rtype_engine REQUIRED)
+engine_add_game_module(pong_game src/PongModule.cpp src/Systems.cpp)
+engine_add_launcher(pong CONFIG pong.yaml)</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IPlugin</span><span class="chip st-locked">Locked</span></div>
+      <p>Base of every backend plugin. The version check refuses a mismatched plugin with a clear error.</p>
+<pre>class IPlugin {
+public:
+    virtual ~IPlugin() = default;
+    virtual uint32_t apiVersion() const = 0;   // == ENGINE_PLUGIN_API_VERSION
+    virtual std::string_view name() const = 0;
+};
+extern "C" EXPORT IPlugin* create_plugin();
+extern "C" EXPORT void destroy_plugin(IPlugin*);</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">DynamicLibrary</span><span class="chip st-locked">Locked</span></div>
+      <p>The only OS-specific code for loading: wraps <code>dlopen</code> / <code>LoadLibrary</code>. Closes the library in its destructor.</p>
+      <div class="facts"><span><b>Pattern</b> RAII, Adapter over the OS API</span></div>
+<pre>class DynamicLibrary {
+public:
+    explicit DynamicLibrary(const std::filesystem::path& file);  // adds lib prefix / .so / .dll
+    ~DynamicLibrary();                                           // dlclose / FreeLibrary
+    template &lt;class Fn&gt; Fn symbol(std::string_view name) const;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">ModuleManager</span><span class="chip st-locked">Locked</span></div>
+      <p>Loads plugins by category and name, loads the game module, keeps libraries open until the very end. With <code>ENGINE_DYNAMIC_MODULES=OFF</code> it resolves the same names from a static table instead (E-10).</p>
+<pre>class ModuleManager {
+public:
+    template &lt;class I&gt;
+    I&amp; load(std::string_view category, std::string_view name);  // "platform", "sfml"
+    IGameModule&amp; loadGame(std::string_view name);                // "rtype"
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">null objects</span><span class="name">NullPlatform · NullRenderer · NullAudio</span><span class="chip st-locked">Locked</span></div>
+      <p>Implement the interfaces and do nothing. Used on the server, in CI tests, and as a fallback when no audio device exists. Never used to hide a real error: a client whose rendering plugin fails stops with a message. Each one is announced once in the logs.</p>
+      <div class="facts"><span><b>Pattern</b> Null Object</span></div>
+<pre>class NullAudio final : public IAudio {
+public:
+    void play(SoundHandle, float) override {}
+    void playMusic(MusicHandle) override {}
+    void stopMusic() override {}
+};</pre>
+    </article>
+
+  </div>
+</section>
+
+<!-- BLOCK 3 -->
+<section class="block" id="b3">
+  <div class="block-head"><h2>3 · ECS</h2><span class="k">engine/ecs · ECS-1 to ECS-5</span></div>
+  <div class="cards">
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">struct</span><span class="name">Entity</span><span class="chip st-locked">Locked</span></div>
+      <p>A 64-bit handle. A reused slot gets a new generation, so a stale handle is detected by comparing two numbers. Never sent over the network.</p>
+      <div class="facts"><span><b>Decision</b> ECS-1</span><span><b>Pattern</b> Object Pool (slot reuse)</span></div>
+<pre>struct Entity {
+    uint32_t index;        // slot in the storages
+    uint32_t generation;   // incremented each time the slot is reused
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IStorage</span><span class="chip st-locked">Locked</span></div>
+      <p>Type-erased storage so the registry can hold components defined in a game module it was compiled without. Indexed by the TypeRegistry's <code>ComponentId</code>.</p>
+      <div class="facts"><span><b>Decision</b> ECS-3</span></div>
+<pre>class IStorage {
+public:
+    virtual ~IStorage() = default;
+    virtual bool has(Entity) const = 0;
+    virtual void remove(Entity) = 0;
+    virtual std::size_t size() const = 0;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class template</span><span class="name">SparseSet&lt;T&gt;</span><span class="chip st-locked">Locked</span></div>
+      <p>One per component type. Paged sparse array maps entity to dense position; dense arrays stay packed. O(1) add and remove by swap-and-pop. Never keep a pointer to a component.</p>
+      <div class="facts"><span><b>Decision</b> ECS-2</span><span><b>Pattern</b> Data Locality</span></div>
+<pre>template &lt;class T&gt;
+class SparseSet final : public IStorage {
+    std::vector&lt;std::unique_ptr&lt;uint32_t[]&gt;&gt; sparse_;  // pages of 4096
+    std::vector&lt;Entity&gt; dense_;
+    std::vector&lt;T&gt;      data_;
+public:
+    T&amp;   emplace(Entity, T value);
+    T&amp;   get(Entity);
+    T*   tryGet(Entity);
+    void remove(Entity) override;   // swap with last, pop
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Registry</span><span class="chip st-locked">Locked</span></div>
+      <p>One per scene. Stores and finds, never decides. Hooks let the network and the editor react to changes.</p>
+      <div class="facts"><span><b>Patterns</b> Registry, Observer (hooks)</span></div>
+<pre>class Registry {
+public:
+    Entity create();
+    bool   alive(Entity) const;
+    template &lt;class T&gt; T&amp;   get(Entity);
+    template &lt;class T&gt; T*   tryGet(Entity);
+    template &lt;class T&gt; bool has(Entity) const;
+    template &lt;class... Ts&gt; View&lt;Ts...&gt; view();
+    template &lt;class T&gt; ComponentHooks&amp; hooks();   // onCreate / onReplace / onDestroy (Signal)
+private:
+    std::vector&lt;std::unique_ptr&lt;IStorage&gt;&gt; storages_;  // by ComponentId
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Commands</span><span class="chip st-locked">Locked</span></div>
+      <p>Command buffer for structural changes. Systems record; the engine applies at the end of each stage, where hooks fire. Editing a component value stays immediate.</p>
+      <div class="facts"><span><b>Decision</b> ECS-4</span><span><b>Patterns</b> Command, Event Queue</span></div>
+<pre>class Commands {
+public:
+    Entity spawn(std::string_view prefab, Vec2 position);
+    void   destroy(Entity);
+    template &lt;class T&gt; void add(Entity, T value);
+    template &lt;class T&gt; void remove(Entity);
+    void   apply(Registry&amp;);   // engine only, end of stage
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class template</span><span class="name">View&lt;Ts...&gt;</span><span class="chip st-locked">Locked</span></div>
+      <p>What <code>world().view&lt;Position, Velocity&gt;()</code> returns: iterates the smallest set, checks the others in O(1), yields <code>[entity, components...]</code>. Exclusion filters to decide.</p>
+    </article>
+
+    <article class="card wide" data-status="locked">
+      <div class="card-top"><span class="kind">structs</span><span class="name">Engine components</span><span class="chip st-locked">Locked</span></div>
+      <p>Plain data, no logic. Generic components ship with the engine; identity components are optional (ECS-5); games add their own (<code>Health</code>, <code>BydosAI</code>…) through <code>registerTypes</code>.</p>
+<pre>struct Position { float x, y; };
+struct Velocity { float dx, dy; };
+struct Sprite   { TextureHandle texture; Rect frame; int layer; };
+struct Collider { float width, height; };
+
+// identity, optional (ECS-5)
+struct Name     { std::string value; };
+struct Uuid     { uint64_t hi, lo; };
+struct Parent   { Entity value; };
+struct Children { std::vector&lt;Entity&gt; list; };
+struct Tags     { small_vector&lt;TagId&gt; ids; };   // text tags from YAML / scripts
+// typed tags are empty structs: struct Enemy {};</pre>
+    </article>
+
+  </div>
+</section>
+
+<!-- BLOCK 4-7 -->
+<section class="block" id="b4">
+  <div class="block-head"><h2>4–7 · Types, scheduling, events, input</h2><span class="k">engine/core · blocks 4 to 7 not designed yet</span></div>
+  <div class="cards">
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">TypeRegistry</span><span class="chip st-locked">Locked</span></div>
+      <p>The dictionary of component types: name, numeric ID, size, fields, and functions to create, read from YAML, write and inspect. IDs are assigned here, never by a static counter.</p>
+      <div class="facts"><span><b>Patterns</b> Registry, reflection by registration</span><span><b>Block</b> 4</span></div>
+<pre>class TypeRegistry {
+public:
+    template &lt;class T&gt; TypeBuilder&lt;T&gt; add(std::string_view name);
+    ComponentId id(std::string_view name) const;
+    const TypeInfo* find(std::string_view name) const;
+};
+types.add&lt;Health&gt;("Health").field("hp", &amp;Health::hp);</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Scheduler · Stage · System</span><span class="chip st-locked">Locked</span></div>
+      <p>The timetable of systems. Named systems in fixed stages, ordered by after/before constraints, timed for the profiler; a throwing system is disabled on the server (ADR 0028).</p>
+      <div class="facts"><span><b>Patterns</b> Game Loop, Update Method</span><span><b>Block</b> 5</span></div>
+<pre>enum class Stage { FixedUpdate, LateUpdate, Render };
+using SystemFn = std::move_only_function&lt;void(Context&amp;)&gt;;
+
+class Scheduler {
+public:
+    SystemBuilder add(Stage, std::string name, SystemFn);  // .after() .before() .roles() .critical()
+    Result&lt;void&gt; build();                // engine only: topological sort, cycles are boot errors
+    void run(Stage, Context&amp;);           // engine only: times systems, applies the failure policy
+    void setEnabled(std::string_view name, bool);
+    std::span&lt;const SystemStats&gt; stats() const;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">EventBus</span><span class="chip st-locked">Locked</span></div>
+      <p>Typed events, queued by default and delivered after each fixed step and after LateUpdate. Subscriptions are RAII: destroying one unsubscribes (ADR 0029).</p>
+      <div class="facts"><span><b>Patterns</b> Mediator, Observer, Event Queue</span><span><b>Block</b> 6</span></div>
+<pre>class EventBus {
+public:
+    template &lt;class E&gt; void publish(E event);
+    template &lt;class E&gt; Subscription subscribe(std::function&lt;void(const E&amp;)&gt;);
+    void dispatch();                 // engine only
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">InputMap · ActionState</span><span class="chip st-locked">Locked</span></div>
+      <p>Turns raw device events from the platform plugin into actions. Rebinding and accessibility options live here, once, for every backend.</p>
+      <div class="facts"><span><b>Pattern</b> Command</span><span><b>Decision</b> E-05</span><span><b>Block</b> 7</span></div>
+<pre>class ActionState {
+public:
+    bool pressed(Action) const;     // this tick
+    bool held(Action) const;
+    float axis(Action) const;
+};</pre>
+    </article>
+
+  </div>
+</section>
+
+<!-- BLOCK 8-9 -->
+<section class="block" id="b8">
+  <div class="block-head"><h2>8–9 · Platform, rendering, audio</h2><span class="k">engine/platform · E-05, E-07, E-08, E-09</span></div>
+  <div class="cards">
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IPlatform</span><span class="chip st-locked">Locked</span></div>
+      <p>Window, raw input, and the renderer, together because SFML ties them. Implemented by <code>platform_sfml</code> (Part 1) and <code>platform_raylib</code> (Part 2).</p>
+      <div class="facts"><span><b>Patterns</b> Bridge, Adapter</span></div>
+<pre>class IPlatform : public IPlugin {
+public:
+    virtual bool openWindow(const WindowDesc&amp;) = 0;
+    virtual void pollEvents(InputMap&amp;) = 0;    // raw events in, never actions
+    virtual IRenderer&amp; renderer() = 0;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IRenderer · Feature</span><span class="chip st-locked">Locked</span></div>
+      <p>One call per frame. The backend sorts by layer, batches by texture, draws. 3D is an optional capability only raylib implements.</p>
+      <div class="facts"><span><b>Pattern</b> Command (draw list)</span><span><b>Decisions</b> E-07, E-08</span></div>
+<pre>enum class Feature { Render3D };
+class IRenderer {
+public:
+    virtual ~IRenderer() = default;
+    virtual void submit(std::span&lt;const DrawCmd&gt;) = 0;
+    virtual bool supports(Feature) const = 0;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">struct + class</span><span class="name">DrawCmd · RenderQueue</span><span class="chip st-locked">Locked</span></div>
+      <p>Plain data describing one draw. The queue keeps its capacity between frames. Engine-owned types only: handles, never <code>sf::Texture*</code>.</p>
+<pre>struct DrawCmd {
+    enum class Kind { Sprite, Text, Rect, Line } kind;
+    TextureHandle tex; Rect src; Vec2 pos; float rot;
+    Vec2 scale; Color tint; int16_t layer;
+};
+class RenderQueue {
+public:
+    void push(const DrawCmd&amp;);
+    std::span&lt;const DrawCmd&gt; commands() const;
+    void clear();
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IAudio</span><span class="chip st-locked">Locked</span></div>
+      <p>One plugin, <code>audio_miniaudio</code>, shared by both platform backends. <code>NullAudio</code> on the server or without a sound device.</p>
+      <div class="facts"><span><b>Decision</b> E-09</span></div>
+<pre>class IAudio : public IPlugin {
+public:
+    virtual void play(SoundHandle, float volume = 1.f) = 0;
+    virtual void playMusic(MusicHandle) = 0;
+    virtual void stopMusic() = 0;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">structs</span><span class="name">Engine vocabulary</span><span class="chip st-locked">Locked</span></div>
+      <p>The core's own types, translated by each plugin. No SFML or raylib type ever leaves its plugin.</p>
+<pre>struct Vec2 { float x, y; };
+struct Rect { float x, y, w, h; };
+struct Color { uint8_t r, g, b, a; };
+enum class Key { Up, Down, Left, Right, Space, /* … */ };
+using TextureHandle = uint32_t;  // also SoundHandle, MusicHandle, FontHandle</pre>
+    </article>
+
+  </div>
+</section>
+
+<!-- BLOCK 10-12 -->
+<section class="block" id="b10">
+  <div class="block-head"><h2>10–12 · Network, scenes and assets, services</h2><span class="k">later blocks</span></div>
+  <div class="cards">
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">INetwork</span><span class="chip st-locked">Locked</span></div>
+      <p>Engine side of networking (E-13): transport, connections, timeouts and crash notification, packet validation, network thread, replication. Designed in the network block; the protocol itself has its own part.</p>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IScripting</span><span class="chip st-locked">Locked</span></div>
+      <p>Scripting plugin for the content layer (Track 3). First implementation: <code>scripting_lua</code> (Lua + sol2), sandboxed and reloadable. Your own language stays optional, as a second plugin or a small pattern language (ADR 0019). Scripts hold behaviour; data stays in YAML (ADR 0018).</p>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">SceneManager</span><span class="chip st-locked">Locked</span></div>
+      <p>Loads YAML scenes in two passes (create, then link parents), resolves prefabs, switches scenes at the end of a frame. Errors report file and line.</p>
+      <div class="facts"><span><b>Pattern</b> Prototype (prefabs)</span><span><b>Block</b> 11</span></div>
+<pre>class SceneManager {
+public:
+    void load(const std::filesystem::path&amp; scene);
+    void switchTo(const std::filesystem::path&amp; scene);   // applied at end of frame
+    Registry&amp; active();
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">AssetManager</span><span class="chip st-locked">Locked</span></div>
+      <p>Loads each file once and hands out handles. The plugin owns GPU and audio memory; the core owns the path-to-handle table.</p>
+      <div class="facts"><span><b>Pattern</b> Flyweight</span><span><b>Block</b> 11</span></div>
+<pre>class AssetManager {
+public:
+    TextureHandle texture(std::string_view path);
+    SoundHandle   sound(std::string_view path);
+    MusicHandle   music(std::string_view path);
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Logger</span><span class="chip st-locked">Locked</span></div>
+      <p>Passed to modules, never a singleton (each .so would get its own copy).</p>
+      <div class="facts"><span><b>Pattern</b> Dependency Injection</span><span><b>Block</b> 12</span></div>
+<pre>class Logger {
+public:
+    template &lt;class... A&gt; void info(std::format_string&lt;A...&gt;, A&amp;&amp;...);
+    template &lt;class... A&gt; void warn(std::format_string&lt;A...&gt;, A&amp;&amp;...);
+    template &lt;class... A&gt; void error(std::format_string&lt;A...&gt;, A&amp;&amp;...);
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">CVars · Console</span><span class="chip st-locked">Locked</span></div>
+      <p>Console variables and developer console (Track 1 tooling).</p>
+    </article>
+
+  </div>
+</section>
+
+<footer>Rules that apply to every type here: interfaces start with <code>I</code>; no exception leaves an <code>extern "C"</code> function; no singletons; no backend type outside its plugin; component IDs come from the TypeRegistry.</footer>
+
+</div>
+
+<script>
+(function () {
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var counts = { locked: 0, review: 0, sketch: 0, todo: 0 };
+  cards.forEach(function (c) { var s = c.getAttribute('data-status'); if (counts[s] !== undefined) counts[s]++; });
+  var labels = { locked: ['Locked', 'st-locked'], review: ['In review', 'st-review'], sketch: ['Sketched', 'st-sketch'], todo: ['To design', 'st-todo'] };
+  var tally = document.getElementById('tally');
+  Object.keys(labels).forEach(function (k) {
+    var d = document.createElement('div');
+    d.innerHTML = '<b>' + counts[k] + '</b><span class="chip ' + labels[k][1] + '">' + labels[k][0] + '</span><small>cards</small>';
+    tally.appendChild(d);
+  });
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.filters button'));
+  function apply(f) {
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === f)); });
+    cards.forEach(function (c) { c.hidden = !(f === 'all' || c.getAttribute('data-status') === f); });
+    document.querySelectorAll('.block').forEach(function (s) {
+      s.hidden = !s.querySelector('.card:not([hidden])');
+    });
+    try { localStorage.setItem('rtype-classes-filter', f); } catch (e) {}
+  }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { apply(b.getAttribute('data-filter')); }); });
+  var saved = 'all';
+  try { saved = localStorage.getItem('rtype-classes-filter') || 'all'; } catch (e) {}
+  apply(saved);
+})();
+</script>

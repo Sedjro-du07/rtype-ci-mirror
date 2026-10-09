@@ -1,0 +1,519 @@
+<title>R-Type Engine Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single schematic column — status strip, layered block diagram, frame loop, process matrix, decision ledger, next steps. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --sunk: #e8ecf2;
+  --fg: #172030;
+  --muted: #5a6577;
+  --line: #c9d1dd;
+  --accent: #0d6b8a;
+  --accent-soft: #d7eef5;
+  --locked: #1f7a4d;
+  --locked-bg: #dcf1e5;
+  --open: #a3620a;
+  --open-bg: #fbecd2;
+  --deferred: #3456b0;
+  --deferred-bg: #dfe6fa;
+  --todo: #6b7486;
+  --todo-bg: #eceff4;
+  --font-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141c; --surface: #161d28; --sunk: #1c2533; --fg: #e3e8f0; --muted: #98a3b5; --line: #2c3748;
+    --accent: #5cc3e0; --accent-soft: #143642;
+    --locked: #6fd39d; --locked-bg: #15372a; --open: #f0b357; --open-bg: #3a2a10;
+    --deferred: #8fa9ff; --deferred-bg: #1d2747; --todo: #9aa3b3; --todo-bg: #222a37;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141c; --surface: #161d28; --sunk: #1c2533; --fg: #e3e8f0; --muted: #98a3b5; --line: #2c3748;
+  --accent: #5cc3e0; --accent-soft: #143642;
+  --locked: #6fd39d; --locked-bg: #15372a; --open: #f0b357; --open-bg: #3a2a10;
+  --deferred: #8fa9ff; --deferred-bg: #1d2747; --todo: #9aa3b3; --todo-bg: #222a37;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; padding: 0 16px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: 0.01em; }
+h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; }
+h2 { font-size: 22px; font-weight: 600; }
+h3 { font-size: 15px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--muted); }
+.meta a { color: var(--accent); }
+section { display: grid; gap: 16px; min-width: 0; }
+.section-head { display: grid; gap: 6px; }
+
+/* status chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.s-locked { color: var(--locked); background: var(--locked-bg); }
+.s-open { color: var(--open); background: var(--open-bg); }
+.s-deferred { color: var(--deferred); background: var(--deferred-bg); }
+.s-todo { color: var(--todo); background: var(--todo-bg); }
+
+/* header */
+header { display: grid; gap: 16px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+.tally { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tally div { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; }
+.tally b { font-family: var(--font-display); font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+@media (max-width: 640px) { .tally { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* block diagram */
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; display: grid; gap: 10px; }
+.tier { display: grid; gap: 10px; }
+.tier-label { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.row { display: grid; gap: 10px; }
+.row.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.row.c6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.row.c5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 860px) { .row.c6, .row.c5 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .row.c3, .row.c6, .row.c5 { grid-template-columns: minmax(0, 1fr); } }
+.box { border: 1.5px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 6px; align-content: start; background: var(--surface); min-width: 0; }
+.box .name { font-family: var(--font-mono); font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.box p { font-size: 13px; color: var(--muted); }
+.box.locked { border-color: var(--locked); }
+.box.open { border-color: var(--open); border-style: dashed; }
+.box.deferred { border-color: var(--deferred); border-style: dashed; }
+.box.todo { border-style: dotted; border-color: var(--todo); background: transparent; }
+.box.later { opacity: 0.78; }
+.core { border: 2px solid var(--accent); border-radius: 8px; padding: 14px; background: var(--accent-soft); display: grid; gap: 10px; }
+.core-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.core-title h3 { font-size: 17px; }
+.connector { text-align: center; font-family: var(--font-mono); font-size: 12px; color: var(--muted); padding-block: 2px; }
+.connector span { display: inline-block; padding: 0 8px; }
+.ifaces { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.iface { font-family: var(--font-mono); font-size: 12.5px; padding: 4px 10px; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; background: var(--surface); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; border: 1.5px solid var(--line); }
+.legend .l-locked { border-color: var(--locked); }
+.legend .l-open { border-color: var(--open); border-style: dashed; }
+.legend .l-deferred { border-color: var(--deferred); border-style: dashed; }
+.legend .l-todo { border-color: var(--todo); border-style: dotted; }
+
+/* loop */
+.loop { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.step { padding: 14px; display: grid; gap: 6px; align-content: start; border-right: 1px solid var(--line); min-width: 0; }
+.step:last-child { border-right: 0; }
+.step .k { font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+.step p { font-size: 13px; color: var(--muted); }
+.step.hot { background: var(--sunk); }
+@media (max-width: 760px) { .loop { grid-template-columns: minmax(0, 1fr); } .step { border-right: 0; border-bottom: 1px solid var(--line); } .step:last-child { border-bottom: 0; } }
+pre { margin: 0; background: var(--sunk); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--fg); }
+
+/* tables */
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--sunk); }
+tr:last-child td { border-bottom: 0; }
+td.id { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
+td.c { text-align: center; font-family: var(--font-mono); }
+.matrix td:first-child { font-family: var(--font-mono); white-space: nowrap; }
+.yes { color: var(--locked); font-weight: 600; }
+.no { color: var(--muted); }
+.decisions td:nth-child(3) { min-width: 300px; }
+
+/* rules + next */
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.panel ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+ol.next { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; counter-reset: n; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+ol.next li { counter-increment: n; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 4px 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+ol.next li:last-child { border-bottom: 0; }
+ol.next li::before { content: counter(n, decimal-leading-zero); font-family: var(--font-mono); color: var(--accent); font-weight: 500; grid-row: span 2; }
+ol.next b { font-weight: 600; }
+ol.next span { color: var(--muted); font-size: 13.5px; }
+ol.next li.now { background: var(--accent-soft); }
+.layers { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.layer { display: grid; grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 0.8fr); gap: 4px 16px; padding: 12px 16px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.layer:last-child { border-bottom: 0; }
+.layer .n { font-family: var(--font-mono); color: var(--accent); font-weight: 500; }
+.layer .t { font-family: var(--font-display); font-weight: 600; }
+.layer .d { font-size: 13.5px; color: var(--muted); }
+.layer .w { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.layer.engine { background: var(--accent-soft); }
+@media (max-width: 760px) { .layer { grid-template-columns: 36px minmax(0, 1fr); } .layer .d, .layer .w { grid-column: 2; } }
+.rule { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; font-size: 14.5px; }
+tr.group td { background: var(--sunk); font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); padding-block: 6px; }
+.patterns td:first-child { font-weight: 600; white-space: nowrap; }
+.engines td:first-child { font-weight: 600; white-space: nowrap; }
+.cols > pre { min-width: 0; align-self: start; }
+.takeaways { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; max-width: 80ch; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+
+/* shared navigation between the three R-Type architecture pages */
+.suite { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.suite-label { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); align-self: center; margin-right: 6px; }
+.suite a { display: grid; gap: 1px; text-decoration: none; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 14px; min-width: 0; }
+.suite a b { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+.suite a span { font-size: 12px; color: var(--muted); }
+.suite a:hover { border-color: var(--accent); }
+.suite a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.suite a[aria-current="page"] { border-color: var(--accent); background: var(--accent-soft); }
+.suite a[aria-current="page"] b { color: var(--accent); }
+</style>
+
+<div class="wrap">
+
+<nav class="suite" aria-label="R-Type architecture pages">
+  <span class="suite-label">R-Type engine</span>
+  <a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener" aria-current="page"><b>Architecture</b><span>Layers, loop, decisions</span></a>
+  <a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener"><b>Classes</b><span>Signatures and diagram</span></a>
+  <a href="https://claude.ai/artifact/FGAmyXhSoPrJycMsLXsoUA" target="_blank" rel="noopener"><b>Inventory</b><span>Everything, with status</span></a>
+</nav>
+
+<header>
+  <div class="eyebrow">R-Type · Architecture · Part 1 of 7: Engine</div>
+  <h1>R-Type Engine Architecture</h1>
+  <p class="muted">The engine architecture is complete and locked. Solid borders are agreed, dashed borders are proposals waiting for the team, dotted borders are pieces we have not designed yet.</p>
+  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-09</span><span>status: locked</span><span>source of truth: Notion › 01 · Engine</span><span>class reference: <a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener">R-Type Engine Classes</a></span></div>
+  <div class="tally">
+    <div><b>35</b><span class="chip s-locked">ADRs</span></div>
+    <div><b>12</b><span class="chip s-locked">Blocks locked</span></div>
+    <div><b>59</b><span class="chip s-locked">Engine tasks</span></div>
+    <div><b>0</b><span class="chip s-todo">Open</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">In one picture</div>
+    <h2>Four layers, dependencies only go down</h2>
+    <p class="muted">Think of a console: the engine is the console, plugins are the cables to the screen, speakers and network, the game module is the cartridge, and the content is the levels on it.</p>
+  </div>
+  <div class="layers">
+    <div class="layer"><span class="n">4</span><span class="t">Content</span><span class="d">YAML scenes and prefabs, scripts, sprites, sounds. Changed without recompiling.</span><span class="w">game designers</span></div>
+    <div class="layer"><span class="n">3</span><span class="t">Game module</span><span class="d">R-Type rules: Bydos, the Force, waves, score. Knows the engine, never SFML.</span><span class="w">gameplay devs</span></div>
+    <div class="layer engine"><span class="n">2</span><span class="t">Engine core</span><span class="d">Loop, ECS, TypeRegistry, InputMap, EventBus, scenes, assets, plugin loader, services.</span><span class="w">engine devs</span></div>
+    <div class="layer"><span class="n">1</span><span class="t">Plugins</span><span class="d">platform (SFML or raylib), audio, network, scripting. Implement interfaces the core defines.</span><span class="w">engine devs</span></div>
+    <div class="layer"><span class="n">0</span><span class="t">OS and libraries</span><span class="d">Linux, Windows, SFML, raylib, Asio, miniaudio.</span><span class="w">third parties</span></div>
+  </div>
+  <p class="rule">A layer knows its own interfaces and the ones below it, never the ones above. The engine does not know R-Type, R-Type does not know SFML, content only knows the names the game and engine expose. CMake enforces it: a forbidden include breaks the build.</p>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">The big picture</div>
+    <h2>Who loads what</h2>
+    <p class="muted">The engine owns <code>main()</code> and the game loop. Everything replaceable lives in a <code>.so</code> / <code>.dll</code> behind an interface the core defines. R-Type itself is one of those modules.</p>
+  </div>
+
+  <div class="diagram" role="img" aria-label="Layered engine architecture: launchers start the engine core, which loads platform, audio, network, scripting plugins and the game module through interfaces.">
+    <div class="tier">
+      <div class="tier-label"><span>Executables · thin launchers</span><span class="chip s-locked">E-06</span></div>
+      <div class="row c3">
+        <div class="box locked"><div class="name">r-type_client</div><p>Starts the engine in client role. Name required by the subject.</p></div>
+        <div class="box locked"><div class="name">r-type_server</div><p>Starts the engine in server role. Headless, never loads a graphics plugin.</p></div>
+        <div class="box locked later"><div class="name">editor (Part 2)</div><p>Same engine, opens any game module, reads its types for the inspector.</p></div>
+      </div>
+    </div>
+
+    <div class="connector"><span>▼ boots</span></div>
+
+    <div class="core">
+      <div class="core-title"><h3>Engine core · libengine</h3><span class="mono muted">game-agnostic, builds alone</span></div>
+      <div class="row c5">
+        <div class="box locked"><div class="name">Game loop + Clock</div><p>Fixed step 1/60 s, render interpolates.</p><span class="chip s-locked">E-04</span></div>
+        <div class="box locked"><div class="name">ECS</div><p>Index + generation handles, paged sparse sets, command buffer.</p><span class="chip s-locked">ECS-1 to 5</span></div>
+        <div class="box locked"><div class="name">TypeRegistry</div><p>Lightweight reflection: names, IDs, serialize, fields.</p><span class="chip s-locked">Needed by E-06</span></div>
+        <div class="box locked"><div class="name">InputMap</div><p>Raw events to actions, rebinding, accessibility.</p><span class="chip s-locked">E-05</span></div>
+        <div class="box locked"><div class="name">RenderQueue</div><p>DrawCmd list, one submit per frame.</p><span class="chip s-locked">E-07</span></div>
+        <div class="box locked"><div class="name">Plugin loader</div><p>dlopen / LoadLibrary, C entry point, version check.</p><span class="chip s-locked">E-02</span></div>
+        <div class="box locked"><div class="name">Scheduler</div><p>System stages and order.</p><span class="chip s-locked">Locked</span></div>
+        <div class="box locked"><div class="name">EventBus</div><p>Mediator, typed messages.</p><span class="chip s-locked">Locked</span></div>
+        <div class="box locked"><div class="name">Scenes + Assets</div><p>YAML scenes, prefabs, handle-based cache.</p><span class="chip s-locked">Locked</span></div>
+        <div class="box locked"><div class="name">Config · Log · CVars</div><p>Core services passed to modules.</p><span class="chip s-locked">Locked</span></div>
+      </div>
+    </div>
+
+    <div class="connector"><span>▼ talks only through interfaces</span></div>
+    <div class="ifaces">
+      <span class="iface">IPlatform</span><span class="iface">IRenderer</span><span class="iface">IAudio</span><span class="iface">INetwork</span><span class="iface">IScripting</span><span class="iface">IGameModule</span>
+    </div>
+    <div class="connector"><span>▼ loads at runtime (.so / .dll)</span></div>
+
+    <div class="tier">
+      <div class="tier-label"><span>Plugins and game modules</span><span class="chip s-locked">E-02 · E-05 · E-08</span></div>
+      <div class="row c6">
+        <div class="box locked"><div class="name">platform_sfml</div><p>Window, 2D render, raw input, ImGui. Ships Part 1.</p></div>
+        <div class="box locked later"><div class="name">platform_raylib</div><p>Same API plus optional 3D capability. Part 2.</p></div>
+        <div class="box locked"><div class="name">audio_miniaudio</div><p>One audio plugin shared by both backends.</p></div>
+        <div class="box locked"><div class="name">network_asio</div><p>Transport only. Protocol designed in the Network part.</p></div>
+        <div class="box locked"><div class="name">scripting_lua</div><p>Lua + sol2 first; own language as an optional second plugin. Track 3.</p></div>
+        <div class="box locked"><div class="name">rtype_game</div><p>Components, systems, scenes. Second game = another module.</p></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="l-locked"></i>Locked</span>
+      <span><i class="l-open"></i>Proposed, awaiting the team</span>
+      <span><i class="l-deferred"></i>Deferred</span>
+      <span><i class="l-todo"></i>Not designed yet</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">One frame</div>
+    <h2>The game loop</h2>
+    <p class="muted">The same loop runs in the client and in the server room. The server skips the render step. Locked as E-04.</p>
+  </div>
+  <div class="loop">
+    <div class="step"><span class="k">1 · Poll</span><h3>Read the world outside</h3><p>Platform plugin turns keyboard and gamepad into raw events, InputMap turns them into actions. Network packets become events.</p></div>
+    <div class="step hot"><span class="k">2 · Fixed update ×N</span><h3>Simulate in 1/60 s slices</h3><p>Movement, collisions, AI. Always the same dt, so every machine and the server compute the same thing.</p></div>
+    <div class="step"><span class="k">3 · Late update</span><h3>Clean up</h3><p>Deferred entity destruction, event dispatch, network send.</p></div>
+    <div class="step hot"><span class="k">4 · Render (α)</span><h3>Describe the frame</h3><p>Render system fills the DrawCmd list, positions interpolated between the last two steps.</p></div>
+    <div class="step"><span class="k">5 · Submit</span><h3>Hand off once</h3><p>One <code>submit()</code> into the platform plugin, which sorts by layer, batches by texture, draws.</p></div>
+  </div>
+<pre>accumulator += clock.restart();
+poll();                                         // 1
+while (accumulator &gt;= STEP) {                   // 2: fixed, identical on every machine
+    scheduler.run(Stage::FixedUpdate, STEP);
+    accumulator -= STEP;
+}
+scheduler.run(Stage::LateUpdate);               // 3
+scheduler.run(Stage::Render, accumulator / STEP); // 4: alpha in [0, 1)
+platform.renderer().submit(renderQueue);        // 5: client only</pre>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Processes</div>
+    <h2>Which process loads which module</h2>
+    <p class="muted">The lobby process is decided in the Server part.</p>
+  </div>
+  <div class="scroll">
+    <table class="matrix">
+      <thead><tr><th>Module</th><th>r-type_client</th><th>r-type_server (room)</th><th>editor, Part 2</th></tr></thead>
+      <tbody>
+        <tr><td>engine core</td><td class="c yes">yes</td><td class="c yes">yes</td><td class="c yes">yes</td></tr>
+        <tr><td>platform_sfml / _raylib</td><td class="c yes">one of them</td><td class="c no">never</td><td class="c yes">one of them</td></tr>
+        <tr><td>audio_miniaudio</td><td class="c yes">yes</td><td class="c no">no</td><td class="c yes">preview</td></tr>
+        <tr><td>network_asio</td><td class="c yes">yes</td><td class="c yes">yes</td><td class="c no">no</td></tr>
+        <tr><td>scripting</td><td class="c yes">yes</td><td class="c yes">yes</td><td class="c yes">yes</td></tr>
+        <tr><td>rtype_game</td><td class="c yes">client systems</td><td class="c yes">server systems</td><td class="c yes">types only</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Study · how real engines do it</div>
+    <h2>Four separate questions behind "game as a module"</h2>
+    <p class="muted">A. Who owns the loop. B. Who owns <code>main()</code>. C. How game code attaches to the engine. D. How the engine learns the game's types (reflection).</p>
+  </div>
+  <div class="scroll">
+    <table class="engines">
+      <thead><tr><th>Engine</th><th>A · Loop</th><th>B · main()</th><th>C · Game code</th><th>D · Reflection</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Quake 1</td><td>engine</td><td>engine</td><td>VM bytecode (QuakeC)</td><td>VM</td><td>Modding without engine source, portable, safe</td></tr>
+        <tr><td>Quake 2</td><td>engine</td><td>engine</td><td>native DLL, import/export tables</td><td>manual</td><td>Speed of C; cost: unsafe native mods</td></tr>
+        <tr><td>Quake 3</td><td>engine</td><td>engine</td><td>QVM bytecode or DLL, split server / client / ui</td><td>manual</td><td>C comfort with VM safety; clean client/server split</td></tr>
+        <tr><td>Source</td><td>engine</td><td>engine (launcher)</td><td>client.dll + server.dll per game</td><td>manual macros</td><td>One engine, many games and mods; versioned interfaces</td></tr>
+        <tr><td>Unreal 4/5</td><td>engine</td><td>engine</td><td>modules: DLLs in dev, monolithic static in shipping</td><td>generated (UHT)</td><td>Fast iteration and editor in dev, speed in shipping</td></tr>
+        <tr><td>Unity</td><td>engine</td><td>engine</td><td>C# assemblies + data</td><td>C# runtime</td><td>Productivity, safety, portability</td></tr>
+        <tr><td>Godot</td><td>engine</td><td>engine</td><td>data + script, GDExtension .so, or static module</td><td>runtime</td><td>Data-driven; editor is itself a Godot app</td></tr>
+        <tr><td>Bevy</td><td>engine</td><td>game</td><td>static plugins</td><td>registration + derive macro</td><td>Simplicity, no fragile Rust ABI</td></tr>
+        <tr><td>AAA in-house</td><td>engine</td><td>engine</td><td>static + scripts / visual scripting</td><td>varies</td><td>Performance, console constraints</td></tr>
+        <tr><td>SFML, raylib</td><td>game</td><td>game</td><td>n/a</td><td>n/a</td><td>Frameworks, not engines</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="takeaways">
+    <li><b>A is unanimous:</b> every engine owns the loop. That is what separates an engine from a framework.</li>
+    <li><b>B is cosmetic:</b> Bevy lets the game write <code>main()</code> and loses nothing. What matters is that the game never writes the loop.</li>
+    <li><b>C is the real decision</b>, driven by four forces: modding and safety (VM, script), performance and consoles (static), iteration and editor (dynamic), many games on one engine (dynamic or data).</li>
+    <li><b>Unreal does not choose:</b> it designs modules once and decides static or dynamic at build time.</li>
+    <li><b>Almost all have three layers:</b> engine, game logic, and content for people who do not write C++.</li>
+    <li><b>D is unavoidable</b> once you have scene files or an editor. In C++ without codegen, it is explicit registration: our TypeRegistry.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Under the hood</div>
+    <h2>What a plugin really is</h2>
+    <p class="muted">A <code>.so</code> / <code>.dll</code> the program opens when it decides, in which it looks up one function by a known name, which returns an object implementing an interface the engine knows.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Kind</th><th>Linux</th><th>Windows</th><th>When the code is attached</th></tr></thead>
+      <tbody>
+        <tr><td>Static library</td><td class="mono">.a</td><td class="mono">.lib</td><td>At build time. Copied into the executable.</td></tr>
+        <tr><td>Shared library, linked</td><td class="mono">.so</td><td class="mono">.dll</td><td>At startup. The OS loads it before <code>main()</code>; missing file, the program refuses to start.</td></tr>
+        <tr><td><b>Shared library, loaded on demand</b></td><td class="mono">.so</td><td class="mono">.dll</td><td><b>At runtime, when the program decides. This is a plugin.</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>The four mechanisms</h3>
+      <ul>
+        <li><b>Loading:</b> <code>dlopen</code> / <code>LoadLibrary</code> opens the file, <code>dlsym</code> / <code>GetProcAddress</code> finds a function by name.</li>
+        <li><b><code>extern "C"</code>:</b> C++ mangles names (<code>_Z13create_pluginv</code>), differently per compiler. <code>extern "C"</code> keeps <code>create_plugin</code> findable. Windows also needs <code>__declspec(dllexport)</code>.</li>
+        <li><b>Interfaces and vtables:</b> a virtual call jumps through a table of addresses filled by the plugin. The engine knows the shape of the contract, never the code.</li>
+        <li><b>ABI:</b> the binary contract (object sizes, vtable layout, <code>std::string</code> layout). Different compilers or options break it silently, hence one toolchain, a version check, and "destroyed by its creator".</li>
+      </ul>
+    </div>
+<pre>// engine side
+DynamicLibrary lib("plugins/platform_sfml");   // .so or .dll
+auto create = lib.symbol&lt;IPlugin*(*)()&gt;("create_plugin");
+IPlugin* p = create();
+if (p-&gt;apiVersion() != ENGINE_PLUGIN_API_VERSION)
+    return Error("platform_sfml: API mismatch");
+
+// plugin side
+extern "C" EXPORT IPlugin* create_plugin()  { return new SfmlPlatform(); }
+extern "C" EXPORT void destroy_plugin(IPlugin* p) { delete p; }</pre>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Design patterns</div>
+    <h2>Every pattern, tied to a problem we have</h2>
+    <p class="muted">Reference: Robert Nystrom, <a href="https://gameprogrammingpatterns.com" target="_blank" rel="noopener">Game Programming Patterns</a> (free online). These rows also feed the comparative study.</p>
+  </div>
+  <div class="scroll">
+    <table class="patterns">
+      <thead><tr><th>Pattern</th><th>Problem it solves</th><th>Where in our engine</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="3">Architecture</td></tr>
+        <tr><td>Entity-Component-System</td><td>Inheritance trees explode (the Force diamond)</td><td>Core of the engine</td></tr>
+        <tr><td>Layers</td><td>Everything depends on everything</td><td>The four layers above, enforced by CMake</td></tr>
+        <tr><td>Microkernel / Plugin</td><td>Interchangeable backends</td><td>Core + plugins + game module</td></tr>
+        <tr class="group"><td colspan="3">Loop</td></tr>
+        <tr><td>Game Loop</td><td>Game time must not depend on CPU speed</td><td>Fixed-step loop (E-04)</td></tr>
+        <tr><td>Update Method, as systems</td><td>Advance every object each step</td><td>ECS systems, batched instead of per-object <code>update()</code></td></tr>
+        <tr><td>Double Buffer</td><td>Draw between two simulation states</td><td>Previous/current state for interpolation, RenderQueue</td></tr>
+        <tr class="group"><td colspan="3">Creation</td></tr>
+        <tr><td>Abstract Factory</td><td>Create a renderer without knowing which</td><td><code>create_plugin()</code>, <code>create_game()</code></td></tr>
+        <tr><td>Prototype</td><td>Spawn 50 identical Bydos</td><td>Prefabs: clone a template, override differences</td></tr>
+        <tr><td>Type Object</td><td>30 enemy kinds must not be 30 classes</td><td>Enemy type as data in YAML (Track 3)</td></tr>
+        <tr><td>Object Pool</td><td>Thousands of missiles created and destroyed</td><td>ECS registry reuses slots (hence the generation)</td></tr>
+        <tr class="group"><td colspan="3">Communication</td></tr>
+        <tr><td>Mediator (Event Bus)</td><td>Damage must trigger sound, FX, network, score without knowing them</td><td>EventBus: publish <code>EntityKilled</code>, subscribers react</td></tr>
+        <tr><td>Observer</td><td>React when a component changes</td><td>Registry hooks <code>on_create</code> / <code>on_destroy</code> / <code>on_replace</code></td></tr>
+        <tr><td>Command</td><td>Separate deciding from executing</td><td>DrawCmd, input actions (rebinding, replay), network inputs, editor undo</td></tr>
+        <tr><td>Event Queue</td><td>Events fired mid-system see a half-updated world</td><td>Deferred EventBus, end-of-frame entity destruction</td></tr>
+        <tr class="group"><td colspan="3">Adaptation</td></tr>
+        <tr><td>Bridge / Strategy</td><td>One abstraction, several implementations</td><td><code>IRenderer</code> ↔ SFML, raylib</td></tr>
+        <tr><td>Adapter</td><td>raylib polls, the engine expects events</td><td>Each plugin adapts its library to engine types</td></tr>
+        <tr><td>Facade</td><td>The game should not juggle ten subsystems</td><td><code>Engine</code> / <code>Context</code>: world, input, assets, events</td></tr>
+        <tr class="group"><td colspan="3">Services</td></tr>
+        <tr><td>Dependency Injection</td><td>Everyone needs logger, assets, config</td><td>Engine passes services to modules (Quake 2 import table). No Singleton: each .so would get its own copy</td></tr>
+        <tr><td>Registry</td><td>A central place to store and find, never decide</td><td>TypeRegistry, ECS Registry, plugin registry</td></tr>
+        <tr><td>RAII</td><td>Release in reverse order, even on error</td><td><code>DynamicLibrary</code>, asset handles</td></tr>
+        <tr class="group"><td colspan="3">Later: gameplay and performance</td></tr>
+        <tr><td>State</td><td>Boss phases, menus</td><td>Bydos AI, screens</td></tr>
+        <tr><td>Spatial Partition</td><td>Collision checks are O(n²)</td><td>Grid or quadtree</td></tr>
+        <tr><td>Dirty Flag</td><td>Recomputing child world positions every frame</td><td>Parent/child hierarchy (the Force)</td></tr>
+        <tr><td>Data Locality</td><td>Cache misses</td><td>Contiguous component storage</td></tr>
+        <tr><td>Flyweight</td><td>300 Bydos, 300 texture copies</td><td>Shared asset handles</td></tr>
+        <tr><td>Bytecode / Interpreter</td><td>Behaviours without recompiling</td><td>Scripting (Track 3)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="rule">Anti-patterns we refuse: a god <code>GameManager</code>, singletons, deep inheritance trees, pointers to components kept across frames.</p>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Decision ledger</div>
+    <h2>Every engine decision so far</h2>
+  </div>
+  <div class="scroll">
+    <table class="decisions">
+      <thead><tr><th>ID</th><th>Topic</th><th>What we chose, in practice</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="id">E-01</td><td>Engine identity</td><td><b>Hybrid.</b> A code-first ECS core like Bevy, with a Unity-like data layer later: YAML scenes and prefabs, inspector, editor. Components hold data only, never logic.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-02</td><td>Modularity</td><td><b>Dynamic plugins from day 1.</b> Backends are <code>.so</code> / <code>.dll</code> loaded at runtime. Contained by the plugin rules below, with CI loading every plugin on Linux and Windows.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-03</td><td>Entity identity on the wire</td><td><b>NetworkId</b> (monotonic, never reused in a session) mapped to local entities on each side; local handles never leave the process. Bytes in the protocol RFC. ADR 0033.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-04</td><td>Loop and timing</td><td>Logic advances in fixed 1/60 s steps whatever the frame rate. Rendering interpolates between steps. Required by the subject (timers, not CPU speed) and needed for networking.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-05</td><td>Plugin boundaries</td><td><b>platform, audio, network, scripting.</b> Window, rendering and raw input stay together because SFML ties them. Key rebinding and accessibility live once in the core InputMap.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-06</td><td>Application model</td><td><b>Game as a module.</b> The engine owns <code>main()</code> through a <b>generic launcher</b> (<code>engine/launcher/main.cpp</code>) built per executable with <code>engine_add_launcher(r-type_client CONFIG client.yaml)</code>; games write no <code>main()</code> and no loop. R-Type is <code>rtype_game</code> implementing <code>IGameModule</code> (registerTypes, registerSystems(Role), firstScene, onStart, onShutdown). Same model as Unity, Source and Quake 2.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-07</td><td>Renderer interface</td><td>Systems write draw commands as plain data; the plugin sorts, batches and draws them in one call per frame. Gives draw order, batching, headless tests, and a clean 3D extension.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-08</td><td>Rendering backends</td><td><b>SFML for 2D, raylib for 2D plus optional 3D</b>, swappable in config, never both in one process. The engine owns its own types (keys, colors, handles). SFML in Part 1, raylib in Part 2.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-09</td><td>Audio plugin</td><td>One <code>audio_miniaudio</code> plugin shared by both backends, since SFML 3 and raylib both use miniaudio internally.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-10</td><td>Linking mode</td><td>Inspired by Unreal: every module is designed once, and a CMake option <code>ENGINE_DYNAMIC_MODULES</code> builds it either as a runtime <code>.so</code> / <code>.dll</code> (dev, Track 1 demo, editor) or statically into one binary (safety net, release). Shows all three kinds of modularity the subject lists.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-11</td><td>Content layer</td><td>Three layers above the plugins: engine (C++), game module (C++ building blocks), content (YAML + scripts that assemble them). Designers add levels and enemies without touching C++. Model of Quake 3, Unity, Godot.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-12</td><td>Game module split</td><td>Either one <code>rtype_game</code> with client and server entry points, or <code>rtype_shared</code> + <code>rtype_server</code> + <code>rtype_client</code> as in Quake 3 and Source, so the server never ships client code. Revisited in the Server part.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-13</td><td>Server and engine boundary</td><td><b>Generic server role.</b> The engine provides everything an online Pong would also need (transport, connections, timeouts and crash notification, packet validation, network thread, replication, server role). The game module provides the server-side rules. <code>r-type_server</code> is the application: launcher and configuration. Lobby placement is decided in the Server part.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-14</td><td>C++ standard</td><td><b>C++23 with an allow-list:</b> all of C++20 except modules, plus <code>std::expected</code>, <code>std::move_only_function</code>, <code>std::print</code>, deducing this, <code>std::to_underlying</code>, <code>std::unreachable</code>. Fallback <code>tl::expected</code>. ADR 0017.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-15</td><td>Data format</td><td><b>Data in YAML, behaviour in scripts.</b> Config, scenes, prefabs in YAML; waves, boss phases and special AI in scripts referenced from prefabs. ADR 0018.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-16</td><td>Script language</td><td><b>Lua first</b> (<code>scripting_lua</code>, Lua + sol2). Your own language stays optional, as a second <code>IScripting</code> plugin or a small pattern language. ADR 0019.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-17</td><td>Game module helpers</td><td><b><code>ENGINE_GAME_MODULE</code>, <code>ENGINE_PLUGIN</code>, <code>engine_add_game_module</code></b>: entry points and build rules written once, same game code in dynamic and static mode. ADR 0020.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">B-1</td><td>Block 1: Engine, Context, lifecycle</td><td><b>Engine is the composition root</b> (member order is shutdown order), <b>Context</b> is the only door from game code, <b>Null Objects</b> for absent services, <b>error policy</b>: exit codes per boot stage, failing systems disabled on the server, signals to a clean quit. ADRs 0021–0024.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr class="group"><td colspan="4">ECS internals</td></tr>
+        <tr><td class="id">ECS-1</td><td>Entity handle</td><td><b>64 bits: <code>uint32 index</code> + <code>uint32 generation</code>.</b> A reused slot gets a new generation, so stale handles are detected by comparing two numbers. Never sent over the network.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">ECS-2</td><td>Component storage</td><td><b>Paged sparse set</b> per component type: packed dense arrays, O(1) add and remove (swap-and-pop), contiguous iteration, views walk the smallest set. Sparse array and archetypes rejected; a benchmark of the three goes into the comparative study.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">ECS-3</td><td>Module components</td><td>Type-erased <code>IStorage</code> indexed by the TypeRegistry's <code>ComponentId</code>. The registry is cleared before a game module is unloaded, because the storages' code lives in that module.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">ECS-4</td><td>Structural changes</td><td><b>Command buffer.</b> Systems record spawn, destroy, add and remove; changes apply at the end of each stage, where hooks fire. Editing a component's value stays immediate.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">ECS-5</td><td>Entity identity card</td><td><b>Optional components</b> instead of the slides' fixed <code>EntityInfo</code>: <code>Name</code>, <code>Uuid</code>, <code>Parent</code>, <code>Children</code>. Typed tags (empty components) for C++, text tags for YAML and scripts.</td><td><span class="chip s-locked">Locked</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Guard rails</div>
+    <h2>Rules that come with dynamic modules</h2>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <h3>Plugin rules (E-02)</h3>
+      <ul>
+        <li>One CMake <code>SHARED</code> target per plugin, built into <code>plugins/</code>.</li>
+        <li><code>extern "C"</code> create and destroy functions. Memory is freed by the module that allocated it.</li>
+        <li>An API version is checked at load. A mismatch gives a clear error, never a crash.</li>
+        <li>No exception crosses a module boundary.</li>
+        <li>One compiler and one C++ runtime for everything.</li>
+        <li>OS-specific loading code lives in one <code>DynamicLibrary</code> class.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Cross-module rules (E-06)</h3>
+      <ul>
+        <li>Component IDs come from the engine TypeRegistry, never from a <code>static</code> counter inside a template. Each <code>.so</code> would get its own counter.</li>
+        <li>Never use <code>typeid</code> or <code>std::type_index</code> as a key across modules.</li>
+        <li>No global singletons. Services such as the logger are passed into each module.</li>
+        <li>No SFML or raylib type ever appears outside its plugin. The core uses handles and its own Key, Color, Rect and Vec2.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Still ahead</div>
+    <h2>What we design next, in order</h2>
+  </div>
+  <ol class="next">
+    <li><b>Engine architecture</b><span>Done: 12 blocks, ADRs 0001–0035, reference and guide in docs/engine/.</span></li>
+    <li class="now"><b>Engine tasks</b><span>59 tasks from the folder tree, self-assign on the Notion board.</span></li>
+    <li><b>Server part</b><span>Lobby, rooms, threads, robustness policy, game module split (E-12).</span></li>
+    <li><b>Network part</b><span>Protocol RFC: header, messages, reliability, byte order.</span></li>
+  </ol>
+</section>
+
+<footer>Then: 02 Network (E-03 resolved there), 03 Server, 04 Client, 05 Game, 06 Tooling, 07 Task distribution.</footer>
+
+</div>

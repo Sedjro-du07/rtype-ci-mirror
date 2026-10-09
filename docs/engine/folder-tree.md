@@ -1,0 +1,244 @@
+# Engine folder tree
+
+Status: **Locked** (2026-10-09). Derived from the architecture reference. Every file is owned by a
+task of the engine board (`ENG-xx`, see [`tasks.md`](tasks.md) and the Notion board). A file listed under
+two tasks is shared: the first task creates it.
+
+```
+engine/
+├── benchmarks/
+│   └── ecs_storage/                                      ENG-56
+├── cmake/
+│   ├── EngineModules.cmake                               ENG-02
+│   ├── EngineOptions.cmake                               ENG-01
+│   └── FeatureProbe.cpp                                  ENG-03
+├── include/
+│   └── engine/
+│       ├── assets/
+│       │   └── AssetManager.hpp                          ENG-40
+│       ├── audio/
+│       │   └── IAudio.hpp                                ENG-34
+│       ├── components/
+│       │   ├── Animation.hpp                             ENG-25
+│       │   ├── Collider.hpp                              ENG-25
+│       │   ├── Hierarchy.hpp                             ENG-25
+│       │   ├── Identity.hpp                              ENG-25
+│       │   ├── Lifetime.hpp                              ENG-25
+│       │   ├── Parallax.hpp                              ENG-25
+│       │   ├── Position.hpp                              ENG-25
+│       │   ├── Script.hpp                                ENG-25
+│       │   ├── Sprite.hpp                                ENG-25
+│       │   ├── Text.hpp                                  ENG-25
+│       │   └── Velocity.hpp                              ENG-25
+│       ├── core/
+│       │   ├── math/
+│       │   │   ├── Color.hpp                             ENG-04
+│       │   │   ├── Rect.hpp                              ENG-04
+│       │   │   └── Vec2.hpp                              ENG-04
+│       │   ├── Error.hpp                                 ENG-04
+│       │   ├── Hash.hpp                                  ENG-04
+│       │   ├── Signal.hpp                                ENG-06
+│       │   └── Time.hpp                                  ENG-05
+│       ├── ecs/
+│       │   ├── Commands.hpp                              ENG-20
+│       │   ├── Entity.hpp                                ENG-16
+│       │   ├── EntityAllocator.hpp                       ENG-16
+│       │   ├── IStorage.hpp                              ENG-17
+│       │   ├── Registry.hpp                              ENG-18, ENG-21
+│       │   ├── SparseSet.hpp                             ENG-17
+│       │   └── View.hpp                                  ENG-19
+│       ├── events/
+│       │   ├── EngineEvents.hpp                          ENG-27
+│       │   └── EventBus.hpp                              ENG-27
+│       ├── input/
+│       │   ├── Action.hpp                                ENG-28
+│       │   ├── ActionState.hpp                           ENG-29
+│       │   ├── InputMap.hpp                              ENG-29
+│       │   ├── Keys.hpp                                  ENG-28
+│       │   └── RawInputEvent.hpp                         ENG-28
+│       ├── module/
+│       │   ├── DynamicLibrary.hpp                        ENG-12
+│       │   ├── Export.hpp                                ENG-11
+│       │   ├── IGameModule.hpp                           ENG-11
+│       │   ├── IPlugin.hpp                               ENG-11
+│       │   ├── ModuleManager.hpp                         ENG-14
+│       │   ├── NullPlugins.hpp                           ENG-15
+│       │   └── StaticModuleTable.hpp                     ENG-13
+│       ├── net/
+│       │   ├── INetwork.hpp                              ENG-36
+│       │   ├── NetComponents.hpp                         ENG-39
+│       │   ├── NetTypes.hpp                              ENG-36
+│       │   ├── NetworkIdMap.hpp                          ENG-39
+│       │   └── NetworkSession.hpp                        ENG-38
+│       ├── reflection/
+│       │   ├── ByteStream.hpp                            ENG-24
+│       │   ├── TypeBuilder.hpp                           ENG-22
+│       │   ├── TypeInfo.hpp                              ENG-22
+│       │   ├── TypeKey.hpp                               ENG-22
+│       │   ├── TypeRegistry.hpp                          ENG-22
+│       │   └── Yaml.hpp                                  ENG-23
+│       ├── render/
+│       │   ├── Camera2D.hpp                              ENG-30
+│       │   ├── DrawCmd.hpp                               ENG-30
+│       │   ├── Handles.hpp                               ENG-30
+│       │   ├── IPlatform.hpp                             ENG-30
+│       │   ├── IRenderer.hpp                             ENG-30
+│       │   ├── RenderQueue.hpp                           ENG-30
+│       │   └── WindowDesc.hpp                            ENG-30
+│       ├── scene/
+│       │   ├── Prefab.hpp                                ENG-41
+│       │   ├── Scene.hpp                                 ENG-43
+│       │   ├── SceneLoader.hpp                           ENG-42
+│       │   └── SceneManager.hpp                          ENG-43
+│       ├── scheduler/
+│       │   ├── Scheduler.hpp                             ENG-26
+│       │   ├── Stage.hpp                                 ENG-26
+│       │   └── System.hpp                                ENG-26
+│       ├── script/
+│       │   └── IScripting.hpp                            ENG-48
+│       ├── services/
+│       │   ├── Console.hpp                               ENG-46
+│       │   ├── CVars.hpp                                 ENG-45
+│       │   ├── Logger.hpp                                ENG-44
+│       │   └── Metrics.hpp                               ENG-47
+│       ├── Context.hpp                                   ENG-09
+│       ├── Engine.hpp                                    ENG-08
+│       └── EngineConfig.hpp                              ENG-07
+├── launcher/
+│   └── main.cpp                                          ENG-10
+├── plugins/
+│   ├── audio_miniaudio/
+│   │   ├── CMakeLists.txt                                ENG-35
+│   │   ├── MiniaudioAudio.cpp                            ENG-35
+│   │   └── MiniaudioAudio.hpp                            ENG-35
+│   ├── network_asio/
+│   │   ├── AsioNetwork.cpp                               ENG-37
+│   │   ├── AsioNetwork.hpp                               ENG-37
+│   │   └── CMakeLists.txt                                ENG-37
+│   ├── platform_raylib/                                  ENG-58
+│   ├── platform_sfml/
+│   │   ├── CMakeLists.txt                                ENG-31
+│   │   ├── ColorFilter.frag                              ENG-33
+│   │   ├── SfmlImGui.cpp                                 ENG-32
+│   │   ├── SfmlKeys.cpp                                  ENG-31
+│   │   ├── SfmlPlatform.cpp                              ENG-31
+│   │   ├── SfmlPlatform.hpp                              ENG-31
+│   │   ├── SfmlRenderer.cpp                              ENG-31
+│   │   └── SfmlRenderer.hpp                              ENG-31
+│   └── scripting_lua/
+│       ├── CMakeLists.txt                                ENG-49
+│       ├── LuaApi.cpp                                    ENG-49
+│       ├── LuaScripting.cpp                              ENG-49
+│       ├── LuaScripting.hpp                              ENG-49
+│       └── Sandbox.cpp                                   ENG-49
+├── src/
+│   ├── assets/
+│   │   └── AssetManager.cpp                              ENG-40
+│   ├── audio/
+│   │   └── AudioCaptions.cpp                             ENG-34
+│   ├── core/
+│   │   ├── Context.cpp                                   ENG-09
+│   │   ├── Engine.cpp                                    ENG-08
+│   │   ├── EngineConfig.cpp                              ENG-07
+│   │   ├── Error.cpp                                     ENG-04
+│   │   └── Time.cpp                                      ENG-05
+│   ├── ecs/
+│   │   ├── Commands.cpp                                  ENG-20
+│   │   ├── EntityAllocator.cpp                           ENG-16
+│   │   └── Registry.cpp                                  ENG-18
+│   ├── events/
+│   │   └── EventBus.cpp                                  ENG-27
+│   ├── input/
+│   │   ├── ActionState.cpp                               ENG-29
+│   │   ├── InputMap.cpp                                  ENG-29
+│   │   └── Keys.cpp                                      ENG-28
+│   ├── module/
+│   │   ├── DynamicLibrary.cpp                            ENG-12
+│   │   ├── ModuleManager.cpp                             ENG-14
+│   │   ├── NullPlugins.cpp                               ENG-15
+│   │   └── StaticModuleTable.cpp                         ENG-13
+│   ├── net/
+│   │   ├── NetworkIdMap.cpp                              ENG-39
+│   │   └── NetworkSession.cpp                            ENG-38
+│   ├── reflection/
+│   │   ├── ByteStream.cpp                                ENG-24
+│   │   ├── TypeRegistry.cpp                              ENG-22
+│   │   └── Yaml.cpp                                      ENG-23
+│   ├── render/
+│   │   ├── Camera2D.cpp                                  ENG-30
+│   │   └── RenderQueue.cpp                               ENG-30
+│   ├── scene/
+│   │   ├── PrefabLibrary.cpp                             ENG-41
+│   │   ├── SceneLoader.cpp                               ENG-42
+│   │   └── SceneManager.cpp                              ENG-43
+│   ├── scheduler/
+│   │   └── Scheduler.cpp                                 ENG-26
+│   ├── script/
+│   │   └── ScriptSystems.cpp                             ENG-48
+│   ├── services/
+│   │   ├── Console.cpp                                   ENG-46
+│   │   ├── CVars.cpp                                     ENG-45
+│   │   ├── Logger.cpp                                    ENG-44
+│   │   └── Metrics.cpp                                   ENG-47
+│   └── systems/
+│       ├── AnimationSystem.cpp                           ENG-52
+│       ├── CollisionSystem.cpp                           ENG-51
+│       ├── DebugOverlaySystem.cpp                        ENG-47
+│       ├── MovementSystems.cpp                           ENG-50
+│       ├── NetSystems.cpp                                ENG-39
+│       ├── RegisterEngineSystems.cpp                     ENG-50
+│       ├── RegisterEngineTypes.cpp                       ENG-25
+│       └── RenderSystems.cpp                             ENG-52
+├── tests/
+│   ├── core/                                             ENG-53
+│   ├── ecs/                                              ENG-54
+│   ├── events/                                           ENG-55
+│   ├── fixtures/                                         ENG-53
+│   ├── headless/                                         ENG-57
+│   ├── input/                                            ENG-55
+│   ├── module/                                           ENG-53
+│   ├── net/                                              ENG-55
+│   ├── reflection/                                       ENG-54
+│   ├── scene/                                            ENG-55
+│   ├── scheduler/                                        ENG-55
+│   └── CMakeLists.txt                                    ENG-53
+├── tools/
+│   └── editor/                                           ENG-59
+└── CMakeLists.txt                                        ENG-01
+```
+
+## Folders
+
+| Folder | Contains |
+|---|---|
+| `engine/cmake/` | CMake options, module functions, C++23 probe. |
+| `engine/include/engine/` | Public headers. `Engine.hpp` (launcher only), `Context.hpp` and `EngineConfig.hpp` at the top level. |
+| `engine/include/engine/core/` | Leaf types with no engine dependency: hash, math, Error, Time, Signal. |
+| `engine/include/engine/module/` | Plugin and game interfaces, loading, Null Objects. |
+| `engine/include/engine/ecs/` | Entities, storages, Registry, View, Commands. |
+| `engine/include/engine/reflection/` | TypeRegistry, type descriptions, YAML and byte codecs. |
+| `engine/include/engine/scheduler/` | Stages, systems, Scheduler. |
+| `engine/include/engine/events/` | EventBus and engine events. |
+| `engine/include/engine/input/` | Keys, raw events, actions, InputMap. |
+| `engine/include/engine/render/` | Rendering API: handles, draw commands, IRenderer, IPlatform. |
+| `engine/include/engine/audio/` | IAudio. |
+| `engine/include/engine/net/` | Transport interface, NetworkSession, replication types. |
+| `engine/include/engine/scene/` | Scenes, prefabs, loader. |
+| `engine/include/engine/assets/` | AssetManager. |
+| `engine/include/engine/services/` | Logger, CVars, Console, Metrics. |
+| `engine/include/engine/script/` | IScripting. |
+| `engine/include/engine/components/` | Built-in components. |
+| `engine/src/` | Implementations, same sub-folders as the headers, plus `systems/` for built-in systems. |
+| `engine/launcher/` | The engine's main(), built once per executable. |
+| `engine/plugins/` | One folder per plugin, each its own CMake target `<kind>_<name>`. |
+| `engine/tests/` | Unit tests per block, fixtures (test plugin, test game), headless smoke test. |
+| `engine/benchmarks/` | ECS storage benchmark for the comparative study. |
+| `engine/tools/` | Part 2: the editor. |
+
+## Rules
+
+- `engine/` builds alone: no include of anything outside `engine/` and its third-party dependencies.
+- Headers follow the layering of the reference (`reference/README.md`): a header never includes a layer below it.
+- A plugin folder never includes another plugin. Only `engine/include/` is shared.
+- Games live outside `engine/` (`games/rtype/`, later `games/pong/`) and use only the public headers.
+- New files go to the folder of their block; a new block needs an ADR.
