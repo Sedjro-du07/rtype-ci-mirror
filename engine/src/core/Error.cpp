@@ -1,0 +1,11 @@
+// engine/src/core/Error.cpp
+// ENG-04 — Core types: hash, Vec2/Rect/Color, Error, Result, BootError
+// Spec: docs/engine/reference/01-core.md · ADR 0017, 0024 · reference 01
+// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
+// Status: not implemented yet. Claim the task on the board before editing this file.
+
+#include "engine/core/Error.hpp"
+
+namespace engine {
+
+} // namespace engine

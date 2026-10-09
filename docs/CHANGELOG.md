@@ -7,6 +7,15 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-09] — engine file skeletons
+
+### Added
+
+- I created every file of the engine tree as a skeleton (141 files: headers, sources, CMake, shader).
+  Each one starts with a comment naming its task, its spec page and its ADR, then an empty
+  `namespace engine`. Nothing is implemented: implementing is the task's work, claimed on the board.
+- On the Notion board, the **File** field of every task now lists all of its files, relative to `engine/`.
+
 ## [2026-10-09] — engine architecture complete
 
 ### Added
