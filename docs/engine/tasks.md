@@ -1,7 +1,9 @@
 # Engine tasks
 
 Derived from [`folder-tree.md`](folder-tree.md). The live board, where you claim tasks, is in Notion
-(**R-Type — Architecture › Engine — tasks (self-assign)**). This file is the reference copy.
+(**R-Type — Architecture › Engine — folder tree & tasks**:
+https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7). This file is the reference copy.
+Team: Ola, Sedjro, Michel, Yann-Ange.
 
 Claim a task yourself on the board: set **Owner** and **Status = Claimed**, and the claim date. Nobody assigns tasks to anyone else.
 Start a task only when the tasks it depends on are at least *In review*, or agree on the interface with their owner first.
