@@ -180,6 +180,14 @@
     "title": "Engine classes and interfaces (summary)"
   },
   {
+    "file": "engine/to-implement.md",
+    "title": "Engine — everything to implement"
+  },
+  {
+    "file": "engine/game-api.md",
+    "title": "Engine — what a game uses"
+  },
+  {
     "file": "engine/folder-tree.md",
     "title": "Engine folder tree"
   },

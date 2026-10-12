@@ -4,7 +4,8 @@ Status: **Locked** with the architecture (2026-10-09), completed 2026-10-12. Thi
 who **make games** with the engine. How the engine is built inside is in the reference:
 [`../reference/README.md`](../reference/README.md).
 
-Start with the tutorial and *Getting started*, then read the topic you need.
+Start with the tutorial and *Getting started*, then read the topic you need. Everything a game may
+call, on one page: [`../game-api.md`](../game-api.md).
 
 ## Start here
 

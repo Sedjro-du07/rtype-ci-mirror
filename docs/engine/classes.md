@@ -2,6 +2,8 @@
 
 Status: **Locked** (2026-10-09). Every type below is specified, with all its methods, in the
 architecture reference: [`reference/README.md`](reference/README.md).
+Two flat lists complement this page: [`to-implement.md`](to-implement.md) (everything the engine team
+must code, with files and tasks) and [`game-api.md`](game-api.md) (everything a game may use).
 
 Naming: interfaces start with `I`, concrete classes have no prefix. Language: C++23 with the
 allow-list of ADR 0017. Online views: [class reference](https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B),

@@ -3,6 +3,7 @@
 Status: **Locked** (2026-10-09). Every class, interface, function and method of the engine, with
 what it does. One page per block. Decisions behind each block are in [`../../adr/README.md`](../../adr/README.md).
 How to *use* the engine is in the guide: [`../guide/README.md`](../guide/README.md).
+Flat lists: [`../to-implement.md`](../to-implement.md) (what to code) and [`../game-api.md`](../game-api.md) (what games use).
 
 | # | Block | Page | Namespace / folder |
 |---|---|---|---|

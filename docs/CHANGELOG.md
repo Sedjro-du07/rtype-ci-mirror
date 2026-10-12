@@ -7,6 +7,16 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-12] — implementation list and game API
+
+### Added
+
+- I added `engine/to-implement.md`: every interface, class, macro, system and plugin class the engine
+  team must code, with its file, its task and the methods that need a body, plus a suggested order.
+- I added `engine/game-api.md`: everything a game may use from the engine (CMake, macros,
+  `IGameModule`, `Context`, ECS, events, input, scenes, assets, drawing, sound, network, services,
+  Lua), and what game code must never touch.
+
 ## [2026-10-12] — engine guide completed
 
 ### Added
