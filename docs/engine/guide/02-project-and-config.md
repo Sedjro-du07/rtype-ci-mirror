@@ -88,6 +88,9 @@ cvars:                       # any console variable, see 13
 | `--port <n>`, `--host <address>` | network |
 | `--set <cvar>=<value>` | set a console variable (repeatable) |
 | `--log <level>` | log level |
+| `--scene <path>` | start on this scene instead of `firstScene()` (tests, debugging) |
+| `--ticks <n>` | quit cleanly after `n` simulation steps (tests, CI) |
+| `--platform null`, `--audio null`, `--network null`, `--scripting null` | use the built-in Null Objects (headless runs) |
 
 ## Exit codes
 

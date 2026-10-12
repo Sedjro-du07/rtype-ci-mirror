@@ -72,6 +72,54 @@
     "title": "Guide · 15 Troubleshooting"
   },
   {
+    "file": "engine/guide/16-time-and-loop.md",
+    "title": "Guide · 16 Time and the game loop"
+  },
+  {
+    "file": "engine/guide/17-context.md",
+    "title": "Guide · 17 The Context"
+  },
+  {
+    "file": "engine/guide/18-collisions.md",
+    "title": "Guide · 18 Collisions"
+  },
+  {
+    "file": "engine/guide/19-game-module-and-state.md",
+    "title": "Guide · 19 Game module and game state"
+  },
+  {
+    "file": "engine/guide/20-hierarchy-and-identity.md",
+    "title": "Guide · 20 Hierarchy and identity"
+  },
+  {
+    "file": "engine/guide/21-saving.md",
+    "title": "Guide · 21 Saving"
+  },
+  {
+    "file": "engine/guide/22-roles.md",
+    "title": "Guide · 22 Roles: client, server, editor"
+  },
+  {
+    "file": "engine/guide/23-testing.md",
+    "title": "Guide · 23 Testing your game"
+  },
+  {
+    "file": "engine/guide/24-building-and-shipping.md",
+    "title": "Guide · 24 Building and shipping"
+  },
+  {
+    "file": "engine/guide/25-accessibility.md",
+    "title": "Guide · 25 Accessibility checklist"
+  },
+  {
+    "file": "engine/guide/26-best-practices.md",
+    "title": "Guide · 26 Best practices"
+  },
+  {
+    "file": "engine/guide/27-not-yet-in-the-engine.md",
+    "title": "Guide · 27 What is not in the engine yet"
+  },
+  {
     "file": "engine/reference/README.md",
     "title": "Engine reference — index"
   },

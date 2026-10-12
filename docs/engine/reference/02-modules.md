@@ -141,7 +141,8 @@ or `PluginNotFound`; every object is destroyed by the `destroy_*` of the module 
 | `NullNetwork` | `INetwork` | for offline runs and tests; `send` drops, `receive` yields nothing |
 | `NullScripting` | `IScripting` | used when `scripting` is empty; `load` returns an error explaining scripting is disabled |
 
-Used on the server, in headless CI, and when no audio device exists (ADR 0023). A client whose
+Used on the server, in headless CI, and when no audio device exists (ADR 0023). The plugin name `null`
+(`platform: null`, `--audio null`…) selects the built-in Null Object of that kind instead of loading a library. A client whose
 platform plugin fails to load stops with exit code 2; it never falls back to `NullPlatform`.
 Each Null Object in use is logged once at boot.
 

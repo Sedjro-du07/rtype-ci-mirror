@@ -32,6 +32,11 @@ Positions are interpolated between ticks automatically.
 
 ## Animation
 
+`engine.animation` advances `time` by `fixedDelta`, picks the frame `floor(time * fps)` and writes it
+into `Sprite.frame`. With `loop: false` it stops on the last frame (an explosion); combine it with
+`Lifetime` to remove the entity when the animation ends. To change animation (idle → turning), set a
+new `Animation` component through `Commands`.
+
 ```yaml
 Animation:
   fps: 12
@@ -48,6 +53,10 @@ Text: { value: "SCORE 0", font: assets/font.ttf, size: 24, layer: 100, screenSpa
 ```
 
 ## Parallax starfield
+
+A background layer moves with `Velocity`; `Parallax.factor` scales that speed (0.2 = far, slow;
+1.0 = foreground) and `wrapWidth` makes the layer jump back by that width once it has scrolled out,
+so two copies side by side give an endless starfield. Put far layers on low `layer` values.
 
 ```yaml
 Parallax: { factor: 0.3, wrapWidth: 1280 }

@@ -69,6 +69,16 @@ subs_.push_back(ctx.world().hooks<Health>().onDestroy.connect(
 
 Hooks fire when the change is applied, never in the middle of a view.
 
+## Temporary entities: `Lifetime`
+
+```yaml
+# prefabs/missile.yaml
+Lifetime: { seconds: 2.5 }     # destroyed automatically 2.5 s after spawning
+```
+
+`engine.lifetime` counts down in fixed steps and destroys through `Commands`. Use it for shots,
+explosions and floating texts instead of writing a timer system each time.
+
 ## Rules
 
 - Keep `Entity` values, never pointers to components.

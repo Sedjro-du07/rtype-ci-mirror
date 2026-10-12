@@ -50,4 +50,9 @@ Every game receives these without writing them. Engine components are registered
 | `engine.render.debug` | Render | client, editor | — | collider outlines when `r_debug_colliders` |
 | `engine.debug_overlay` | Render | client, editor | last | console and metrics (block 12) |
 
+Collision rule: a pair (a, b) collides when their boxes overlap and `(a.layer & b.mask) != 0` and
+`(b.layer & a.mask) != 0`. `engine.collision` only detects and publishes `Collision` every tick the
+pair overlaps; there is no physical response in Part 1. `trigger` marks sensors for game rules and
+for the future physics response. The grid cell size is the CVar `phys_grid_cell` (default 64).
+
 Game systems can be placed with `after("engine.movement")`, `before("engine.collision")` and so on.

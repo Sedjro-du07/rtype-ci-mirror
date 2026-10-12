@@ -7,6 +7,29 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-12] — engine guide completed
+
+### Added
+
+- I added twelve guide pages: time and the game loop, the Context, collisions, game module and game
+  state, hierarchy and identity, saving, roles, testing, building and shipping, an accessibility
+  checklist, best practices, and what is not in the engine yet.
+- The guide index is now grouped by topic, and troubleshooting covers collisions, scenes, saving,
+  scripts, networking and Windows builds.
+
+### Changed
+
+- Writing those pages showed gaps in the reference, which I filled without changing any decision:
+  the collision rule (layers and masks must match both ways, detection only, `trigger` for sensors,
+  `phys_grid_cell`), `Commands::setParent` for attaching inside systems, the `null` plugin name for
+  headless runs, the `--scene` and `--ticks` options, and the automatic load and save of `Archive`
+  settings in `user/settings.yaml`.
+
+### Known gap
+
+- The engine has no UI widgets (buttons, focus, menu navigation without a mouse). It is listed in
+  guide page 27 and needs its own design and ADR.
+
 ## [2026-10-09] — engine file skeletons
 
 ### Added

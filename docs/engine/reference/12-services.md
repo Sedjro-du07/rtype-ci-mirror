@@ -69,7 +69,10 @@ public:
 
 Engine-defined variables include `r_vsync`, `r_ui_scale`, `r_color_filter`, `r_debug_colliders`,
 `snd_master`, `snd_music`, `snd_effects`, `snd_interface`, `in_deadzone`, `net_snapshot_rate`,
-`net_timeout`, `asset_hot_reload`, `sim_tick_rate` (read-only).
+`net_timeout`, `asset_hot_reload`, `phys_grid_cell`, `sim_tick_rate` (read-only).
+
+The engine calls `loadArchive("user/settings.yaml")` after reading the config and `saveArchive` at shutdown,
+so `Archive` variables (volumes, UI scale, colour filter, deadzone, game options) persist between runs.
 
 ## Console — `services/Console.hpp`
 

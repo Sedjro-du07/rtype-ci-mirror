@@ -174,6 +174,7 @@ public:
     template <class T> void add(Entity e, T value);
     template <class T> void set(Entity e, T value);         // add or replace
     template <class T> void remove(Entity e);
+    void   setParent(Entity child, Entity parent, Vec2 localOffset = {}); // Entity::null() detaches
     void   addRaw(Entity e, ComponentId id, std::vector<std::byte> value); // scripts, replication
     bool   empty() const;
     void   apply(Registry& registry, SceneManager& scenes); // engine only; in recording order; skips dead entities
