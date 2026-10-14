@@ -408,9 +408,11 @@ def folder_readmes():
         m = re.match(r'# .*?\n\n(.*?)\n\nPlaceholder', old, flags=re.S)
         if m:
             desc = m.group(1) + '\n\n'
+        private = ('Headers in this folder are **private** to the engine: they are not under `include/`, '
+                   'so games cannot include them.\n\n')
+        desc = desc.replace(private, '')                           # added below, never twice
         if d.startswith('src/') and any(f.endswith('.hpp') for f in files if f):
-            desc += ('Headers in this folder are **private** to the engine: they are not under `include/`, '
-                     'so games cannot include them.\n\n')
+            desc += private
         lines = [title, '', desc + 'Placeholder created from the architecture. Replace this file\'s list as files are written.', '']
         real = [f for f in files if f]
         if real:

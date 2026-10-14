@@ -2,50 +2,6 @@
 
 Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
 
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
-Headers in this folder are **private** to the engine: they are not under `include/`, so games cannot include them.
-
 Placeholder created from the architecture. Replace this file's list as files are written.
 
 | File to create | Task | Details |

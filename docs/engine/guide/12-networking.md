@@ -22,7 +22,7 @@ void RType::onStart(engine::Context& ctx) {
 # server.yaml
 role: server
 game: rtype
-net: { port: 4242, maxClients: 4, snapshotRate: 20 }
+net: { port: 4242, maxClients: 32, snapshotRate: 20 }   # maxClients: whole server, lobby included
 ```
 
 | Call | Side | Does |

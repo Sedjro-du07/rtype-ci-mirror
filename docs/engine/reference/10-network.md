@@ -30,7 +30,7 @@ enum class DisconnectReason : uint8_t { Quit, Timeout, Kicked, ProtocolError, Se
 
 struct NetConfig {
     uint16_t port = 4242;
-    uint32_t maxClients = 4;
+    uint32_t maxClients = 32;             // whole server, lobby included: rooms.maxRooms (8) × 4 players
     double   heartbeatSeconds = 0.5;
     double   timeoutSeconds = 5.0;        // no packet for this long → PlayerLeft{Timeout} / LeftServer{Timeout}
     uint32_t maxDatagramBytes = 1200;     // larger datagrams are dropped, never allocated
@@ -131,7 +131,7 @@ public:
   RFC). One connection is one player in Part 1.
 - The handshake carries the player name and `TypeRegistry::formatFingerprint()`. A server refuses a
   client whose fingerprint differs (`FormatMismatch`), whose name is empty or too long, or when
-  `maxClients` is reached (`ServerFull`); the client receives `LeftServer{reason}` with a log line
+  `maxClients` players are connected to the whole server, lobby included (`ServerFull`); the client receives `LeftServer{reason}` with a log line
   explaining what to rebuild or change.
 - Events published (block 6): `PlayerJoined{player}`, `PlayerLeft{player, reason}` on the server;
   `JoinedServer{me}`, `LeftServer{reason}` on the client.

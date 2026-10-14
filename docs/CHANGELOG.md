@@ -7,6 +7,17 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 1: server capacity
+
+### Fixed
+
+- `net.maxClients` still defaulted to 4, a value from before rooms: with 8 rooms allowed, the fifth
+  player was refused with `ServerFull`. It keeps its meaning (connections to the whole server, lobby
+  included) and now defaults to 32 (`rooms.maxRooms` 8 × 4 players). ADR 0038, reference 10 and
+  guides 02 and 12 updated. `maxRooms` 8 stays a default to adjust once the prototype is measured.
+- `docs/tasks/generate.py` added the "headers are private" line to folder READMEs again on every run
+  (up to 23 copies in `src/reflection/`); it now writes it once.
+
 ## [2026-10-14] — server part, round 4: one game code, two builds
 
 ### Added

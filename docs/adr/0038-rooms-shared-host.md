@@ -31,6 +31,9 @@ room-based servers host many matches per process (Photon, Nakama, Colyseus).
    `RoomId`; (3) the lobby and the rooms communicate only through messages, never through pointers;
    (4) the protocol reserves a redirection message ("your room is at this address").
 5. `server.yaml` gets `rooms.maxRooms` (default 8) and `rooms.workerThreads` (0 = number of cores).
+   `net.maxClients` keeps its meaning (connections to the whole server, lobby included) and its
+   default goes from 4 to 32 (8 rooms × 4 players), so the default configuration can fill every room.
+   8 is a default to adjust after measurement, not a measured limit.
 
 ## Alternatives considered
 

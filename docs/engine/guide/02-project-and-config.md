@@ -66,7 +66,7 @@ window:
 
 net:
   port: 4242
-  maxClients: 4
+  maxClients: 32             # whole server, lobby included (8 rooms × 4 players)
   heartbeatSeconds: 0.5
   timeoutSeconds: 5.0
   maxDatagramBytes: 1200
