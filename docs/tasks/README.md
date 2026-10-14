@@ -76,7 +76,7 @@ Board: [Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d) · ta
 
 | Wave | ID | Phase | Task | Depends on |
 |---|---|---|---|---|
-| 1 | [SRV-19](SRV-19.md) | 04 Tests | Wireshark dissector for RTEP (Lua) | — |
+| 1 | [SRV-19](SRV-19.md) | 04 Tests | Wireshark dissector for MSEP (Lua) | — |
 | 4 | [SRV-04](SRV-04.md) | 02 Messages | Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits | [ENG-22](ENG-22.md), [ENG-24](ENG-24.md) |
 | 5 | [SRV-06](SRV-06.md) | 03 Transports | StreamFramer: TCP message framing with size limit | [ENG-37](ENG-37.md) |
 | 5 | [SRV-08](SRV-08.md) | 05 Rooms | Room types and events: PartyId, RoomId, RoomSettings, Party, RoomInfo, lobby / room / client events | [ENG-22](ENG-22.md), [ENG-27](ENG-27.md), [ENG-36](ENG-36.md) |

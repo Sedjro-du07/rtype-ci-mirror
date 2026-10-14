@@ -1,4 +1,4 @@
-# RTEP — R-Type Engine Protocol, version 1.0
+# MSEP — Magic Shifter Engine Protocol, version 1.0
 
 ```
 R-Type team                                                    Epitech
@@ -8,9 +8,9 @@ Protocol version: 1 (0x01)                       Status: v1.0, frozen
 
 ## Abstract
 
-This document specifies RTEP, the network protocol of the R-Type engine. A client and a server built
+This document specifies MSEP, the network protocol of the R-Type engine. A client and a server built
 with the engine use it to connect, keep a session alive, gather in a lobby and parties, enter rooms,
-replicate a game world and exchange the game's own messages. RTEP runs over UDP for everything that
+replicate a game world and exchange the game's own messages. MSEP runs over UDP for everything that
 happens during a game and over TCP for the connection and the lobby. It is binary, big-endian and
 defined by the engine for every game; a game only defines the content of its own messages.
 
@@ -51,7 +51,7 @@ increments the protocol version (section 4.1). The decisions behind each section
 
 ### 1.1 Purpose
 
-RTEP carries everything a networked game made with the engine needs: identity of players, presence,
+MSEP carries everything a networked game made with the engine needs: identity of players, presence,
 lobby and parties, rooms (one game each), replication of entities from the server to clients, player
 input from clients to the server, and typed messages declared by the game.
 
@@ -776,7 +776,7 @@ no secret.
 ## 13. Why TCP is used
 
 The subject requires UDP for all in-game communication and tolerates TCP with a strong justification.
-RTEP uses TCP **only outside the simulation**:
+MSEP uses TCP **only outside the simulation**:
 
 | Use | Why TCP |
 |---|---|

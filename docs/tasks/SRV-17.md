@@ -71,7 +71,7 @@ void setRelevance(std::move_only_function<bool(PlayerId, Entity)> fn);   // defa
 
 - [ADR 0041](../adr/0041-netcode-means-in-engine-policy-in-game.md)
 - [ADR 0043](../adr/0043-protocol-v1-game-api.md)
-- [RFC §9](../network/rfc.md) (RTEP v1.0)
+- [RFC §9](../network/rfc.md) (MSEP v1.0)
 
 ## To implement
 

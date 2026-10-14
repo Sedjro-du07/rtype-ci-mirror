@@ -86,7 +86,7 @@ def ref_links(ref, base_docs):
             out.append(f'[guide {num}]({base_docs}engine/guide/{name})')
     m = re.search(r'RFC( \(all\)|(?: §[\d.]+,?)+)?', ref)
     if m:
-        out.append(f'[RFC{(m.group(1) or "").rstrip(",")}]({base_docs}network/rfc.md) (RTEP v1.0)')
+        out.append(f'[RFC{(m.group(1) or "").rstrip(",")}]({base_docs}network/rfc.md) (MSEP v1.0)')
     for step, page in (('step 1', '01-scope.md'), ('step 7', '07-prototypes.md')):
         if step in ref:
             out.append(f'[network {step}]({base_docs}network/{page})')
@@ -364,8 +364,8 @@ def skeleton_body(path):
 def comment_of(path):
     if path.endswith(('.cmake', 'CMakeLists.txt')):
         return '#'
-    if path.endswith('.frag'):
-        return '//'
+    if path.endswith('.lua'):
+        return '--'
     return '//'
 
 

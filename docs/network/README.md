@@ -1,6 +1,6 @@
 # Network part
 
-Designing the protocol RFC, step by step. **Done: RTEP v1.0 is frozen** ([rfc.md](rfc.md)).
+Designing the protocol RFC, step by step. **Done: MSEP v1.0 is frozen** ([rfc.md](rfc.md)).
 
 | Step | Page | Status |
 |---|---|---|

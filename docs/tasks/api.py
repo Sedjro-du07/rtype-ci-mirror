@@ -960,11 +960,11 @@ public:
                  property: never crashes, never allocates beyond the limits, never reaches game code'''),
 ]),
 'SRV-19': dict(extra=[
-    ('tools/wireshark/rtep.lua', 'lua', '''-- Wireshark dissector for RTEP v1.0 (heuristic on magic 0x5254 + version 1, UDP and TCP)
-local rtep = Proto("rtep", "R-Type Engine Protocol")
+    ('tools/wireshark/msep.lua', 'lua', '''-- Wireshark dissector for MSEP v1.0 (heuristic on magic 0x5254 + version 1, UDP and TCP)
+local msep = Proto("msep", "Magic Shifter Engine Protocol")
 -- fields: header (kind, sessionKey, sequence, ack, ackBits), messages (id → name from RFC §8.5,
 -- messageSeq for reliable ids, length), Hello / Accepted / Refused / Snapshot / Input payloads
-function rtep.dissector(buffer, pinfo, tree) end
+function msep.dissector(buffer, pinfo, tree) end
 local function heuristic(buffer, pinfo, tree) end   -- registered for udp and tcp'''),
 ]),
 'SRV-20': dict(extra=[

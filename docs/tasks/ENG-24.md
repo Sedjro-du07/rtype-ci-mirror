@@ -51,7 +51,7 @@ public:
 ## Read first
 
 - [ADR 0027](../adr/0027-reflection-by-name.md)
-- [RFC §5](../network/rfc.md) (RTEP v1.0)
+- [RFC §5](../network/rfc.md) (MSEP v1.0)
 
 ## To implement
 

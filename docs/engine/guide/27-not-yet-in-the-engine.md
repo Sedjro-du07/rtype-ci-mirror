@@ -13,7 +13,7 @@ So nobody looks for a feature that does not exist. Each line says where it will 
 | Hot reload of the game module (C++) | not planned | Track 1 option; scripts and assets already hot-reload |
 | Client-side prediction, reconciliation | written by the game team with the engine's data (`lastInputProcessed`, RFC §9.4; ADR 0041) | the game |
 | Delta snapshots against a baseline, compression | not in protocol v1 (v1 sends only changed components until acknowledged, RFC §9.3) | Part 2, Track 2, protocol version 2 |
-| Protocol bytes (header, message ids, reliability scheme) | specified: RTEP v1.0, [`docs/network/rfc.md`](../../network/rfc.md) | tasks ENG-38, SRV-01 to SRV-07, SRV-16 to SRV-20 |
+| Protocol bytes (header, message ids, reliability scheme) | specified: MSEP v1.0, [`docs/network/rfc.md`](../../network/rfc.md) | tasks ENG-38, SRV-01 to SRV-07, SRV-16 to SRV-20 |
 | Admission by the game (accept or refuse a player with your reason) | designed (ADR 0042, 0043), not implemented | task SRV-02 |
 | Rooms and lobby (several games on one server) | designed (ADR 0038, 0039), not implemented | tasks SRV-08 to SRV-15, guide 28 |
 | Dedicated room hosting (one process per room, client redirection) | planned; `RoomRedirect` id reserved in the RFC | Part 2, Track 1 (`ProcessRoomHost`, ADR 0038) |

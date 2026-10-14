@@ -54,7 +54,7 @@ private:
 ## Read first
 
 - [ADR 0037](../adr/0037-game-facing-networking.md)
-- [RFC §7](../network/rfc.md) (RTEP v1.0)
+- [RFC §7](../network/rfc.md) (MSEP v1.0)
 
 ## To implement
 

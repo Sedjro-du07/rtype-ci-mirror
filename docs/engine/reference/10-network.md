@@ -9,7 +9,7 @@ Everything an online Pong would also need (ADR 0011): transport, connections, he
 timeouts, a network thread, packet bounds, replication of components, sending player actions.
 **This block fixes classes, threads and responsibilities. The bytes (header layout, message ids,
 reliability scheme, byte order) are defined by the protocol RFC, [`docs/network/rfc.md`](../../network/rfc.md)
-(RTEP v1.0); section numbers below (RFC §n) point into it.**
+(MSEP v1.0); section numbers below (RFC §n) point into it.**
 
 What the game sees (ADR 0037): it opens the server or connects explicitly, deals with **players**
 (`PlayerId`) and **typed messages**. Sockets, threads, connections, bytes and message ids stay

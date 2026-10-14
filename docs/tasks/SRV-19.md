@@ -1,29 +1,29 @@
-# SRV-19 · Wireshark dissector for RTEP (Lua)
+# SRV-19 · Wireshark dissector for MSEP (Lua)
 
 Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **04 Tests** · **Wave 1** · status and owner live on the board.
 
 ## Goal
 
-See RTEP in Wireshark: debugging aid and defense demo (network step 7).
+See MSEP in Wireshark: debugging aid and defense demo (network step 7).
 
 ## Files
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `tools/wireshark/rtep.lua`
+- `tools/wireshark/msep.lua`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `tools/wireshark/rtep.lua`
+### `tools/wireshark/msep.lua`
 
 ```lua
--- Wireshark dissector for RTEP v1.0 (heuristic on magic 0x5254 + version 1, UDP and TCP)
-local rtep = Proto("rtep", "R-Type Engine Protocol")
+-- Wireshark dissector for MSEP v1.0 (heuristic on magic 0x5254 + version 1, UDP and TCP)
+local msep = Proto("msep", "Magic Shifter Engine Protocol")
 -- fields: header (kind, sessionKey, sequence, ack, ackBits), messages (id → name from RFC §8.5,
 -- messageSeq for reliable ids, length), Hello / Accepted / Refused / Snapshot / Input payloads
-function rtep.dissector(buffer, pinfo, tree) end
+function msep.dissector(buffer, pinfo, tree) end
 local function heuristic(buffer, pinfo, tree) end   -- registered for udp and tcp
 ```
 
@@ -37,7 +37,7 @@ local function heuristic(buffer, pinfo, tree) end   -- registered for udp and tc
 
 ## Read first
 
-- [RFC (all)](../network/rfc.md) (RTEP v1.0)
+- [RFC (all)](../network/rfc.md) (MSEP v1.0)
 - [network step 7](../network/07-prototypes.md)
 
 ## To implement

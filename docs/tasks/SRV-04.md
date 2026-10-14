@@ -46,7 +46,7 @@ uint64_t     fingerprint(std::span<const TypeInfo* const> types);    // used by 
 - [ADR 0036](../adr/0036-one-add-and-type-categories.md)
 - [ADR 0037](../adr/0037-game-facing-networking.md)
 - [reference 04](../engine/reference/04-reflection.md)
-- [RFC §5](../network/rfc.md) (RTEP v1.0)
+- [RFC §5](../network/rfc.md) (MSEP v1.0)
 
 ## To implement
 

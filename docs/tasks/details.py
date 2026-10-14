@@ -510,7 +510,7 @@ DETAILS = {
     done=["100 000 inputs per fuzzer, no crash, no allocation beyond the limits, nothing reaches game code"],
     watch=["Fuzz the real decoding path (`poll`), not a copy of it"]),
 'SRV-19': dict(
-    goal="See RTEP in Wireshark: debugging aid and defense demo (network step 7).",
+    goal="See MSEP in Wireshark: debugging aid and defense demo (network step 7).",
     todo=["Lua dissector: heuristic on magic + version, UDP and TCP", "Header fields, message list, names from RFC §8.5, reliable messageSeq",
           "Hello, Accepted, Refused, Snapshot and Input payloads decoded"],
     done=["The RFC §15 examples, replayed from a capture, are shown field by field"],

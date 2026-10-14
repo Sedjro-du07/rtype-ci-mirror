@@ -37,7 +37,7 @@ tests/net/fuzz/  UdpPacketFuzzTest (random and mutated valid packets: header, ev
 
 ## Read first
 
-- [RFC §4.6, §11](../network/rfc.md) (RTEP v1.0)
+- [RFC §4.6, §11](../network/rfc.md) (MSEP v1.0)
 - [network step 7](../network/07-prototypes.md)
 
 ## To implement

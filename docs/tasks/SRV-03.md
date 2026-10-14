@@ -66,7 +66,7 @@ private:
 
 - [ADR 0037](../adr/0037-game-facing-networking.md)
 - [reference 10](../engine/reference/10-network.md)
-- [RFC §4.5, §10](../network/rfc.md) (RTEP v1.0)
+- [RFC §4.5, §10](../network/rfc.md) (MSEP v1.0)
 
 ## To implement
 

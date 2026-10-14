@@ -7,6 +7,18 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — protocol renamed MSEP
+
+### Changed
+
+- The protocol is now called MSEP (Magic Shifter Engine Protocol) instead of RTEP, in the RFC, the
+  references, the tasks and the architecture pages. The Wireshark dissector is `tools/wireshark/msep.lua`.
+  Bytes are unchanged.
+
+### Fixed
+
+- `generate.py` wrote `//` comments in Lua skeletons; Lua files now get `--`.
+
 ## [2026-10-14] — network part done: RTEP v1.0
 
 ### Added

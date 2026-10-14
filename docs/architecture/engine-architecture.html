@@ -180,7 +180,7 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
 <header>
   <div class="eyebrow">R-Type · Architecture · Parts 1–3 of 7: Engine, Server, Network</div>
   <h1>R-Type Engine Architecture</h1>
-  <p class="muted">The engine, the server part and the network protocol are designed and locked. The engine hosts several games at once in rooms, and speaks RTEP v1.0, a binary protocol over UDP and TCP. Solid borders are agreed, dashed borders are proposals waiting for the team, dotted borders are pieces we have not designed yet.</p>
+  <p class="muted">The engine, the server part and the network protocol are designed and locked. The engine hosts several games at once in rooms, and speaks MSEP v1.0, a binary protocol over UDP and TCP. Solid borders are agreed, dashed borders are proposals waiting for the team, dotted borders are pieces we have not designed yet.</p>
   <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-14</span><span>status: locked</span><span>source of truth: Notion › 01 · Engine, 02 · Server, 03 · Network</span><span>class reference: <a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener">R-Type Engine Classes</a></span></div>
   <div class="tally">
     <div><b>43</b><span class="chip s-locked">ADRs</span></div>
@@ -475,7 +475,7 @@ extern "C" EXPORT void destroy_plugin(IPlugin* p) { delete p; }</pre>
         <tr class="group"><td colspan="4">Network part (2026-10-14)</td></tr>
         <tr><td class="id">N-1</td><td>Who optimises</td><td><b>The engine gives the means, the game team optimises.</b> The engine is used without its code: it owns the bytes and exposes settings (budget, priority, relevance, quantisation) and extension points; prediction belongs to the game; engine interpolation is a default that can be turned off. ADR 0041.</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">N-2</td><td>Admission</td><td>The engine refuses only what it cannot decode (protocol version, game, types). The game accepts or refuses a player with its own reason, like Unreal's <code>PreLogin</code> or Unity's connection approval. ADR 0042.</td><td><span class="chip s-locked">Locked</span></td></tr>
-        <tr><td class="id">N-3</td><td>Protocol RTEP v1.0</td><td>Big-endian, magic "RT" + version, 16-byte UDP header with a session key and packet acks, TCP frames up to 64 KB, no fragmentation, replication sent until acknowledged, reconnection within 30 s with a single-use token, room transitions on the reliable UDP stream. 36 decisions (D1–D36), 40 scenarios. ADR 0043.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">N-3</td><td>Protocol MSEP v1.0</td><td>Big-endian, magic "RT" + version, 16-byte UDP header with a session key and packet acks, TCP frames up to 64 KB, no fragmentation, replication sent until acknowledged, reconnection within 30 s with a single-use token, room transitions on the reliable UDP stream. 36 decisions (D1–D36), 40 scenarios. ADR 0043.</td><td><span class="chip s-locked">Locked</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -510,7 +510,7 @@ extern "C" EXPORT void destroy_plugin(IPlugin* p) { delete p; }</pre>
 <section>
   <div class="section-head">
     <div class="eyebrow">Network part</div>
-    <h2>RTEP v1.0 at a glance</h2>
+    <h2>MSEP v1.0 at a glance</h2>
     <p class="muted">The protocol the engine speaks for every game. Everything in a running game travels on UDP; TCP carries only the connection and the lobby. Full specification: <code>docs/network/rfc.md</code>.</p>
   </div>
   <div class="layers">
@@ -582,7 +582,7 @@ extern "C" EXPORT void destroy_plugin(IPlugin* p) { delete p; }</pre>
   <ol class="next">
     <li><b>Engine</b><span>Done: 12 blocks, ADRs 0001–0035, reference and guide in docs/engine/, 59 tasks.</span></li>
     <li><b>Server part</b><span>Done: rooms, lobby and parties, one game code in two builds; ADRs 0036–0040.</span></li>
-    <li><b>Network part</b><span>Done: RTEP v1.0 frozen, ADRs 0041–0043, 20 server tasks.</span></li>
+    <li><b>Network part</b><span>Done: MSEP v1.0 frozen, ADRs 0041–0043, 20 server tasks.</span></li>
     <li class="now"><b>Client part</b><span>Menus and lobby screens, scene flow on the client, UI widgets (the team already has the design).</span></li>
     <li><b>Game part</b><span>R-Type itself: components, systems, levels, bosses, Part II of the RFC.</span></li>
     <li><b>Tooling and task distribution</b><span>CI, tests, package manager; final sharing of the work.</span></li>
