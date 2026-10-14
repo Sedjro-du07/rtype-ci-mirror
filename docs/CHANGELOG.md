@@ -7,6 +7,13 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 2: end of game
+
+### Added
+
+- `docs/network/02-exchanges.md`, group 6 (end of game): normal end, failed room, shutdown during
+  games, lobby ↔ room channel reserved for Part 2; questions 28 to 31.
+
 ## [2026-10-14] — network part, step 2: in game
 
 ### Added

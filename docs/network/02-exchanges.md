@@ -10,8 +10,8 @@ must arrive, whether order matters, transport. Groups follow a player's life:
 | 3 | Lobby and party: invitations, room list | validated |
 | 4 | Entering and leaving a room | validated |
 | 5 | In game: inputs, snapshots, spawns and destructions, game messages | validated |
-| 6 | End of game, back to the lobby, failed room | next |
-| 7 | Reconnection | |
+| 6 | End of game, back to the lobby, failed room | validated |
+| 7 | Reconnection | next |
 
 ## Group 1 · Connection
 
@@ -401,3 +401,64 @@ Late or duplicated packet: recognised and dropped, which needs sequence numbers 
     spawn?
 27. Settings exposed to the game (ADR 0041): rate per entity, field precision, who receives what,
     priorities; list them.
+
+## Group 6 · End of game, back to the lobby, failed room
+
+Already decided (ADR 0039, guide 28): the room reports its end (`reportFinished`), the lobby receives
+`RoomFinished`, the game decides (usually `closeRoom`), clients receive `ReturnedToLobby`. A system that
+throws stops its room, the lobby receives `RoomFailed`, other rooms continue, the game decides. In
+Part 1 room and lobby share a process: they talk through an in-memory mailbox, not the network; only
+exchanges with clients belong to the protocol.
+
+### Normal end
+
+```
+Client(s)                    Server: lobby               Server: room 7
+  │                         │                 ◀── reportFinished(victory, 12400)
+  │                         │ RoomFinished → the game     │
+  │◀── (game message: results screen) ────────────────── │  if the game wants
+  │                         │ closeRoom(7)                │  the room stops
+  │◀── ReturnedToLobby(7, reason) ── TCP                  │
+  │  the client goes back to its lobby scene (parties stay together)
+```
+
+### Failed room
+
+```
+Client(s)                    Server: lobby               Server: room 7
+  │                         │                 ◀── exception in a system
+  │   (no more snapshots)   │ RoomFailed{7, error}        │  room stopped
+  │                         │ game: closeRoom(7)          │
+  │◀── ReturnedToLobby(7, reason) ── TCP                  │
+  │  message "the game stopped"
+```
+
+The subject requires it (track2_3): a crash never takes the server down, and players are told.
+
+### Server shutdown during games
+
+Group 2: `ServerShutdown` to everyone.
+
+### Room in another process (Part 2)
+
+Lobby and room then talk over the network: ready, heartbeat, finished, crash detected (slide track2_3).
+A server-to-server channel, reserved for Part 2 and inventoried then.
+
+### Inventory
+
+| Exchange | Direction | When | Size | Must arrive | Order | Transport |
+|---|---|---|---|---|---|---|
+| Results (game message) | S → members | end of game | small | yes | before the return to the lobby | chosen by the game |
+| ReturnedToLobby | S → members | once | small + reason | yes | yes | TCP |
+| Lobby ↔ room | — | — | — | — | — | memory (Part 1), network (Part 2) |
+
+### Questions for step 4
+
+28. Results and return out of order: results sent reliable UDP from the room, `ReturnedToLobby` on
+    TCP; results may arrive after the scene change (question 16 the other way round).
+29. Telling clients as soon as a room fails: between `RoomFailed` and the game's decision clients
+    receive nothing and may believe in a timeout; an engine "room paused" signal?
+30. Who gives the reason of `ReturnedToLobby`: the event carries text, but `closeRoom(room)` and
+    `moveToLobby(party)` take no reason; the game should be able to give it (as for admission, kick).
+31. Room results to clients: forwarded by the engine (`RoomFinished` already holds them), or always a
+    game message?
