@@ -364,6 +364,10 @@
     "title": "ADR 0037 — The game sees players and typed messages, never sockets or bytes"
   },
   {
+    "file": "adr/0038-rooms-shared-host.md",
+    "title": "ADR 0038 — Several games on one server: rooms, hosted in-process first"
+  },
+  {
     "file": "../benchmark-graphics-rtype.md",
     "title": "Graphics library benchmark (FR)"
   },

@@ -45,6 +45,7 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0035](0035-services-and-tools.md) | Logger, CVars, console, metrics and the scripting interface | Block 12 | Accepted |
 | [0036](0036-one-add-and-type-categories.md) | One `add<T>()`, the type category comes from the macro | SRV-A | Accepted (amends 0027) |
 | [0037](0037-game-facing-networking.md) | The game sees players and typed messages, never sockets or bytes | SRV-1 to SRV-4 | Accepted (amends 0033) |
+| [0038](0038-rooms-shared-host.md) | Several games on one server: rooms, hosted in-process first | SRV-5 | Accepted (principles) |
 
 ## Not yet recorded
 

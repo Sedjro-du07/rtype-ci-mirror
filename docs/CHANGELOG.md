@@ -7,6 +7,23 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — server part, round 2: rooms
+
+### Added
+
+- We decided how several groups play at once on one server, and I recorded it as ADR 0038: the room
+  is the unit of play (its own world, systems run, events, tick, players); the engine provides the
+  room mechanics and the game the rules; rooms run in one process on a pool of worker threads in
+  Part 1 (`ThreadPoolRoomHost`), and a one-process-per-room host (`ProcessRoomHost`) stays possible
+  for bigger games without changing game code, thanks to four rules (state in the room, creation
+  through the engine, messages only, redirection reserved in the protocol).
+- Guide page 27 lists what bigger games would still need inside one match: parallel systems,
+  interest management, world streaming.
+
+### Not yet
+
+- The room API, files and tasks come with the next Server round.
+
 ## [2026-10-14] — task waves
 
 ### Added
