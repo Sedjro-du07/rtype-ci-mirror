@@ -19,7 +19,12 @@ enum class LogLevel : uint8_t { Trace, Debug, Info, Warn, Error };
 struct LogRecord { LogLevel level; std::string_view tag; std::string_view message;
                    std::chrono::system_clock::time_point time; };
 
-class ILogSink { public: virtual ~ILogSink() = default; virtual void write(const LogRecord&) = 0; virtual void flush() {} };
+class ILogSink {
+public:
+    virtual ~ILogSink() = default;
+    virtual void write(const LogRecord&) = 0;
+    virtual void flush();                       // default: does nothing
+};
 // Provided sinks: ConsoleSink (colored stdout/stderr), FileSink (rotating file), ConsoleUiSink (developer console)
 
 struct LogConfig { LogLevel level = LogLevel::Info; std::filesystem::path file = "logs/engine.log"; bool color = true; };

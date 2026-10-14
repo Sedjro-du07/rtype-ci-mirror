@@ -446,6 +446,19 @@ void netSendInput(Context& ctx);       // "engine.net.send_input"     LateUpdate
 void netReceiveInput(Context& ctx);    // "engine.net.receive_input"  FixedUpdate (first), server
 void registerNetSystems(Scheduler& s); // called by registerEngineSystems'''),
 ]),
+# ---------------------------------------------------------------- 11 Scenes & assets
+'ENG-41': dict(extra=[
+    ('include/engine/scene/Prefab.hpp', 'cpp', '''struct ComponentData {                 // one parsed component value, ready to copy into a registry
+    ComponentId            id;
+    std::vector<std::byte> value;      // constructed with TypeInfo::construct, filled by fromYaml
+    int                    line = 0;   // for error messages
+};
+struct PrefabChild {
+    std::string                prefab;      // nested prefab path, or empty for an inline entity
+    std::vector<ComponentData> components;  // inline components or overrides of the nested prefab
+    Vec2                       offset;      // local offset from the parent
+};'''),
+]),
 # ---------------------------------------------------------------- 12 Services
 'ENG-44': dict(extra=[
     ('src/services/Logger.cpp', 'cpp', '''class ConsoleSink final : public ILogSink {          // coloured stdout (Info and below) / stderr (Warn, Error)
@@ -466,7 +479,22 @@ public:
     void write(const LogRecord& r) override;
 };'''),
 ]),
+'ENG-45': dict(extra=[
+    ('include/engine/services/CVars.hpp', 'cpp', '''struct CVarInfo {                      // read-only view for the console and the archive
+    std::string_view name, description;
+    uint32_t         flags;
+    std::string      value;            // current value as text
+    std::string      defaultValue;
+};'''),
+]),
 'ENG-47': dict(extra=[
+    ('include/engine/services/Metrics.hpp', 'cpp', '''struct MetricsSnapshot {
+    double   frameMs, fps;
+    std::vector<std::pair<std::string_view, double>> systemMs;   // per system, last frame
+    size_t   entities;
+    uint32_t drawCalls;
+    double   rttMs, lossPercent, kbIn, kbOut;                     // network, 0 offline
+};'''),
     ('src/systems/DebugOverlaySystem.cpp', 'cpp', '''void debugOverlay(Context& ctx);   // "engine.debug_overlay": Render, client and editor, last
 // private helpers
 void drawConsole(Console& console);

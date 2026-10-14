@@ -36,6 +36,17 @@ public:
                        std::span<const ComponentData> overrides = {}); // creates the entity and its children
     void clear();
 };
+
+struct ComponentData {                 // one parsed component value, ready to copy into a registry
+    ComponentId            id;
+    std::vector<std::byte> value;      // constructed with TypeInfo::construct, filled by fromYaml
+    int                    line = 0;   // for error messages
+};
+struct PrefabChild {
+    std::string                prefab;      // nested prefab path, or empty for an inline entity
+    std::vector<ComponentData> components;  // inline components or overrides of the nested prefab
+    Vec2                       offset;      // local offset from the parent
+};
 ```
 
 ## Depends on

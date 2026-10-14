@@ -41,6 +41,13 @@ public:
     Result<void> loadArchive(const std::filesystem::path& file);      // user settings (volumes, bindings options)
     Result<void> saveArchive(const std::filesystem::path& file) const;// Archive-flagged only
 };
+
+struct CVarInfo {                      // read-only view for the console and the archive
+    std::string_view name, description;
+    uint32_t         flags;
+    std::string      value;            // current value as text
+    std::string      defaultValue;
+};
 ```
 
 ## Depends on

@@ -30,6 +30,14 @@ public:
     MetricsSnapshot snapshot() const;                       // frame time, per-system times, entity count,
                                                             // draw calls, network rtt / loss / bandwidth
 };
+
+struct MetricsSnapshot {
+    double   frameMs, fps;
+    std::vector<std::pair<std::string_view, double>> systemMs;   // per system, last frame
+    size_t   entities;
+    uint32_t drawCalls;
+    double   rttMs, lossPercent, kbIn, kbOut;                     // network, 0 offline
+};
 ```
 
 ### `src/systems/DebugOverlaySystem.cpp`
