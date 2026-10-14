@@ -29,7 +29,7 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0019](0019-lua-first-custom-language-optional.md) | Scripting ships with Lua first, a custom language stays optional | E-16 | Accepted |
 | [0020](0020-game-module-helpers.md) | A macro and a CMake function plug a game into the engine | E-17 | Accepted |
 | [0021](0021-engine-composition-root.md) | Engine is the composition root and member order is shutdown order | Block 1 | Accepted |
-| [0022](0022-context-facade.md) | Game code reaches the engine only through Context | Block 1 | Accepted |
+| [0022](0022-context-facade.md) | Game code reaches the engine only through Context | Block 1 | Amended by 0039 |
 | [0023](0023-null-object-services.md) | Absent services are Null Objects | Block 1 | Accepted |
 | [0024](0024-error-handling-policy.md) | Boot errors stop cleanly, system errors never stop the server | Block 1 | Accepted |
 | [0025](0025-module-loading.md) | Plugins and games load through one ModuleManager | Block 2 | Accepted |
@@ -45,7 +45,8 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0035](0035-services-and-tools.md) | Logger, CVars, console, metrics and the scripting interface | Block 12 | Accepted |
 | [0036](0036-one-add-and-type-categories.md) | One `add<T>()`, the type category comes from the macro | SRV-A | Accepted (amends 0027) |
 | [0037](0037-game-facing-networking.md) | The game sees players and typed messages, never sockets or bytes | SRV-1 to SRV-4 | Accepted (amends 0033) |
-| [0038](0038-rooms-shared-host.md) | Several games on one server: rooms, hosted in-process first | SRV-5 | Accepted (principles) |
+| [0038](0038-rooms-shared-host.md) | Several games on one server: rooms, hosted in-process first | SRV-5 | Accepted |
+| [0039](0039-room-api.md) | Room API: lobby, parties, rooms, contexts | SRV-6 to SRV-9 | Accepted (amends 0022) |
 
 ## Not yet recorded
 

@@ -43,6 +43,7 @@ public:
 
 - [ENG-50](ENG-50.md) — Systems: previous_position, movement, hierarchy, parallax, lifetime
 - [ENG-54](ENG-54.md) — Unit tests: ECS, reflection, commands, hooks
+- [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
 
 ## Read first
 

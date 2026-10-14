@@ -73,6 +73,7 @@ public:
 - [ENG-15](ENG-15.md) — Null Objects: NullPlatform, NullRenderer, NullAudio, NullNetwork, NullScripting
 - [ENG-37](ENG-37.md) — network_asio plugin: UDP and TCP on an I/O thread
 - [ENG-38](ENG-38.md) — NetworkSession core: connections, bounded inbox, validation, heartbeat, timeouts
+- [SRV-08](SRV-08.md) — Room types and events: PartyId, RoomId, RoomSettings, Party, RoomInfo, lobby / room / client events
 
 ## Read first
 

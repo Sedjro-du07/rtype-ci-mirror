@@ -59,7 +59,7 @@ DETAILS = {
 'ENG-07': dict(
     goal="Read the configuration file and the command line into one `EngineConfig`.",
     todo=["YAML keys of `EngineConfig` (role, game, plugins, tickRate, root, window, net, log, cvars)",
-          "CLI options: --config, --role, --platform, --audio, --network, --scripting, --port, --host, --log, --scene, --ticks, --set name=value",
+          "`rooms` section (host, maxRooms, workerThreads)", "CLI options: --config, --role, --platform, --audio, --network, --scripting, --port, --host, --log, --scene, --ticks, --set name=value",
           "Unknown key → error with `file:line`; CLI overrides the file"],
     done=["Tests: valid file, unknown key, wrong type, every CLI option overriding the file"],
     watch=["`YAML::Node` stays in `EngineConfig.hpp`, which games never include"]),
@@ -77,7 +77,7 @@ DETAILS = {
            "Never call game code from the network thread"]),
 'ENG-09': dict(
     goal="The only door from game code into the engine (ADR 0022).",
-    todo=["Accessors of reference 01 forwarding to `Engine` members", "Private constructor, `friend class Engine`"],
+    todo=["Accessors of reference 01 forwarding to the engine (client) or to a room (server)", "Private constructor, `friend class Engine` and `RoomRuntime`; base class `ServiceContext` comes from SRV-09"],
     done=["A game test module compiles using only `Context.hpp` and block headers, never `Engine.hpp`"],
     watch=["Context holds no state of its own; never cache it in game code"]),
 'ENG-10': dict(
@@ -88,7 +88,7 @@ DETAILS = {
 # ---------------------------------------------------------------- 02 Modules
 'ENG-11': dict(
     goal="The contracts between the engine, plugins and games, plus the macros that export them.",
-    todo=["`IPlugin`, `PluginKind`, `PluginContext`", "`IGameModule` with default `onStart` / `onShutdown`",
+    todo=["`IPlugin`, `PluginKind`, `PluginContext`", "`IGameModule` with default `onStart`, `onLobbyStart`, `onRoomStart`, `onShutdown` (ADR 0039)",
           "`ENGINE_PLUGIN_API_VERSION`, `ENGINE_GAME_API_VERSION`, `ENGINE_EXPORT`",
           "`ENGINE_GAME_MODULE(C)` and `ENGINE_PLUGIN(C)`: extern \"C\" create / destroy / version, try/catch → nullptr; static registrar in static mode"],
     done=["Test fixture plugin and game build and are found by ModuleManager in both modes"],
@@ -129,7 +129,7 @@ DETAILS = {
     goal="The per-scene world: entities, typed and raw component access, identity and hierarchy.",
     todo=["Entities: create, destroy (recursive over Children), alive, clear",
           "Typed: emplace, get, tryGet, has, replace, remove via TypeRegistry ids", "Raw: storage, getRaw, emplaceRaw, removeRaw, componentsOf",
-          "Identity: find(name), find(Uuid) indexed, withTag", "Hierarchy: setParent, parent, children"],
+          "Identity: find(name), find(Uuid) indexed, withTag", "Hierarchy: setParent, parent, children", "World singletons: `singleton<T>()`, `trySingleton<T>()` on a hidden entity (ADR 0039)"],
     done=["Tests: every method, unregistered type error message, recursive destroy"],
     watch=["Hooks fire on every path, including raw and Commands"]),
 'ENG-19': dict(
@@ -176,7 +176,7 @@ DETAILS = {
 'ENG-26': dict(
     goal="Named systems in fixed stages, ordered by constraints, timed, with the failure policy (ADR 0024, 0028).",
     todo=["`add(stage, name, fn)` + `SystemBuilder` (after, before, roles, disabled, critical)", "`build`: topological sort per stage; unknown name or cycle → error",
-          "`run`: time each system, catch exceptions, apply the policy per role", "`setEnabled`, `stats`, `clearGameSystems`"],
+          "`run`: time each system, catch exceptions, apply the policy per role", "`setEnabled`, `stats`, `clearGameSystems`", "Per-room instances: `add<F>` keeps a copyable prototype, `addFactory`, `instantiate(stage)` (ADR 0039)"],
     done=["Tests: ordering, cycle message, server disables a throwing system, critical ends the session, client quits with code 5"],
     watch=["Ties keep registration order: deterministic"]),
 # ---------------------------------------------------------------- 06 Events
@@ -400,4 +400,70 @@ DETAILS = {
     todo=["Players: join, leave, kick, timeout", "Handshake: mismatch, full, bad name", "Messages on the three transports", "Codec fuzzing and malformed input"],
     done=["All green in CI; fuzz test runs at least 10 000 random inputs"],
     watch=["Loopback only, port 0"]),
+
+'SRV-08': dict(
+    goal="The vocabulary of several games on one server: ids, records and events shared by the engine and the game.",
+    todo=["`PartyId`, `RoomId`, `RoomState`, `RoomSettings`, `Party`, `RoomInfo`",
+          "Lobby events (`PartyChanged`, `InviteRequested`, `InviteAnswered`, `LeavePartyRequested`, `RoomListRequested`, `RoomStarted`, `RoomFinished` with `resultAs<T>()`, `RoomFailed`, `RoomClosed`)",
+          "Room events (`PlayerEnteredRoom`, `PlayerLeftRoom`) and client events (`PartyUpdated`, `InviteReceived`, `RoomListReceived`, `EnteredRoom`, `ReturnedToLobby`)",
+          "Register them in `registerEngineTypes`; `RoomInfo`, `RoomSettings` and `Party` as `ENGINE_STRUCT` so they can travel"],
+    done=["The types compile in a game test module; every event registers without `DuplicateName`"],
+    watch=["Ids are 0 for none, like `PlayerId`", "No engine-internal type (ConnectionId, RoomRuntime) in these headers"]),
+'SRV-09': dict(
+    goal="Split the door into the engine in three so that world access in lobby code does not compile (ADR 0039 amends 0022).",
+    todo=["`ServiceContext`: log (tagged with the room), read-only CVars, assets, metrics, role",
+          "`Context : ServiceContext`: world, commands, scenes, events, time, network (`RoomNetwork`), `room()` on the server, `lobby()` on the client, client-only input / render / audio / console / requestQuit",
+          "`LobbyContext : ServiceContext`: lobby, events, network (whole session), console, writable CVars, requestQuit",
+          "Constructors private: built by `Engine` (lobby, client) and `RoomRuntime` (one per room)"],
+    done=["A test lobby callback using `ctx.world()` fails to compile (compile-fail test)",
+          "A system receives the Context of its room: two rooms see two different worlds"],
+    watch=["Contexts never own anything", "`room()` on the client and `lobby()` on the server assert with a clear message"]),
+'SRV-10': dict(
+    goal="Keep track of parties and rooms on the lobby thread, with the fixed rules of the engine.",
+    todo=["`PartyTable`: a party of 1 on `PlayerJoined`, move, remove (new leader promoted), setLeader, lookups",
+          "`RoomDirectory`: add (refused over `maxRooms`), remove, state, enter / leave with a party, `roomOf(player)`"],
+    done=["Tests: join → party of 1; invite + accept → one party of 2 and the old party dissolved; leader leaves → a new leader; maxRooms respected"],
+    watch=["A player is always in exactly one party", "Lobby thread only: no locks here"]),
+'SRV-11': dict(
+    goal="One isolated game: its own world, commands, events, time, network ids and system instances.",
+    todo=["`RoomRuntime`: owns a SceneManager (loads `settings.level`), Commands, EventBus, Time, NetworkIdMap, its Context",
+          "Instantiate the game systems for this room (`Scheduler::instantiate`, ADR 0039 option B)",
+          "`tick()`: drain the inbox, FixedUpdate, apply commands, dispatch events, LateUpdate; catch exceptions → `failed()`",
+          "`RoomMailbox`: thread-safe queue (multi-producer, single consumer) for lobby → room and room → lobby"],
+    done=["Two RoomRuntimes ticked one after the other never see each other's entities or events",
+          "A throwing system marks the room failed and posts `Failed` to the outbox"],
+    watch=["A room is never ticked by two threads at once", "No pointer to the lobby inside a room: messages only (ADR 0038 rule 3)"]),
+'SRV-12': dict(
+    goal="Run every room in parallel on a fixed pool of threads, each room sequentially.",
+    todo=["`WorkerPool`: N threads (0 = cores), `submit(job)`, clean join",
+          "`IRoomHost` interface: start, stop, post, collect",
+          "`ThreadPoolRoomHost`: schedules each room's tick at its tick rate on the pool; never two ticks of one room at once; collects outboxes for the lobby"],
+    done=["50 rooms at 60 ticks/s on 8 threads keep their tick rate in a stress test",
+          "A slow room does not delay the others"],
+    watch=["`ProcessRoomHost` (dedicated) will implement the same interface in Part 2: keep it free of thread assumptions"]),
+'SRV-13': dict(
+    goal="The server-side game API for parties and rooms, and the lobby loop of the server.",
+    todo=["`Lobby`: parties (party, partyOf, sendInvite, addToParty, removeFromParty, setLeader, sendToParty) and rooms (createRoom, moveParty, moveToLobby, closeRoom, sendRoomList, room, rooms)",
+          "Publish the lobby events; turn client requests into `InviteRequested` / `InviteAnswered` / `LeavePartyRequested` / `RoomListRequested`",
+          "`RoomHandle`: id, settings, players, parties, `keep(Subscription)`, `reportFinished<T>`",
+          "Call `IGameModule::onLobbyStart` once and `onRoomStart` for every room after its level is loaded",
+          "Server `Engine` loop on the main thread: network poll, lobby events, room host collect (shared file with ENG-08)"],
+    done=["Headless server: two parties create two rooms, play in parallel, one reports finished, the game closes it, its party is back in the lobby"],
+    watch=["The engine never applies a game rule (who may start, solo allowed…): it only publishes events and executes calls"]),
+'SRV-14': dict(
+    goal="Make the network follow players between the lobby and the rooms.",
+    todo=["`PlayerRouting`: where each player is (lobby or room)",
+          "Route game messages to the room's `on<T>` or the lobby's `on<T>`",
+          "`RoomNetwork`: players, send, broadcast, on<T>, ping limited to the room",
+          "Replication per room: only the room's entities; reset a player's replication state on enter / leave",
+          "`ClientLobby`: myParty, invite, answerInvite, leaveParty, requestRoomList, currentRoom; client events"],
+    done=["A player in room 1 never receives an entity or a message of room 2; returning to the lobby stops every snapshot"],
+    watch=["Messages of a player who just left a room must not reach that room any more"]),
+'SRV-15': dict(
+    goal="Prove rooms are isolated, parallel and robust.",
+    todo=["Parallel rooms (no shared entities, events, ids)", "Crash in one room → RoomFailed, others continue",
+          "Party flows (invite, answer, leave, leader change, disconnect of a leader)", "Room flows (create, move, finish, close, maxRooms)",
+          "Systems with state get one copy per room"],
+    done=["All green in CI with thread sanitizer enabled"],
+    watch=["Run the room tests under ThreadSanitizer: data races are the main risk"]),
 }

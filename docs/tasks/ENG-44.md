@@ -80,6 +80,7 @@ public:
 
 - [ENG-14](ENG-14.md) — ModuleManager: load by kind and name, version check, reverse unload
 - [ENG-26](ENG-26.md) — Scheduler: stages, names, after/before, roles, stats, failure policy
+- [SRV-09](SRV-09.md) — Contexts: ServiceContext, LobbyContext, one Context per room
 
 ## Read first
 

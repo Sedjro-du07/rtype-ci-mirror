@@ -79,6 +79,10 @@ Dispatch points: after each `FixedUpdate` step (after `Commands::apply`) and aft
 | `Caption` | `std::string text; float seconds` | `IAudio::play` with a caption | accessibility: visual cue for a sound |
 | `ConsoleCommand` | `std::string line` | `Console` | a command was executed |
 
+Lobby, party and room events (`PartyChanged`, `InviteRequested`, `RoomFinished`, `PlayerEnteredRoom`,
+`EnteredRoom`…) are listed in reference 14. On the server, every room has its own `EventBus`; the lobby
+has another one. An event published in a room is never seen by another room or by the lobby.
+
 `DisconnectReason`: `Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`, `ServerFull`, `FormatMismatch`.
 
 Events never leave the process. To tell other machines, use a network message (`ENGINE_MESSAGE`, block 10).

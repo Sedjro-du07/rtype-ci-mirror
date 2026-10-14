@@ -187,6 +187,22 @@ Totals: **9 interfaces**, **~65 classes and structs** (6 private to the server l
 | `StreamFramer` | class | `src/net/StreamFramer.hpp`, `.cpp` | SRV-06 | `feed`, `next`, size limit |
 | Server tests | tests | `tests/net/players/`, `tests/net/messages/`, `tests/reflection/codec/` | SRV-07 | players, handshake, messages on three transports, codec fuzzing |
 
+## Rooms (lobby, parties, rooms) — SRV-08 to SRV-15 · [reference 14](reference/14-rooms.md) · [server tasks](../server/tasks.md)
+
+| Item | Kind | File | Task | To implement |
+|---|---|---|---|---|
+| `PartyId`, `RoomId`, `RoomState`, `RoomSettings`, `Party`, `RoomInfo`, room events | types, events | `inc/room/RoomTypes.hpp`, `inc/room/RoomEvents.hpp` | SRV-08 | fields, `RoomFinished::resultAs<T>`, registration |
+| `ServiceContext`, `LobbyContext` (+ `Context` base change) | class | `inc/ServiceContext.hpp`, `inc/LobbyContext.hpp`, `src/core/*Context.cpp` | SRV-09 | accessors; private constructors |
+| `PartyTable`, `RoomDirectory` | private class | `src/room/` | SRV-10 | `createSolo`, `move`, `remove`, `setLeader`…; `add`, `remove`, `setState`, `enter`, `leave`, `roomOf` |
+| `RoomRuntime`, `RoomMailbox` | private class | `src/room/` | SRV-11 | `start`, `tick`, mailboxes; system instances per room |
+| `WorkerPool`, `IRoomHost`, `ThreadPoolRoomHost` | private class | `src/room/` | SRV-12 | `submit`; `start`, `stop`, `post`, `collect` |
+| `Lobby`, `RoomHandle`, server lobby loop | class | `inc/room/Lobby.hpp`, `inc/room/RoomHandle.hpp`, `src/core/Engine.cpp` | SRV-13 | every `Lobby` method, `keep`, `reportFinished<T>`, module hooks |
+| `PlayerRouting`, `RoomNetwork`, `ClientLobby` | class | `src/net/PlayerRouting.hpp`, `inc/room/RoomNetwork.hpp`, `inc/room/ClientLobby.hpp` | SRV-14 | routing, per-room replication, client requests |
+| Room tests | tests | `tests/room/` | SRV-15 | isolation, crash, party and room flows (ThreadSanitizer) |
+
+Also changed: `Registry::singleton<T>` (ENG-18), `Scheduler::add` per-room copies / `addFactory` / `instantiate` (ENG-26),
+`IGameModule::onLobbyStart` / `onRoomStart` (ENG-11), `EngineConfig::rooms` (ENG-07).
+
 ## 11 · Scenes, prefabs, assets — ENG-40 to ENG-43 · [reference 11](reference/11-scenes-assets.md)
 
 | Item | Kind | File | Task | To implement |

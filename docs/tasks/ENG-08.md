@@ -11,7 +11,7 @@ The composition root: owns every subsystem, runs boot → load → loop → shut
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/Engine.hpp`
-- `src/core/Engine.cpp`
+- `src/core/Engine.cpp` (shared with [SRV-13](SRV-13.md))
 
 ## Classes and methods
 

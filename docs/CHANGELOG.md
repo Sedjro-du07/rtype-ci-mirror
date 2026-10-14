@@ -7,6 +7,25 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — server part, round 3: room API
+
+### Added
+
+- We designed the room API and I recorded it as ADR 0039: lobby (server level), parties (a group that
+  stays together, every player always in one, a player alone is a party of 1) and rooms (one game);
+  `Lobby`, `RoomHandle`, `RoomNetwork`, `ClientLobby` and their events; client requests reach the game
+  as lobby events and the game answers; starting a game is a game message.
+- Reference 14 (lobby, parties and rooms) with the private classes (`PartyTable`, `RoomDirectory`,
+  `RoomRuntime`, `RoomMailbox`, `IRoomHost`, `ThreadPoolRoomHost`, `WorkerPool`, `PlayerRouting`) and
+  guide page 28. Server tasks SRV-08 to SRV-15 (waves 5 to 16) with their declarations.
+
+### Changed
+
+- ADR 0039 amends ADR 0022: three context types (`ServiceContext`, `Context` per room, `LobbyContext`).
+- `IGameModule` gains `onLobbyStart` and `onRoomStart`; `onShutdown` receives a `ServiceContext`.
+- `Registry::singleton<T>()` holds the state of one game; systems are instantiated once per room
+  (`Scheduler::add` copies, `addFactory`); `EngineConfig` gets a `rooms` section.
+
 ## [2026-10-14] — server part, round 2: rooms
 
 ### Added

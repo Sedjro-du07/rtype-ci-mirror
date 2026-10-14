@@ -120,6 +120,10 @@
     "title": "Guide · 27 What is not in the engine yet"
   },
   {
+    "file": "engine/guide/28-lobby-parties-rooms.md",
+    "title": "Guide · 28 Lobby, parties and rooms"
+  },
+  {
     "file": "engine/reference/README.md",
     "title": "Engine reference — index"
   },
@@ -174,6 +178,10 @@
   {
     "file": "engine/reference/13-components-systems.md",
     "title": "Reference · 13 Built-in components and systems"
+  },
+  {
+    "file": "engine/reference/14-rooms.md",
+    "title": "Reference · 14 Lobby, parties and rooms"
   },
   {
     "file": "engine/classes.md",
@@ -366,6 +374,10 @@
   {
     "file": "adr/0038-rooms-shared-host.md",
     "title": "ADR 0038 — Several games on one server: rooms, hosted in-process first"
+  },
+  {
+    "file": "adr/0039-room-api.md",
+    "title": "ADR 0039 — Room API: lobby, parties, rooms, contexts"
   },
   {
     "file": "../benchmark-graphics-rtype.md",

@@ -58,6 +58,7 @@ struct AssetStats { uint32_t textures, fonts, sounds, musics, scripts; uint64_t 
 ## Unlocks
 
 - [ENG-41](ENG-41.md) — PrefabLibrary and instantiate
+- [SRV-09](SRV-09.md) — Contexts: ServiceContext, LobbyContext, one Context per room
 
 ## Read first
 

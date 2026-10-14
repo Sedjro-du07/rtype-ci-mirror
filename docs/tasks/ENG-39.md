@@ -64,7 +64,8 @@ void registerNetSystems(Scheduler& s); // called by registerEngineSystems
 
 ## Unlocks
 
-- no task waits for this one
+- [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
+- [SRV-14](SRV-14.md) — Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset
 
 ## Read first
 

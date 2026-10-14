@@ -59,6 +59,10 @@ public:
     Entity parent(Entity e) const;
     std::span<const Entity> children(Entity e) const;
 
+    // World singletons (ADR 0039): the one T of this world, on a hidden entity; game state of one room
+    template <class T> T& singleton();
+    template <class T> T* trySingleton();
+
     // Observer hooks (fired by emplace / replace / remove / destroy, including through Commands)
     template <class T> ComponentHooks& hooks();
     ComponentHooks& hooks(ComponentId id);
@@ -86,10 +90,12 @@ struct ComponentHooks {
 - [ENG-41](ENG-41.md) — PrefabLibrary and instantiate
 - [ENG-48](ENG-48.md) — IScripting, Script component, script systems
 - [ENG-54](ENG-54.md) — Unit tests: ECS, reflection, commands, hooks
+- [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
 
 ## Read first
 
 - [ADR 0026](../adr/0026-registry-api.md)
+- [ADR 0039](../adr/0039-room-api.md)
 - [reference 03](../engine/reference/03-ecs.md)
 
 ## To implement
@@ -99,6 +105,7 @@ struct ComponentHooks {
 - [ ] Raw: storage, getRaw, emplaceRaw, removeRaw, componentsOf
 - [ ] Identity: find(name), find(Uuid) indexed, withTag
 - [ ] Hierarchy: setParent, parent, children
+- [ ] World singletons: `singleton<T>()`, `trySingleton<T>()` on a hidden entity (ADR 0039)
 
 ## Done when
 

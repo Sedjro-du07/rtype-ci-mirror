@@ -127,6 +127,10 @@ public:
     Entity parent(Entity e) const;
     std::span<const Entity> children(Entity e) const;
 
+    // World singletons (ADR 0039): the one T of this world, on a hidden entity; game state of one room
+    template <class T> T& singleton();
+    template <class T> T* trySingleton();
+
     // Observer hooks (fired by emplace / replace / remove / destroy, including through Commands)
     template <class T> ComponentHooks& hooks();
     ComponentHooks& hooks(ComponentId id);

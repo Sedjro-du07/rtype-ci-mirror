@@ -150,6 +150,11 @@ Rules for callbacks:
 connection. If someone changed a type on one side only, the client is refused with
 `LeftServer{FormatMismatch}` and a log line saying to rebuild both.
 
+## Several games on one server
+
+With rooms, a game's systems see only the players of their room through `ctx.network()`, and
+replication sends each player only the entities of their room. Lobby, parties and rooms: page 28.
+
 ## Diagnostics
 
 `net` in the console prints RTT, loss and bandwidth per player; the metrics overlay shows the

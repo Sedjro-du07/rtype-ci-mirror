@@ -38,6 +38,7 @@ struct EngineConfig {
     YAML::Node            cvars;            // initial console variables, see block 12
     std::filesystem::path sceneOverride;    // --scene: start here instead of IGameModule::firstScene()
     uint64_t              maxTicks = 0;     // --ticks: quit cleanly after N steps (0 = never); tests and CI
+    RoomsConfig           rooms;            // server: host ("shared"), maxRooms (8), workerThreads (0 = cores); reference 14
 
     // Reads the YAML file, then applies command-line overrides (--config, --role, --platform, --audio,
     // --network, --scripting, --port, --host, --log, --scene, --ticks, --set name=value). Unknown keys are an error with file:line.
@@ -168,40 +169,42 @@ while running_:
     audio.update(); metrics_.endFrame()
 ```
 
-The server runs the same loop with Null platform, renderer and audio, and nothing in `Render`.
+The client runs this loop with one world. On the server, the main thread runs the **lobby** loop
+(network poll, lobby events and callbacks with a `LobbyContext`, room mailboxes) and every room runs
+the FixedUpdate / LateUpdate part of this loop with its own world, Commands, events and time on the
+worker pool (reference 14, ADR 0038/0039). The server has Null platform, renderer and audio, and no `Render`.
 
 ---
 
 ## `class Context` — `Context.hpp`
 
-The only door from game code into the engine (ADR 0022). Non-owning, built only by `Engine`,
-used only on the loop thread, valid only during the call it was passed to.
+The door from game code into the engine (ADR 0022). Since ADR 0039 there are three context types:
+`ServiceContext` (shared services, everywhere), `Context` (a room on the server, the game on the
+client) and `LobbyContext` (server lobby code). All three are declared with the lobby and rooms in
+reference 14; `Context` is repeated here because it is what every game system receives.
+Non-owning, built only by the engine, valid only during the call it was passed to.
 
 ```cpp
-class Context {
+class Context : public ServiceContext {     // log(), cvars(), assets(), metrics(), role() come from ServiceContext
 public:
-    Registry&          world();             // registry of the ACTIVE scene; re-read it after a scene switch
+    Registry&          world();             // this room's world (server) / the game's world (client)
     Commands&          commands();          // deferred spawn / destroy / add / remove
     SceneManager&      scenes();            // switchTo(), markPersistent(), active scene name
-    EventBus&          events();            // publish / subscribe
-    const ActionState& input() const;       // local player's actions this tick
-    InputMap&          inputMap();          // bindings and options (options menu, rebinding)
-    AssetManager&      assets();            // textures, sounds, music, fonts, scripts by path
-    RenderQueue&       render();            // describe what to draw this frame
-    IAudio&            audio();             // NullAudio on the server
-    NetworkSession&    network();           // players, messages, stats (block 10)
-    const Time&        time() const;        // fixedDelta, tick, alpha, total
-    Logger&            log();
-    CVars&             cvars();
-    Console&           console();
-    Metrics&           metrics();           // record your own series for the overlay
-    Role               role() const;
-    void               requestQuit();       // a request: the frame finishes cleanly
+    EventBus&          events();            // this room's events only
+    const Time&        time() const;        // fixedDelta, tick, alpha, total of this room
+    RoomNetwork&       network();           // server: the players of this room; client: the session
+    RoomHandle&        room();              // server only: id, players, reportFinished (reference 14)
+    ClientLobby&       lobby();             // client only: party, invitations, room list (reference 14)
+    const ActionState& input() const;       // client: local player's actions this tick
+    InputMap&          inputMap();          // client: bindings and options (options menu, rebinding)
+    RenderQueue&       render();            // client: describe what to draw this frame
+    IAudio&            audio();             // client (NullAudio on the server)
+    Console&           console();           // client (the server console belongs to the lobby)
+    void               requestQuit();       // client only: a room cannot stop the server
 
 private:
-    friend class Engine;
-    explicit Context(Engine& engine);
-    Engine* engine_;
+    friend class Engine;  friend class RoomRuntime;
+    Context(/* engine-owned references of one room or of the client */);
 };
 ```
 

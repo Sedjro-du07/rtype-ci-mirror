@@ -58,6 +58,7 @@ struct CVarInfo {                      // read-only view for the console and the
 ## Unlocks
 
 - [ENG-46](ENG-46.md) — Console and built-in commands
+- [SRV-09](SRV-09.md) — Contexts: ServiceContext, LobbyContext, one Context per room
 
 ## Read first
 

@@ -193,6 +193,14 @@ public:
 `Handshake` and `Codec` signatures follow the protocol RFC (bytes) and block 4 (`TypeInfo`); their
 behaviour is fixed above and in ADR 0037.
 
+## Rooms
+
+With several games on one server (ADR 0038/0039), a room sees the network through `RoomNetwork`
+(reference 14): only its own players. Game messages from a player are routed to the player's room, or
+to the lobby when the player is not in a game (`PlayerRouting`). Replication sends a player only the
+entities of their room and resets that player's state when they enter or leave a room; each room has
+its own `NetworkIdMap`.
+
 ## Replication
 
 ### Components — `net/NetComponents.hpp`

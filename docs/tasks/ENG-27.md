@@ -67,6 +67,8 @@ struct ConsoleCommand     { std::string line; };                          ENGINE
 - [ENG-48](ENG-48.md) — IScripting, Script component, script systems
 - [ENG-51](ENG-51.md) — Collision system: uniform grid, AABB, layers, Collision events
 - [ENG-55](ENG-55.md) — Unit tests: scheduler, events, input, scenes, session
+- [SRV-08](SRV-08.md) — Room types and events: PartyId, RoomId, RoomSettings, Party, RoomInfo, lobby / room / client events
+- [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
 
 ## Read first
 

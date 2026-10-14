@@ -60,6 +60,7 @@ private:
 ## Unlocks
 
 - [SRV-07](SRV-07.md) — Tests: players, handshake, messages, codec, malformed input
+- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API, lobby loop in Engine
 
 ## Read first
 

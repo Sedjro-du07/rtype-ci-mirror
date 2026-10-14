@@ -41,8 +41,10 @@ is, and `types.add<T>()` uses it (ADR 0036).
 | `void registerTypes(TypeRegistry&)` | yes | once at boot, after engine types |
 | `void registerSystems(Role, Scheduler&)` | yes | once at load, after engine systems |
 | `std::string_view firstScene() const` | yes | at load (unless `--scene`) |
-| `void onStart(Context&)` | no | once, after the first scene, before the loop |
-| `void onShutdown(Context&)` | no | once at shutdown, world still alive |
+| `void onStart(Context&)` | no | client: once, after the first scene, before the loop |
+| `void onLobbyStart(LobbyContext&)` | no | server: once, lobby subscriptions and `on<T>` |
+| `void onRoomStart(Context&)` | no | server: once per room, room subscriptions with `ctx.room().keep(...)` |
+| `void onShutdown(ServiceContext&)` | no | once, before the module is unloaded |
 
 ### Config — `config.yaml` and command line · guide [02](guide/02-project-and-config.md)
 
@@ -92,7 +94,12 @@ Supported field types (`FieldKind`): `bool`, `int32_t`, `uint32_t`, `int64_t`, `
 
 ---
 
-## 3 · At runtime: the `Context` · `Context.hpp` · guide [17](guide/17-context.md)
+## 3 · At runtime: the `Context` · `Context.hpp` · guide [17](guide/17-context.md), [28](guide/28-lobby-parties-rooms.md)
+
+Three context types (ADR 0039): `Context` (game systems: one per room on the server, the game on the
+client), `LobbyContext` (server lobby code: no world), `ServiceContext` (their common base: `log`,
+read-only `cvars`, `assets`, `metrics`, `role`). On the server, `ctx.world()`, `events()`, `time()` and
+`network()` are those of the room being ticked; `room()` gives the room, `requestQuit()` is client only.
 
 Every system and hook receives a `Context&`. It is the only door into the engine. Valid only
 during the call; never store it.
@@ -342,10 +349,30 @@ Calls: `self:get(name)`, `self:set(name, t)`, `self:has(name)`, `self:remove(nam
 
 ---
 
+## 16 · Lobby, parties and rooms · `room/*.hpp` · guide [28](guide/28-lobby-parties-rooms.md) · reference [14](reference/14-rooms.md)
+
+| Where | API |
+|---|---|
+| Server lobby (`LobbyContext::lobby()`) | `Lobby`: `party`, `partyOf`, `parties`, `sendInvite`, `addToParty`, `removeFromParty`, `setLeader`, `sendToParty<T>`, `createRoom(RoomSettings)`, `moveParty`, `moveToLobby`, `closeRoom`, `sendRoomList`, `room`, `rooms` |
+| Server room (`Context::room()`) | `RoomHandle`: `id`, `settings`, `players`, `parties`, `keep(Subscription)`, `reportFinished<T>` |
+| Server room (`Context::network()`) | `RoomNetwork`: `players`, `send`, `broadcast`, `on<T>`, `ping` — the room's players only |
+| Client (`Context::lobby()`) | `ClientLobby`: `myParty`, `invite`, `answerInvite`, `leaveParty`, `requestRoomList`, `currentRoom` |
+| World | `Registry::singleton<T>()`, `trySingleton<T>()`: the state of one game |
+
+Types: `PartyId`, `RoomId`, `RoomState`, `RoomSettings` (`name`, `level`, `maxPlayers`, `listed`), `Party`,
+`RoomInfo`. Lobby events: `PartyChanged`, `InviteRequested`, `InviteAnswered`, `LeavePartyRequested`,
+`RoomListRequested`, `RoomStarted`, `RoomFinished` (`resultAs<T>()`), `RoomFailed`, `RoomClosed`. Room
+events: `PlayerEnteredRoom`, `PlayerLeftRoom`. Client events: `PartyUpdated`, `InviteReceived`,
+`RoomListReceived`, `EnteredRoom`, `ReturnedToLobby`.
+
+Rules: game state lives in the room (singletons, components), never in module members or globals;
+rooms are created through the lobby; starting a game is a game message (`PlayRequest`); systems with
+members are copied once per room.
+
 ## Never in game code
 
 `Engine`, `EngineConfig::load`, `ModuleManager`, `DynamicLibrary`, `StaticModuleTable`, `IPlugin`,
-`IPlatform`, `IRenderer`, `INetwork`, `IScripting`, `ConnectionId`, `NetworkSession::sendRaw`, `IStorage`, `SparseSet`, `EntityAllocator`,
+`IPlatform`, `IRenderer`, `INetwork`, `IScripting`, `ConnectionId`, `NetworkSession::sendRaw`, `RoomRuntime`, `IRoomHost`, `ThreadPoolRoomHost`, `WorkerPool`, `PartyTable`, `RoomDirectory`, `RoomMailbox`, `PlayerRouting`, `IStorage`, `SparseSet`, `EntityAllocator`,
 `SceneLoader`, `NetworkIdMap`, `TypeInfo` function pointers, and every method marked *engine only* in
 the reference (`Scheduler::build/run`, `Commands::apply`, `EventBus::dispatch`, `InputMap::feed`,
 `RenderQueue::frame`, `SceneManager::applyPending`, …). Writing a backend instead of a game? See

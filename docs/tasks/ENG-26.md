@@ -62,7 +62,10 @@ public:
     explicit Scheduler(Role role, Logger& log);
 
     // Names are unique, "<module>.<system>": "engine.movement", "rtype.bydos_ai".
-    SystemBuilder add(Stage stage, std::string name, SystemFn fn);
+    template <class F> SystemBuilder add(Stage stage, std::string name, F fn);   // F copyable: one copy per room
+    using SystemFactory = std::function<SystemFn()>;
+    SystemBuilder addFactory(Stage stage, std::string name, SystemFactory make); // builds one instance per room
+    std::vector<SystemFn> instantiate(Stage stage) const;   // engine only: the systems of one room, in order
 
     Result<void> build();                 // engine only: topological sort per stage;
                                           // unknown name in after/before or a cycle → ScheduleCycle
@@ -86,11 +89,13 @@ public:
 - [ENG-47](ENG-47.md) — Metrics and engine.debug_overlay (ImGui, ImPlot)
 - [ENG-50](ENG-50.md) — Systems: previous_position, movement, hierarchy, parallax, lifetime
 - [ENG-55](ENG-55.md) — Unit tests: scheduler, events, input, scenes, session
+- [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
 
 ## Read first
 
 - [ADR 0024](../adr/0024-error-handling-policy.md)
 - [ADR 0028](../adr/0028-named-ordered-systems.md)
+- [ADR 0039](../adr/0039-room-api.md)
 - [reference 05](../engine/reference/05-scheduler.md)
 
 ## To implement
@@ -99,6 +104,7 @@ public:
 - [ ] `build`: topological sort per stage; unknown name or cycle → error
 - [ ] `run`: time each system, catch exceptions, apply the policy per role
 - [ ] `setEnabled`, `stats`, `clearGameSystems`
+- [ ] Per-room instances: `add<F>` keeps a copyable prototype, `addFactory`, `instantiate(stage)` (ADR 0039)
 
 ## Done when
 

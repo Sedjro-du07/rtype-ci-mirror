@@ -66,7 +66,7 @@ Board: [Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7) · ta
 | 10 | [ENG-08](ENG-08.md) | 01 Core | Engine: lifecycle, member order, fixed-step loop, error policy | [ENG-07](ENG-07.md), [ENG-14](ENG-14.md), [ENG-26](ENG-26.md), [ENG-43](ENG-43.md), [ENG-27](ENG-27.md), [ENG-29](ENG-29.md), [ENG-30](ENG-30.md), [ENG-38](ENG-38.md), [ENG-46](ENG-46.md) |
 | 10 | [ENG-55](ENG-55.md) | 14 Tests & bench | Unit tests: scheduler, events, input, scenes, session | [ENG-26](ENG-26.md), [ENG-27](ENG-27.md), [ENG-29](ENG-29.md), [ENG-43](ENG-43.md), [ENG-38](ENG-38.md) |
 | 10 | [ENG-59](ENG-59.md) | 15 Part 2 | Editor (Track 1): hierarchy, inspector, scene save | [ENG-43](ENG-43.md), [ENG-32](ENG-32.md) |
-| 11 | [ENG-09](ENG-09.md) | 01 Core | Context facade | [ENG-08](ENG-08.md) |
+| 11 | [ENG-09](ENG-09.md) | 01 Core | Context facade | [ENG-08](ENG-08.md), [SRV-09](SRV-09.md) |
 | 11 | [ENG-10](ENG-10.md) | 01 Core | Generic launcher main() and signal handling | [ENG-08](ENG-08.md), [ENG-02](ENG-02.md) |
 | 11 | [ENG-57](ENG-57.md) | 14 Tests & bench | Headless smoke test in CI: client with Null plugins runs 1000 ticks | [ENG-08](ENG-08.md), [ENG-15](ENG-15.md) |
 
@@ -78,8 +78,16 @@ Board: [Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d) · ta
 |---|---|---|---|---|
 | 4 | [SRV-04](SRV-04.md) | 02 Messages | Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits | [ENG-22](ENG-22.md), [ENG-24](ENG-24.md) |
 | 5 | [SRV-06](SRV-06.md) | 03 Transports | StreamFramer: TCP message framing with size limit | [ENG-37](ENG-37.md) |
+| 5 | [SRV-08](SRV-08.md) | 05 Rooms | Room types and events: PartyId, RoomId, RoomSettings, Party, RoomInfo, lobby / room / client events | [ENG-22](ENG-22.md), [ENG-27](ENG-27.md), [ENG-36](ENG-36.md) |
 | 6 | [SRV-01](SRV-01.md) | 01 Players | Players: PlayerTable, startServer / connectTo, player events, names, kick, ping | [ENG-38](ENG-38.md) |
 | 6 | [SRV-05](SRV-05.md) | 03 Transports | ReliableChannel: acknowledged and resent UDP messages | [ENG-38](ENG-38.md) |
+| 6 | [SRV-10](SRV-10.md) | 05 Rooms | PartyTable and RoomDirectory: parties, leaders, room records, maxRooms | [SRV-08](SRV-08.md) |
 | 7 | [SRV-02](SRV-02.md) | 01 Players | Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link | [SRV-01](SRV-01.md), [SRV-06](SRV-06.md), [ENG-22](ENG-22.md) |
 | 7 | [SRV-03](SRV-03.md) | 02 Messages | Typed messages: MessageDispatcher, send / broadcast / on<T> | [SRV-01](SRV-01.md), [SRV-04](SRV-04.md), [SRV-05](SRV-05.md), [SRV-06](SRV-06.md) |
 | 8 | [SRV-07](SRV-07.md) | 04 Tests | Tests: players, handshake, messages, codec, malformed input | [SRV-01](SRV-01.md), [SRV-02](SRV-02.md), [SRV-03](SRV-03.md), [SRV-04](SRV-04.md), [SRV-05](SRV-05.md), [SRV-06](SRV-06.md) |
+| 9 | [SRV-09](SRV-09.md) | 05 Rooms | Contexts: ServiceContext, LobbyContext, one Context per room | [SRV-08](SRV-08.md), [ENG-40](ENG-40.md), [ENG-44](ENG-44.md), [ENG-45](ENG-45.md), [ENG-47](ENG-47.md) |
+| 12 | [SRV-11](SRV-11.md) | 05 Rooms | RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages | [ENG-09](ENG-09.md), [ENG-18](ENG-18.md), [ENG-20](ENG-20.md), [ENG-26](ENG-26.md), [ENG-27](ENG-27.md), [ENG-39](ENG-39.md), [ENG-43](ENG-43.md), [SRV-09](SRV-09.md) |
+| 13 | [SRV-12](SRV-12.md) | 05 Rooms | WorkerPool, IRoomHost and ThreadPoolRoomHost: rooms in parallel on a thread pool | [SRV-11](SRV-11.md) |
+| 14 | [SRV-13](SRV-13.md) | 05 Rooms | Lobby and RoomHandle: the server game API, lobby loop in Engine | [SRV-10](SRV-10.md), [SRV-12](SRV-12.md), [SRV-03](SRV-03.md) |
+| 15 | [SRV-14](SRV-14.md) | 05 Rooms | Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset | [SRV-13](SRV-13.md), [ENG-39](ENG-39.md) |
+| 16 | [SRV-15](SRV-15.md) | 04 Tests | Tests: parallel rooms, isolation, crash in a room, party and room flows | [SRV-13](SRV-13.md), [SRV-14](SRV-14.md) |

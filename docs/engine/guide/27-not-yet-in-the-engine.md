@@ -13,7 +13,7 @@ So nobody looks for a feature that does not exist. Each line says where it will 
 | Hot reload of the game module (C++) | not planned | Track 1 option; scripts and assets already hot-reload |
 | Client-side prediction, reconciliation, delta snapshots, compression | not designed | Network part (Track 2) |
 | Protocol bytes (header, message ids, reliability scheme, byte order) | not designed | Network part, protocol RFC |
-| Rooms and lobby (several games on one server) | principles decided (ADR 0038), API being designed | Server part, round 3 |
+| Rooms and lobby (several games on one server) | designed (ADR 0038, 0039), not implemented | tasks SRV-08 to SRV-15, guide 28 |
 | Dedicated room hosting (one process per room, client redirection) | planned | Part 2, Track 1 (`ProcessRoomHost`, ADR 0038) |
 | Parallel systems inside one game (job system) | not designed | Part 2, Track 1; the scheduler is single-threaded per room (ADR 0028) |
 | Interest management (send each player only what concerns them) | not designed | Network part / Track 2; today every `Replicated` component is sent |

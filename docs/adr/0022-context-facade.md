@@ -1,6 +1,6 @@
 # ADR 0022: Game code reaches the engine only through Context
 
-- Status: Accepted
+- Status: Accepted, amended by [ADR 0039](0039-room-api.md) (three context types)
 - Date: 2026-10-09
 - Deciders: the R-Type team
 - Discussion id: Block 1

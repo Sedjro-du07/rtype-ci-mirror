@@ -10,7 +10,7 @@ The only door from game code into the engine (ADR 0022).
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `include/engine/Context.hpp`
+- `include/engine/Context.hpp` (shared with [SRV-09](SRV-09.md))
 - `src/core/Context.cpp`
 
 ## Classes and methods
@@ -20,50 +20,48 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ### `include/engine/Context.hpp`
 
 ```cpp
-class Context {
+class Context : public ServiceContext {     // log(), cvars(), assets(), metrics(), role() come from ServiceContext
 public:
-    Registry&          world();             // registry of the ACTIVE scene; re-read it after a scene switch
+    Registry&          world();             // this room's world (server) / the game's world (client)
     Commands&          commands();          // deferred spawn / destroy / add / remove
     SceneManager&      scenes();            // switchTo(), markPersistent(), active scene name
-    EventBus&          events();            // publish / subscribe
-    const ActionState& input() const;       // local player's actions this tick
-    InputMap&          inputMap();          // bindings and options (options menu, rebinding)
-    AssetManager&      assets();            // textures, sounds, music, fonts, scripts by path
-    RenderQueue&       render();            // describe what to draw this frame
-    IAudio&            audio();             // NullAudio on the server
-    NetworkSession&    network();           // players, messages, stats (block 10)
-    const Time&        time() const;        // fixedDelta, tick, alpha, total
-    Logger&            log();
-    CVars&             cvars();
-    Console&           console();
-    Metrics&           metrics();           // record your own series for the overlay
-    Role               role() const;
-    void               requestQuit();       // a request: the frame finishes cleanly
+    EventBus&          events();            // this room's events only
+    const Time&        time() const;        // fixedDelta, tick, alpha, total of this room
+    RoomNetwork&       network();           // server: the players of this room; client: the session
+    RoomHandle&        room();              // server only: id, players, reportFinished (reference 14)
+    ClientLobby&       lobby();             // client only: party, invitations, room list (reference 14)
+    const ActionState& input() const;       // client: local player's actions this tick
+    InputMap&          inputMap();          // client: bindings and options (options menu, rebinding)
+    RenderQueue&       render();            // client: describe what to draw this frame
+    IAudio&            audio();             // client (NullAudio on the server)
+    Console&           console();           // client (the server console belongs to the lobby)
+    void               requestQuit();       // client only: a room cannot stop the server
 
 private:
-    friend class Engine;
-    explicit Context(Engine& engine);
-    Engine* engine_;
+    friend class Engine;  friend class RoomRuntime;
+    Context(/* engine-owned references of one room or of the client */);
 };
 ```
 
 ## Depends on
 
 - [ENG-08](ENG-08.md) — Engine: lifecycle, member order, fixed-step loop, error policy
+- [SRV-09](SRV-09.md) — Contexts: ServiceContext, LobbyContext, one Context per room
 
 ## Unlocks
 
-- no task waits for this one
+- [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
 
 ## Read first
 
 - [ADR 0022](../adr/0022-context-facade.md)
+- [ADR 0039](../adr/0039-room-api.md)
 - [reference 01](../engine/reference/01-core.md)
 
 ## To implement
 
-- [ ] Accessors of reference 01 forwarding to `Engine` members
-- [ ] Private constructor, `friend class Engine`
+- [ ] Accessors of reference 01 forwarding to the engine (client) or to a room (server)
+- [ ] Private constructor, `friend class Engine` and `RoomRuntime`; base class `ServiceContext` comes from SRV-09
 
 ## Done when
 

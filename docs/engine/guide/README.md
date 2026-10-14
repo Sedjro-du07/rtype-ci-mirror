@@ -52,6 +52,7 @@ call, on one page: [`../game-api.md`](../game-api.md).
 |---|---|
 | [22 · Roles: client, server, editor](22-roles.md) | what each role loads and runs, which systems go where |
 | [12 · Networking](12-networking.md) | replicated entities, connections, player input, messages |
+| [28 · Lobby, parties and rooms](28-lobby-parties-rooms.md) | several games on one server: parties, rooms, module hooks, game state per room |
 
 ## Tools, quality, shipping
 

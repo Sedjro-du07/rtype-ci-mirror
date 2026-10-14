@@ -37,6 +37,7 @@ struct EngineConfig {
     YAML::Node            cvars;            // initial console variables, see block 12
     std::filesystem::path sceneOverride;    // --scene: start here instead of IGameModule::firstScene()
     uint64_t              maxTicks = 0;     // --ticks: quit cleanly after N steps (0 = never); tests and CI
+    RoomsConfig           rooms;            // server: host ("shared"), maxRooms (8), workerThreads (0 = cores); reference 14
 
     // Reads the YAML file, then applies command-line overrides (--config, --role, --platform, --audio,
     // --network, --scripting, --port, --host, --log, --scene, --ticks, --set name=value). Unknown keys are an error with file:line.
@@ -61,6 +62,7 @@ struct EngineConfig {
 ## To implement
 
 - [ ] YAML keys of `EngineConfig` (role, game, plugins, tickRate, root, window, net, log, cvars)
+- [ ] `rooms` section (host, maxRooms, workerThreads)
 - [ ] CLI options: --config, --role, --platform, --audio, --network, --scripting, --port, --host, --log, --scene, --ticks, --set name=value
 - [ ] Unknown key → error with `file:line`; CLI overrides the file
 

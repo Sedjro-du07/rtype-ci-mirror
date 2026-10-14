@@ -28,6 +28,8 @@ enum RoleMask : uint8_t { ClientRole = 1, ServerRole = 2, EditorRole = 4, AllRol
 ```
 
 A system is any callable taking `Context&`: a free function, a lambda, or a functor with state.
+On the server, systems are registered once and **instantiated once per room** (ADR 0039): a functor
+with members gets its own copy in every room, so no game state is shared between rooms.
 
 ## `class SystemBuilder` — `scheduler/Scheduler.hpp`
 
@@ -65,7 +67,10 @@ public:
     explicit Scheduler(Role role, Logger& log);
 
     // Names are unique, "<module>.<system>": "engine.movement", "rtype.bydos_ai".
-    SystemBuilder add(Stage stage, std::string name, SystemFn fn);
+    template <class F> SystemBuilder add(Stage stage, std::string name, F fn);   // F copyable: one copy per room
+    using SystemFactory = std::function<SystemFn()>;
+    SystemBuilder addFactory(Stage stage, std::string name, SystemFactory make); // builds one instance per room
+    std::vector<SystemFn> instantiate(Stage stage) const;   // engine only: the systems of one room, in order
 
     Result<void> build();                 // engine only: topological sort per stage;
                                           // unknown name in after/before or a cycle → ScheduleCycle

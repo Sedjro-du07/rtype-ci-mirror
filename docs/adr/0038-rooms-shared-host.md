@@ -1,6 +1,6 @@
 # ADR 0038: Several games on one server: rooms, hosted in-process first
 
-- Status: Accepted (principles; the room API is designed in the next Server round)
+- Status: Accepted (API in [ADR 0039](0039-room-api.md))
 - Date: 2026-10-14
 - Deciders: the R-Type team
 - Discussion id: SRV-5 (Server part, round 2)

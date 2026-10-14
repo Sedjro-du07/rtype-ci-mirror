@@ -84,6 +84,13 @@ engine/
 │       │   ├── IRenderer.hpp                             ENG-30
 │       │   ├── RenderQueue.hpp                           ENG-30
 │       │   └── WindowDesc.hpp                            ENG-30
+│       ├── room/
+│       │   ├── ClientLobby.hpp                           SRV-14
+│       │   ├── Lobby.hpp                                 SRV-13
+│       │   ├── RoomEvents.hpp                            SRV-08
+│       │   ├── RoomHandle.hpp                            SRV-13
+│       │   ├── RoomNetwork.hpp                           SRV-14
+│       │   └── RoomTypes.hpp                             SRV-08
 │       ├── scene/
 │       │   ├── Prefab.hpp                                ENG-41
 │       │   ├── Scene.hpp                                 ENG-43
@@ -100,9 +107,11 @@ engine/
 │       │   ├── CVars.hpp                                 ENG-45
 │       │   ├── Logger.hpp                                ENG-44
 │       │   └── Metrics.hpp                               ENG-47
-│       ├── Context.hpp                                   ENG-09
+│       ├── Context.hpp                                   ENG-09, SRV-09
 │       ├── Engine.hpp                                    ENG-08
-│       └── EngineConfig.hpp                              ENG-07
+│       ├── EngineConfig.hpp                              ENG-07
+│       ├── LobbyContext.hpp                              SRV-09
+│       └── ServiceContext.hpp                            SRV-09
 ├── launcher/
 │   └── main.cpp                                          ENG-10
 ├── plugins/
@@ -137,9 +146,11 @@ engine/
 │   │   └── AudioCaptions.cpp                             ENG-34
 │   ├── core/
 │   │   ├── Context.cpp                                   ENG-09
-│   │   ├── Engine.cpp                                    ENG-08
+│   │   ├── Engine.cpp                                    ENG-08, SRV-13
 │   │   ├── EngineConfig.cpp                              ENG-07
 │   │   ├── Error.cpp                                     ENG-04
+│   │   ├── LobbyContext.cpp                              SRV-09
+│   │   ├── ServiceContext.cpp                            SRV-09
 │   │   └── Time.cpp                                      ENG-05
 │   ├── ecs/
 │   │   ├── Commands.cpp                                  ENG-20
@@ -163,6 +174,8 @@ engine/
 │   │   ├── MessageDispatcher.hpp                         SRV-03
 │   │   ├── NetworkIdMap.cpp                              ENG-39
 │   │   ├── NetworkSession.cpp                            ENG-38, SRV-01
+│   │   ├── PlayerRouting.cpp                             SRV-14
+│   │   ├── PlayerRouting.hpp                             SRV-14
 │   │   ├── PlayerTable.cpp                               SRV-01
 │   │   ├── PlayerTable.hpp                               SRV-01
 │   │   ├── ReliableChannel.cpp                           SRV-05
@@ -178,6 +191,24 @@ engine/
 │   ├── render/
 │   │   ├── Camera2D.cpp                                  ENG-30
 │   │   └── RenderQueue.cpp                               ENG-30
+│   ├── room/
+│   │   ├── ClientLobby.cpp                               SRV-14
+│   │   ├── IRoomHost.hpp                                 SRV-12
+│   │   ├── Lobby.cpp                                     SRV-13
+│   │   ├── PartyTable.cpp                                SRV-10
+│   │   ├── PartyTable.hpp                                SRV-10
+│   │   ├── RoomDirectory.cpp                             SRV-10
+│   │   ├── RoomDirectory.hpp                             SRV-10
+│   │   ├── RoomHandle.cpp                                SRV-13
+│   │   ├── RoomMailbox.cpp                               SRV-11
+│   │   ├── RoomMailbox.hpp                               SRV-11
+│   │   ├── RoomNetwork.cpp                               SRV-14
+│   │   ├── RoomRuntime.cpp                               SRV-11
+│   │   ├── RoomRuntime.hpp                               SRV-11
+│   │   ├── ThreadPoolRoomHost.cpp                        SRV-12
+│   │   ├── ThreadPoolRoomHost.hpp                        SRV-12
+│   │   ├── WorkerPool.cpp                                SRV-12
+│   │   └── WorkerPool.hpp                                SRV-12
 │   ├── scene/
 │   │   ├── PrefabLibrary.cpp                             ENG-41
 │   │   ├── SceneLoader.cpp                               ENG-42
@@ -213,6 +244,7 @@ engine/
 │   │   └── players/                                      SRV-07
 │   ├── reflection/                                       ENG-54
 │   │   └── codec/                                        SRV-07
+│   ├── room/                                             SRV-15
 │   ├── scene/                                            ENG-55
 │   ├── scheduler/                                        ENG-55
 │   └── CMakeLists.txt                                    ENG-53

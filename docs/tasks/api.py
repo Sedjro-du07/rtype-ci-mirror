@@ -761,4 +761,88 @@ tests/net/players/        HandshakeTest (FormatMismatch, ServerFull, bad name, U
 tests/net/messages/       UnreliableTest, ReliableUnderLossTest (20 % loss), StreamTest, CallbackExceptionTest
 tests/reflection/codec/   RoundTripTest (every FieldKind), LimitsTest, EntityMappingTest, FuzzTest (10 000 inputs)'''),
 ]),
+
+# ================================================================ ROOMS (ADR 0038, 0039)
+'SRV-10': dict(extra=[
+    ('src/room/PartyTable.hpp', 'cpp', '''class PartyTable {
+public:
+    PartyId createSolo(PlayerId p);                   // on PlayerJoined
+    void    move(PlayerId p, PartyId to);             // dissolves the old party if empty
+    void    remove(PlayerId p);                       // on PlayerLeft; promotes a new leader
+    void    setLeader(PartyId party, PlayerId p);
+    const Party& get(PartyId p) const;  PartyId of(PlayerId p) const;
+    std::span<const PartyId> all() const;
+};'''),
+    ('src/room/RoomDirectory.hpp', 'cpp', '''class RoomDirectory {
+public:
+    explicit RoomDirectory(uint32_t maxRooms);
+    std::optional<RoomId> add(const RoomSettings& s);
+    void remove(RoomId r);
+    void setState(RoomId r, RoomState s);
+    void enter(RoomId r, const Party& party);  void leave(RoomId r, PartyId party);
+    const RoomInfo& get(RoomId r) const;  RoomId roomOf(PlayerId p) const;
+    std::span<const RoomId> all() const;
+};'''),
+]),
+'SRV-11': dict(extra=[
+    ('src/room/RoomMailbox.hpp', 'cpp', '''struct RoomMessage { enum class Kind : uint8_t { PlayerEntered, PlayerLeft, NetMessage, Finished, Failed, Close };
+                     Kind kind; PlayerId player = 0; uint16_t messageId = 0; std::vector<std::byte> payload; };
+
+class RoomMailbox {                                   // multi-producer, single-consumer
+public:
+    void push(RoomMessage m);
+    std::vector<RoomMessage> drain();
+};'''),
+    ('src/room/RoomRuntime.hpp', 'cpp', '''class RoomRuntime {
+public:
+    RoomRuntime(RoomId id, const RoomSettings& s, const EngineServices& services, const Scheduler& prototypes);
+    Result<void> start();                             // loads settings.level, instantiates systems
+    void tick();                                      // FixedUpdate / LateUpdate of this room; one thread at a time
+    RoomMailbox& inbox();  RoomMailbox& outbox();
+    bool failed() const;  RoomId id() const;
+};'''),
+]),
+'SRV-12': dict(extra=[
+    ('src/room/WorkerPool.hpp', 'cpp', '''class WorkerPool {
+public:
+    explicit WorkerPool(unsigned threads);            // 0 = std::thread::hardware_concurrency()
+    ~WorkerPool();                                    // joins
+    void submit(std::move_only_function<void()> job);
+    unsigned size() const;
+};'''),
+    ('src/room/IRoomHost.hpp', 'cpp', '''class IRoomHost {
+public:
+    virtual ~IRoomHost() = default;
+    virtual Result<void> start(std::unique_ptr<RoomRuntime> room) = 0;
+    virtual void stop(RoomId room) = 0;
+    virtual void post(RoomId room, RoomMessage m) = 0;
+    virtual void collect(std::move_only_function<void(RoomId, RoomMessage&&)> toLobby) = 0;   // lobby thread
+};'''),
+    ('src/room/ThreadPoolRoomHost.hpp', 'cpp', '''class ThreadPoolRoomHost final : public IRoomHost {
+public:
+    ThreadPoolRoomHost(WorkerPool& pool, double tickRate, Logger& log);
+    Result<void> start(std::unique_ptr<RoomRuntime> room) override;
+    void stop(RoomId room) override;
+    void post(RoomId room, RoomMessage m) override;
+    void collect(std::move_only_function<void(RoomId, RoomMessage&&)> toLobby) override;
+};'''),
+]),
+'SRV-13': dict(extra=[
+    ('src/core/Engine.cpp', 'cpp', '''// Server part of Engine (shared file with ENG-08)
+void Engine::runLobbyLoop();      // main thread: network poll, lobby events (LobbyContext), roomHost.collect(), console
+void Engine::onRoomMessage(RoomId room, RoomMessage&& m);   // Finished / Failed → RoomFinished / RoomFailed events'''),
+]),
+'SRV-14': dict(extra=[
+    ('src/net/PlayerRouting.hpp', 'cpp', '''class PlayerRouting {
+public:
+    void   setRoom(PlayerId p, RoomId r);             // 0 = lobby
+    RoomId roomOf(PlayerId p) const;
+    std::span<const PlayerId> playersIn(RoomId r) const;
+};'''),
+]),
+'SRV-15': dict(extra=[
+    ('tests/room/', 'text', '''tests/room/  ParallelRoomsTest (no shared entities, events, ids), RoomCrashTest (RoomFailed, others continue),
+             PartyFlowTest (invite, answer, leave, leader change, leader disconnect),
+             RoomFlowTest (create, move, finish, close, maxRooms), SystemCopyPerRoomTest — run with ThreadSanitizer'''),
+]),
 }

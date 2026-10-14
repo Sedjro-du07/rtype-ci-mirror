@@ -33,13 +33,13 @@ TEAM = 'Ola, Sedjro, Michel, Yann-Ange'
 REF_PAGES = {
     '01': '01-core.md', '02': '02-modules.md', '03': '03-ecs.md', '04': '04-reflection.md', '05': '05-scheduler.md',
     '06': '06-events.md', '07': '07-input.md', '08': '08-rendering.md', '09': '09-audio.md', '10': '10-network.md',
-    '11': '11-scenes-assets.md', '12': '12-services.md', '13': '13-components-systems.md',
+    '11': '11-scenes-assets.md', '12': '12-services.md', '13': '13-components-systems.md', '14': '14-rooms.md',
 }
 FOLDER_SPEC = {
     'core': '01', 'module': '02', 'ecs': '03', 'reflection': '04', 'scheduler': '05', 'events': '06', 'input': '07',
     'render': '08', 'audio': '09', 'net': '10', 'scene': '11', 'assets': '11', 'services': '12', 'script': '12',
     'components': '13', 'systems': '13', 'platform_sfml': '08', 'platform_raylib': '08', 'audio_miniaudio': '09',
-    'network_asio': '10', 'scripting_lua': '12', 'launcher': '01', 'cmake': '01', 'module_': '02',
+    'network_asio': '10', 'scripting_lua': '12', 'room': '14', 'launcher': '01', 'cmake': '01', 'module_': '02',
 }
 BY_ID = {t['id']: t for t in TASKS}
 
@@ -103,7 +103,7 @@ def reference_blocks():
             if not m:
                 continue
             key = m.group(1).removeprefix('engine/')
-            if key == 'src/net/':                      # private classes are listed per task in api.py
+            if key in ('src/net/', 'src/room/'):       # private classes are listed per task in api.py
                 continue
             for lang, code in re.findall(r'```(cpp|cmake)?\n(.*?)```', parts[i + 1], flags=re.S):
                 if re.match(r'\s*void \w+::register', code):     # usage examples are not declarations

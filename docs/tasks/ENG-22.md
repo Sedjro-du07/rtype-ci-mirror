@@ -176,6 +176,7 @@ public:
 - [ENG-54](ENG-54.md) — Unit tests: ECS, reflection, commands, hooks
 - [SRV-02](SRV-02.md) — Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link
 - [SRV-04](SRV-04.md) — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits
+- [SRV-08](SRV-08.md) — Room types and events: PartyId, RoomId, RoomSettings, Party, RoomInfo, lobby / room / client events
 
 ## Read first
 

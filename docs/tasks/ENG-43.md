@@ -57,6 +57,7 @@ public:
 - [ENG-08](ENG-08.md) — Engine: lifecycle, member order, fixed-step loop, error policy
 - [ENG-55](ENG-55.md) — Unit tests: scheduler, events, input, scenes, session
 - [ENG-59](ENG-59.md) — Editor (Track 1): hierarchy, inspector, scene save
+- [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
 
 ## Read first
 

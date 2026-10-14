@@ -69,8 +69,11 @@ public:
     virtual void registerTypes(TypeRegistry& types) = 0;               // every type the game invents (add<T>)
     virtual void registerSystems(Role role, Scheduler& scheduler) = 0; // the game's systems for this role
     virtual std::string_view firstScene() const = 0;                   // path relative to the game root
-    virtual void onStart(Context& ctx) {}                              // once, after the first scene, before the loop
-    virtual void onShutdown(Context& ctx) {}                           // once, world still alive
+    virtual void onStart(Context& ctx) {}                              // client: once, after the first scene, before the loop
+    virtual void onLobbyStart(LobbyContext& ctx) {}                    // server: once, lobby subscriptions and on<T> (ADR 0039)
+    virtual void onRoomStart(Context& ctx) {}                          // server: once per room, after its level is loaded;
+                                                                       // keep room subscriptions with ctx.room().keep(...)
+    virtual void onShutdown(ServiceContext& ctx) {}                    // once, before the module is unloaded
 };
 ```
 
@@ -98,7 +101,7 @@ public:
 ## To implement
 
 - [ ] `IPlugin`, `PluginKind`, `PluginContext`
-- [ ] `IGameModule` with default `onStart` / `onShutdown`
+- [ ] `IGameModule` with default `onStart`, `onLobbyStart`, `onRoomStart`, `onShutdown` (ADR 0039)
 - [ ] `ENGINE_PLUGIN_API_VERSION`, `ENGINE_GAME_API_VERSION`, `ENGINE_EXPORT`
 - [ ] `ENGINE_GAME_MODULE(C)` and `ENGINE_PLUGIN(C)`: extern "C" create / destroy / version, try/catch → nullptr; static registrar in static mode
 
