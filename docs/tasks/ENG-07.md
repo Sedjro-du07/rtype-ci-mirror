@@ -43,6 +43,12 @@ struct EngineConfig {
     // --network, --scripting, --port, --host, --log, --scene, --ticks, --set name=value). Unknown keys are an error with file:line.
     static Result<EngineConfig> load(const std::filesystem::path& file, int argc, char** argv);
 };
+
+struct RoomsConfig {                      // server.yaml "rooms:" (ADR 0038)
+    std::string host = "shared";          // "dedicated" in Part 2
+    uint32_t    maxRooms = 8;
+    uint32_t    workerThreads = 0;        // 0 = number of cores
+};
 ```
 
 ## Depends on

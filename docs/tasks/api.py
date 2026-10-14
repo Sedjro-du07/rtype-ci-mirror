@@ -159,6 +159,13 @@ public:
 
 std::unique_ptr<IPlugin> makeNullPlugin(PluginKind kind);   // used by ModuleManager for the name "null"'''),
 ]),
+'ENG-07': dict(extra=[
+    ('include/engine/EngineConfig.hpp', 'cpp', '''struct RoomsConfig {                      // server.yaml "rooms:" (ADR 0038)
+    std::string host = "shared";          // "dedicated" in Part 2
+    uint32_t    maxRooms = 8;
+    uint32_t    workerThreads = 0;        // 0 = number of cores
+};'''),
+]),
 'ENG-13': dict(extra=[
     ('include/engine/module/StaticModuleTable.hpp', 'cpp', '''struct PluginEntry { std::string_view stem; StaticModuleTable::CreatePlugin create; StaticModuleTable::DestroyPlugin destroy; };
 struct GameEntry   { std::string_view name; StaticModuleTable::CreateGame create;   StaticModuleTable::DestroyGame destroy; };'''),
