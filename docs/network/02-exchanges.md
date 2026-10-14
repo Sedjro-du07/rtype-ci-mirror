@@ -8,8 +8,8 @@ must arrive, whether order matters, transport. Groups follow a player's life:
 | 1 | Connection: handshake, refusals, TCP ↔ UDP link | validated |
 | 2 | Presence: heartbeat, timeout, voluntary leave, kick, shutdown | validated |
 | 3 | Lobby and party: invitations, room list | validated |
-| 4 | Entering and leaving a room | next |
-| 5 | In game: inputs, snapshots, spawns and destructions, game messages | |
+| 4 | Entering and leaving a room | validated |
+| 5 | In game: inputs, snapshots, spawns and destructions, game messages | next |
 | 6 | End of game, back to the lobby, failed room | |
 | 7 | Reconnection | |
 
@@ -248,3 +248,72 @@ All on TCP: out of game, allowed by the subject for the lobby.
     as for admission?
 15. Invitation received during a game: the player stays reachable over TCP; not simulation traffic,
     so the subject allows it. Acceptable?
+
+## Group 4 · Entering and leaving a room
+
+Already decided (ADR 0039, guide 28): starting a game is a rule of the game, so a message of the game;
+the game calls `createRoom` then `moveParty`; clients receive `EnteredRoom` and change scene
+themselves; in the room the game receives `PlayerEnteredRoom`, and replication starts from zero for
+that player.
+
+### Starting a game
+
+```
+Client (leader)              Server: lobby              Server: room 7
+  │── PlayRequest ─── TCP ─▶│ game: leader? solo allowed?
+  │                         │ createRoom(…) → room 7 ───────▶│ loads the level, onRoomStart
+  │                         │ moveParty(party, 7) ──────────▶│
+  │◀── EnteredRoom(7, settings) ─ TCP ─ (every member)       │
+  │  the client changes scene                                │
+  │                                                          │ PlayerEnteredRoom{p} → the game spawns the ship
+  │◀═══════════════════ snapshots (spawns, positions) ═ UDP ═│
+  │═══════════════════════════ inputs ════════════════ UDP ═▶│
+```
+
+### Joining an existing room (from the list)
+
+Same as starting, with another message of the game ("join room 7"); the game checks places, then
+`moveParty`. No new engine mechanism.
+
+### Room cannot be created
+
+`maxRooms` reached: `createRoom` fails; the game tells its player with its own message. The engine
+answers nothing to the client.
+
+### Leaving the current game
+
+```
+Client                       Server: lobby              Server: room 7
+  │── (game message) ─ TCP ▶│ game: moveToLobby(party)
+  │                         │ ──────────────────────────────▶│ PlayerLeftRoom{p} → the game destroys the ship
+  │◀── ReturnedToLobby(7, reason) ─ TCP                      │
+  │  the client goes back to its lobby scene                 │
+```
+
+### Disconnection during a game
+
+Group 2 applies, then the room receives `PlayerLeftRoom{p, Timeout}` (or another reason).
+Reconnection: group 7.
+
+### Room in another process (Part 2)
+
+`EnteredRoom` will carry "your room is at this address" and a token; the client runs a group 1
+handshake with the room process. The message is reserved (ADR 0038); its content is decided later.
+
+### Inventory
+
+| Exchange | Direction | When | Size | Must arrive | Order | Transport |
+|---|---|---|---|---|---|---|
+| Game request (play, join, leave) | C → S | player action | tiny | yes | yes | TCP (the game's choice) |
+| EnteredRoom | S → members | once | small (room + settings) | yes | yes | TCP |
+| ReturnedToLobby | S → members | once | small | yes | yes | TCP |
+| Snapshots, inputs | — | — | — | — | — | group 5 |
+
+### Questions for step 4
+
+16. Two channels that do not wait for each other: `EnteredRoom` goes on TCP, the first snapshot on
+    UDP and may arrive first. A rule is needed (drop, hold, room number in snapshots…).
+17. Loading time: a "ready" message from the client before snapshots, or a first full snapshot sent
+    until acknowledged? (Slide 20: the room streams the spawns, that is the clients' loading screen.)
+18. Late packets of the previous room after `ReturnedToLobby`: recognise and drop them.
+19. Content of `EnteredRoom`: room id, settings, the room's starting tick (with question 3).
