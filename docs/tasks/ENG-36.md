@@ -34,7 +34,7 @@ struct NetConfig {
     uint16_t port = 4242;
     uint32_t maxClients = 32;             // whole server, lobby included: rooms.maxRooms (8) × 4 players
     double   heartbeatSeconds = 0.5;
-    double   timeoutSeconds = 5.0;        // no packet for this long → PlayerLeft{Timeout} / LeftServer{Timeout}
+    double   timeoutSeconds = 5.0;        // no packet for this long → PlayerDisconnected{Timeout} (grace) / ConnectionInterrupted
     uint32_t maxDatagramBytes = 1200;     // larger datagrams are dropped, never allocated
     uint32_t maxQueuedDatagrams = 1024;   // inbox bound per frame; excess is dropped and counted
     double   snapshotRate = 20.0;         // replication snapshots per second
