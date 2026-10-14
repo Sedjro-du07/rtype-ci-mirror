@@ -29,7 +29,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ```cpp
 template <class Tag> struct Handle {
     uint32_t id = 0;                       // 0 = invalid
-    constexpr bool valid() const noexcept { return id != 0; }
+    constexpr bool valid() const noexcept;   // id != 0
     friend constexpr bool operator==(Handle, Handle) = default;
 };
 using TextureHandle = Handle<struct TextureTag>;
