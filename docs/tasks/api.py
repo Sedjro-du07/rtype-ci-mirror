@@ -112,6 +112,10 @@ class NullScripting final : public IScripting { /* every IPlugin + IScripting me
 
 std::unique_ptr<IPlugin> makeNullPlugin(PluginKind kind);   // used by ModuleManager for the name "null"'''),
 ]),
+'ENG-13': dict(extra=[
+    ('include/engine/module/StaticModuleTable.hpp', 'cpp', '''struct PluginEntry { std::string_view stem; StaticModuleTable::CreatePlugin create; StaticModuleTable::DestroyPlugin destroy; };
+struct GameEntry   { std::string_view name; StaticModuleTable::CreateGame create;   StaticModuleTable::DestroyGame destroy; };'''),
+]),
 # ---------------------------------------------------------------- 03 ECS
 'ENG-21': dict(auto=False, extra=[
     ('include/engine/ecs/Registry.hpp', 'cpp', '''// The hook part of Registry (the rest belongs to ENG-18).

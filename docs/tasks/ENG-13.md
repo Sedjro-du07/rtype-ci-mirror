@@ -29,6 +29,9 @@ public:
     static const PluginEntry* findPlugin(std::string_view stem);
     static const GameEntry*   findGame(std::string_view name);
 };
+
+struct PluginEntry { std::string_view stem; StaticModuleTable::CreatePlugin create; StaticModuleTable::DestroyPlugin destroy; };
+struct GameEntry   { std::string_view name; StaticModuleTable::CreateGame create;   StaticModuleTable::DestroyGame destroy; };
 ```
 
 ## Depends on
