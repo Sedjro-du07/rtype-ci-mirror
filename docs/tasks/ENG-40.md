@@ -32,13 +32,21 @@ public:
     MusicHandle   music(std::string_view path);
     ScriptHandle  script(std::string_view path);
 
-    std::string_view pathOf(TextureHandle) const;  // reverse lookup for saving scenes; same for other kinds
-    void retain(TextureHandle); void release(TextureHandle);   // reference counting (same for other kinds)
+    // Reverse lookup (saving scenes) and reference counting, one overload per handle kind.
+    std::string_view pathOf(TextureHandle) const; std::string_view pathOf(FontHandle) const;
+    std::string_view pathOf(SoundHandle) const;   std::string_view pathOf(MusicHandle) const;
+    std::string_view pathOf(ScriptHandle) const;
+    void retain(TextureHandle);  void retain(FontHandle);  void retain(SoundHandle);
+    void retain(MusicHandle);    void retain(ScriptHandle);
+    void release(TextureHandle); void release(FontHandle); void release(SoundHandle);
+    void release(MusicHandle);   void release(ScriptHandle);
     void collectUnused();                          // frees zero-count assets; called after a scene switch
     void reloadChanged();                          // dev: re-reads files whose timestamp changed (CVar asset_hot_reload)
     std::filesystem::path resolve(std::string_view path) const; // game root + path; rejects "../" escapes
     AssetStats stats() const;                      // counts and bytes per kind
 };
+
+struct AssetStats { uint32_t textures, fonts, sounds, musics, scripts; uint64_t bytes; uint32_t failed; };
 ```
 
 ## Depends on
