@@ -57,6 +57,7 @@ public:
 ## Watch out
 
 - Scheme (ack bitfield, ordering) is defined in the protocol RFC: implement after it
+- UDP only: `stream` messages never go through it (network step 3)
 
 ## Workflow
 

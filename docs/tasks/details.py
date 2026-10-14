@@ -380,7 +380,8 @@ DETAILS = {
           "`send<T>` ×2, `broadcast<T>` choosing the transport declared on the message", "`on<T>` ×2 returning a Subscription",
           "Call callbacks during `poll()` on the loop thread; catch exceptions and log with the message name"],
     done=["Tests: Chat over stream, WaveCleared over reliable, Ping over unreliable; exception in a callback does not stop the server"],
-    watch=["Message ids follow `TypeRegistry::messages()` order", "Callbacks must check `Entity::isNull()`"]),
+    watch=["Message ids follow `TypeRegistry::messages()` order", "Callbacks must check `Entity::isNull()`",
+           "Engine lobby messages use the same mechanism with their own id range (network step 3; ranges in the RFC)"]),
 'SRV-04': dict(
     goal="One binary codec for any registered type, used by messages and replication.",
     todo=["`encode` / `decode` walking `TypeInfo::fields` (private `Codec`)", "Lists: count then elements, count checked against `maxLength` (default 64) before allocating",
@@ -391,7 +392,8 @@ DETAILS = {
     goal="Make `reliable()` UDP messages arrive: acknowledgements and resends.",
     todo=["`ReliableChannel` (private) per connection: sequence numbers, ack tracking, resend timer, duplicate drop"],
     done=["Test with simulated 20 % loss: every reliable message delivered exactly once"],
-    watch=["Scheme (ack bitfield, ordering) is defined in the protocol RFC: implement after it"]),
+    watch=["Scheme (ack bitfield, ordering) is defined in the protocol RFC: implement after it",
+           "UDP only: `stream` messages never go through it (network step 3)"]),
 'SRV-06': dict(
     goal="Cut the TCP byte stream into messages safely.",
     todo=["`StreamFramer` (private): length-prefixed framing, partial reads, `maxStreamMessageBytes` limit → close the stream"],

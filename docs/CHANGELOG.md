@@ -7,6 +7,15 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 3: layers
+
+### Added
+
+- `docs/network/03-layers.md`: transport, frame, session, reliability, engine messages (lobby,
+  replication), game messages; each layer's role, its step 4 questions and the code already planned
+  for it. Engine and game messages share one typed mechanism with separate id ranges; reliability is
+  UDP only. SRV-03 and SRV-05 note it.
+
 ## [2026-10-14] — network part, step 2 complete: reconnection
 
 ### Added

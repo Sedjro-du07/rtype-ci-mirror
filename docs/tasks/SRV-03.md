@@ -82,6 +82,7 @@ private:
 
 - Message ids follow `TypeRegistry::messages()` order
 - Callbacks must check `Entity::isNull()`
+- Engine lobby messages use the same mechanism with their own id range (network step 3; ranges in the RFC)
 
 ## Workflow
 

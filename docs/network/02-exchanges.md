@@ -537,4 +537,4 @@ Tokens are lost on the server: normal connection.
 
 ## Step 2 complete
 
-Seven groups, 37 questions for step 4. Next: step 3, layers.
+Seven groups, 37 questions for step 4. Next: [step 3, layers](03-layers.md).

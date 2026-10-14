@@ -220,6 +220,10 @@
     "title": "Network · 02 Inventory of exchanges"
   },
   {
+    "file": "network/03-layers.md",
+    "title": "Network · 03 Layers"
+  },
+  {
     "file": "tasks/README.md",
     "title": "Tasks — details (one page per task)"
   },
