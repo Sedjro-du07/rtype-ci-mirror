@@ -274,7 +274,18 @@ struct LeftServer         { DisconnectReason reason; };                   ENGINE
 struct Caption            { std::string text; float seconds; };           ENGINE_EVENT(Caption)
 struct ConsoleCommand     { std::string line; };                          ENGINE_EVENT(ConsoleCommand)'''),
 ]),
+# ---------------------------------------------------------------- 07 Input
+'ENG-28': dict(extra=[
+    ('include/engine/input/Keys.hpp', 'cpp', '''std::string_view keyName(Key k);                         // label of the current keyboard layout, for display
+std::optional<Key>           keyFromName(std::string_view name);      // input.yaml ↔ enum
+std::optional<GamepadButton> gamepadButtonFromName(std::string_view name);
+std::optional<GamepadAxis>   gamepadAxisFromName(std::string_view name);
+std::string_view             toName(Key k);  std::string_view toName(GamepadButton b);  std::string_view toName(GamepadAxis a);'''),
+]),
 # ---------------------------------------------------------------- 08 Rendering
+'ENG-30': dict(extra=[
+    ('include/engine/render/IRenderer.hpp', 'cpp', '''struct RenderStats { uint32_t commands = 0, batches = 0, drawCalls = 0; double submitMs = 0; };'''),
+]),
 'ENG-31': dict(extra=[
     ('plugins/platform_sfml/SfmlPlatform.hpp', 'cpp', '''class SfmlPlatform final : public IPlatform {
 public:

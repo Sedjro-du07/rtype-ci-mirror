@@ -28,6 +28,12 @@ enum class MouseButton : uint8_t { Left, Right, Middle };
 enum class GamepadButton : uint8_t { South, East, West, North, LeftShoulder, RightShoulder,
                                      Start, Select, DPadUp, DPadDown, DPadLeft, DPadRight };
 enum class GamepadAxis : uint8_t { LeftX, LeftY, RightX, RightY, LeftTrigger, RightTrigger };
+
+std::string_view keyName(Key k);                         // label of the current keyboard layout, for display
+std::optional<Key>           keyFromName(std::string_view name);      // input.yaml ↔ enum
+std::optional<GamepadButton> gamepadButtonFromName(std::string_view name);
+std::optional<GamepadAxis>   gamepadAxisFromName(std::string_view name);
+std::string_view             toName(Key k);  std::string_view toName(GamepadButton b);  std::string_view toName(GamepadAxis a);
 ```
 
 ### `include/engine/input/RawInputEvent.hpp`

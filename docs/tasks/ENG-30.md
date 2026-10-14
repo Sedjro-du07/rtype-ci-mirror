@@ -71,6 +71,8 @@ public:
     virtual void   setColorFilter(ColorFilter f) = 0;      // no-op if !supports(ColorFilter)
     virtual RenderStats stats() const = 0;                 // commands, batches, draw calls of the last frame
 };
+
+struct RenderStats { uint32_t commands = 0, batches = 0, drawCalls = 0; double submitMs = 0; };
 ```
 
 ### `include/engine/render/Camera2D.hpp`
