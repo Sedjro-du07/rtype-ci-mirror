@@ -20,7 +20,8 @@ So nobody looks for a feature that does not exist. Each line says where it will 
 | Parallel systems inside one game (job system) | not designed | Part 2, Track 1; the scheduler is single-threaded per room (ADR 0028) |
 | Interest management (send each player only what concerns them) | designed: `RoomNetwork::setRelevance` (ADR 0043), not implemented | task SRV-17 |
 | World streaming (worlds larger than memory) | not planned | Part 2, Track 1 if a game needs it |
-| Solo play, matchmaking | not designed | Server part |
+| Solo play | decided: a player alone is a party of 1; the game decides whether solo is allowed (ADR 0039) | guide 28 |
+| Matchmaking (quick join, private codes) | not designed | Part 2 |
 | Random number service | not planned | games own a seeded generator (page 26) |
 | Localization (several languages) | not planned | — |
 
