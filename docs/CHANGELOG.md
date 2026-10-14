@@ -7,6 +7,13 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 2: in game
+
+### Added
+
+- `docs/network/02-exchanges.md`, group 5 (in game): input and snapshot loop, spawn and destroy,
+  reliable, unreliable and stream game messages, loss, delay and duplicates; questions 20 to 27.
+
 ## [2026-10-14] — network part, step 2: entering and leaving a room
 
 ### Added

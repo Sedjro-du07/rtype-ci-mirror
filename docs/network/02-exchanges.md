@@ -9,8 +9,8 @@ must arrive, whether order matters, transport. Groups follow a player's life:
 | 2 | Presence: heartbeat, timeout, voluntary leave, kick, shutdown | validated |
 | 3 | Lobby and party: invitations, room list | validated |
 | 4 | Entering and leaving a room | validated |
-| 5 | In game: inputs, snapshots, spawns and destructions, game messages | next |
-| 6 | End of game, back to the lobby, failed room | |
+| 5 | In game: inputs, snapshots, spawns and destructions, game messages | validated |
+| 6 | End of game, back to the lobby, failed room | next |
 | 7 | Reconnection | |
 
 ## Group 1 · Connection
@@ -317,3 +317,87 @@ handshake with the room process. The message is reserved (ADR 0038); its content
     until acknowledged? (Slide 20: the room streams the spawns, that is the clients' loading screen.)
 18. Late packets of the previous room after `ReturnedToLobby`: recognise and drop them.
 19. Content of `EnteredRoom`: room id, settings, the room's starting tick (with question 3).
+
+## Group 5 · In game
+
+The heart of the protocol and the only traffic the subject forces on UDP. Already decided:
+replication (`NetworkId`, `NetPrefab`, `Replicated`, 20 snapshots/s, only the room's entities; ADR
+0033, 0039); inputs as an action mask each tick into `RemoteInput` (ADR 0030, 0033); game messages
+`unreliable`, `reliable` (UDP + acks) or `stream` (TCP) (ADR 0037); an `Entity` in a message becomes
+`Entity::null()` when unknown (ADR 0037); prediction fields in v1: input number and last input
+processed (ADR 0041).
+
+### Normal loop
+
+```
+Client                                            Server: room
+  │══ Input (#41, mask) ══════════════════ UDP ═▶│  60 per second → RemoteInput
+  │══ Input (#42, mask) ══════════════════ UDP ═▶│
+  │◀═ Snapshot (tick 1200, last input processed 42,
+  │            entities: spawn / update / destroy) ═ UDP ═│  20 per second
+  │   interpolation (engine default) or the game's own (ADR 0041)
+```
+
+### An entity appears, then disappears
+
+```
+  │◀═ Snapshot: spawn #57 (NetPrefab "bydos", position) ═│  the client instantiates the same prefab
+  │◀═ Snapshot: #57 position …                          ═│
+  │◀═ Snapshot: destroy #57                             ═│  the client destroys it
+```
+
+If the snapshot carrying the spawn or the destroy is lost, the client never sees the enemy or keeps it
+forever: question 20.
+
+### Reliable game message
+
+```
+Server                                            Client
+  │── WaveCleared{3} (reliable) ══════════ UDP ═▶  ✕ lost
+  │   no ack after a delay → resent               │
+  │── WaveCleared{3} ═════════════════════ UDP ═▶│  arrived
+  │◀══════════════════════════════ ack ═══ UDP ══│
+```
+
+The same client → server (for example `Ready`).
+
+### Unreliable game message
+
+Sent once; if lost, the next one replaces it.
+
+### Stream game message during a game
+
+Text chat (`.stream()`) on TCP; allowed by the subject, it is not simulation traffic.
+
+### Loss, delay, duplicates
+
+Lost input: the server keeps the last known state. Lost snapshot: the next one is enough (full state).
+Late or duplicated packet: recognised and dropped, which needs sequence numbers (subject, slide 3).
+
+### Inventory
+
+| Exchange | Direction | When | Size | Must arrive | Order | Transport |
+|---|---|---|---|---|---|---|
+| Input | C → S | 60/s | ~24 bytes | no (redundancy possible) | newest wins | UDP |
+| Snapshot | S → C | 20/s | up to ~3 KB worst case | no: the next replaces it | newest wins | UDP |
+| Spawn / destroy | S → C | inside snapshots | small per entity | yes | yes (spawn before updates) | UDP |
+| Reliable game message | both | the game's | the game's | yes | to decide | UDP + acks |
+| Ack of reliable messages | both | on each receipt | tiny | no (repeated) | no | UDP |
+| Unreliable game message | both | the game's | the game's | no | no | UDP |
+| Stream game message | both | the game's | the game's | yes | yes | TCP |
+
+### Questions for step 4
+
+20. Guaranteeing spawns and destroys: reliable messages, or repeated in every snapshot until the
+    client acknowledges?
+21. A snapshot over 1200 bytes: split over datagrams, spread over ticks, or a limit?
+22. Does the client acknowledge snapshots? Needed for deltas later (an engine mechanism a game uses or
+    not through its settings, ADR 0041).
+23. Input redundancy: how many past inputs per packet; what the server does with an input too old or
+    from the future.
+24. Order of reliable messages: guaranteed, or per message type only?
+25. Several messages in one datagram (aggregation) to save headers?
+26. A message naming an entity before its spawn: keep `Entity::null()`, or hold the message until the
+    spawn?
+27. Settings exposed to the game (ADR 0041): rate per entity, field precision, who receives what,
+    priorities; list them.
