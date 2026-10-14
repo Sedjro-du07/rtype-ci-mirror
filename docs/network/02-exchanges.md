@@ -7,8 +7,8 @@ must arrive, whether order matters, transport. Groups follow a player's life:
 |---|---|---|
 | 1 | Connection: handshake, refusals, TCP ↔ UDP link | validated |
 | 2 | Presence: heartbeat, timeout, voluntary leave, kick, shutdown | validated |
-| 3 | Lobby and party: invitations, room list | next |
-| 4 | Entering and leaving a room | |
+| 3 | Lobby and party: invitations, room list | validated |
+| 4 | Entering and leaving a room | next |
 | 5 | In game: inputs, snapshots, spawns and destructions, game messages | |
 | 6 | End of game, back to the lobby, failed room | |
 | 7 | Reconnection | |
@@ -168,3 +168,83 @@ packets, over how long) is decided with the flood threat in step 4.
 9. Reason for a crash (TCP closed without Bye): neither `Quit` nor `Timeout`; a "connection lost"?
 10. TCP closed without Bye: immediate leave, or start of a grace period for reconnection (group 7).
 11. Kick reason: free text from the game (as for admission, ADR 0042) or a fixed list.
+
+## Group 3 · Lobby and party
+
+Already decided (ADR 0039, reference 14): the client sends requests, the server turns them into
+events, the game decides by calling the `Lobby`. The engine carries and applies.
+
+### Arriving in the lobby (after group 1)
+
+```
+Client                                         Server
+  │◀────────────────────────────── Accepted ── TCP ─│
+  │◀───────────────── PartyUpdated (party of 1) ────│  the player leads their party of 1
+```
+
+### Inviting a friend
+
+```
+Client A (leader)          Server                        Client B
+  │── InviteRequest(B) ──▶│ InviteRequested{A, B}          │
+  │                       │ game: A is leader? party full? │
+  │                       │ lobby.sendInvite(party, B)     │
+  │                       │── InviteReceived(A, party) ───▶│  popup
+  │                       │◀── InviteAnswer(party, yes) ───│
+  │                       │ InviteAnswered → game: addToParty
+  │◀── PartyUpdated ──────│── PartyUpdated ───────────────▶│  to every member
+```
+
+### Leaving one's party
+
+```
+Client                                         Server
+  │── LeaveParty ──────────────────────────── TCP ─▶│  LeavePartyRequested → game: removeFromParty
+  │◀───────────────── PartyUpdated (party of 1) ────│  former members get PartyUpdated too
+```
+
+### A member disconnects
+
+The server removes the player; if they led, another member leads (a party always has a leader). The
+remaining members receive `PartyUpdated`.
+
+### Room list
+
+```
+Client                                         Server
+  │── RoomListRequest ─────────────────────── TCP ─▶│  RoomListRequested → the game picks which rooms
+  │◀───────────────────── RoomList (RoomInfo…) TCP ─│  lobby.sendRoomList(player, rooms)
+  RoomListReceived{rooms}
+```
+
+The game decides which rooms to show (for example hides private ones).
+
+### Game messages in the lobby
+
+For example party chat: `lobby.sendToParty(party, msg)`; typed messages of the game, with the
+transport the game chose.
+
+### Inventory
+
+| Exchange | Direction | When | Size | Must arrive | Order | Transport |
+|---|---|---|---|---|---|---|
+| InviteRequest | C → S | player action | tiny | yes | yes | TCP |
+| InviteReceived | S → C | if the game accepts | small | yes | yes | TCP |
+| InviteAnswer | C → S | player action | tiny | yes | yes | TCP |
+| LeaveParty | C → S | player action | tiny | yes | yes | TCP |
+| PartyUpdated | S → members | on every change | small | yes | yes (last state wins) | TCP |
+| RoomListRequest | C → S | player action | tiny | yes | yes | TCP |
+| RoomList | S → C | answer | medium (≤ `maxRooms` entries) | yes | yes | TCP |
+| Game messages | both | the game's | the game's | the game's | the game's | chosen by the game |
+
+All on TCP: out of game, allowed by the subject for the lobby.
+
+### Questions for step 4
+
+12. Online players list: to invite, a client needs ids and names; `ClientLobby` has nothing for it.
+    Engine mechanism, or the game's messages?
+13. Names of party members: `PartyUpdated` carries `PlayerId`s; clients need names to show.
+14. Request refused by the game: today the requester receives nothing; an answer "refused (reason)",
+    as for admission?
+15. Invitation received during a game: the player stays reachable over TCP; not simulation traffic,
+    so the subject allows it. Acceptable?
