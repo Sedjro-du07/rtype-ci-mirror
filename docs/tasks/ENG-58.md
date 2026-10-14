@@ -19,10 +19,44 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ### `plugins/platform_raylib/RaylibPlatform.hpp`
 
 ```cpp
-class RaylibPlatform final : public IPlatform { /* same methods as SfmlPlatform; pollEvents converts
-                                                   raylib polling (IsKeyPressed…) into RawInputEvent */ };
-class RaylibRenderer final : public IRenderer   { /* same methods as SfmlRenderer; supports(Render3D) == true */ };
+class RaylibPlatform final : public IPlatform {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "raylib"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext& ctx) override; void shutdown() noexcept override;
+    Result<void> openWindow(const WindowDesc& desc) override;   // InitWindow
+    void closeWindow() override;
+    bool windowOpen() const override;                           // !WindowShouldClose()
+    void pollEvents(InputMap& input, EventBus& events) override;// raylib polling (IsKeyPressed…) → RawInputEvent
+    IRenderer& renderer() override;
+    void setWindow(const WindowDesc& desc) override;
+    void beginDebugUi() override; void endDebugUi() override;   // rlImGui
+    void setClipboard(std::string_view) override; std::string clipboard() const override;
+private:
+    RaylibRenderer renderer_;
+    std::array<bool, 512> previousKeys_{};                      // to turn polling into edges
+};
 ENGINE_PLUGIN(RaylibPlatform)
+```
+
+### `plugins/platform_raylib/RaylibRenderer.hpp`
+
+```cpp
+class RaylibRenderer final : public IRenderer {
+public:
+    Result<TextureHandle> createTexture(std::span<const std::byte> encodedImage, std::string_view debugName) override;
+    void   destroyTexture(TextureHandle) override;
+    Vec2   textureSize(TextureHandle) const override;
+    Result<FontHandle> createFont(std::span<const std::byte> fontFile, std::string_view debugName) override;
+    void   destroyFont(FontHandle) override;
+    void   submit(const RenderFrame& frame) override;           // BeginDrawing / DrawTexturePro / EndDrawing
+    bool   supports(Feature f) const override;                  // Render3D: true
+    void   setColorFilter(ColorFilter f) override;
+    RenderStats stats() const override;
+private:
+    std::vector<Texture2D> textures_;
+    std::vector<Font>      fonts_;
+};
 ```
 
 ## Depends on

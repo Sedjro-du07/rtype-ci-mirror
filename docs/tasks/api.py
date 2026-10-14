@@ -106,9 +106,56 @@ private:
     NullRenderer renderer_;
 };
 
-class NullAudio final : public IAudio { /* every IPlugin + IAudio method; play() returns 0 */ };
-class NullNetwork final : public INetwork { /* every IPlugin + INetwork method; send drops, receive nothing */ };
-class NullScripting final : public IScripting { /* every IPlugin + IScripting method; load() returns ScriptError "scripting disabled" */ };
+class NullAudio final : public IAudio {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "null"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext&) override; void shutdown() noexcept override;
+    Result<SoundHandle> createSound(std::span<const std::byte>, std::string_view) override;  // valid handle
+    void   destroySound(SoundHandle) override;
+    Result<MusicHandle> openMusic(const std::filesystem::path&) override;
+    void   closeMusic(MusicHandle) override;
+    VoiceId play(SoundHandle, const PlayParams&) override;           // returns 0
+    void    stop(VoiceId) override;
+    void    setVoiceVolume(VoiceId, float) override;
+    void    playMusic(MusicHandle, float) override;
+    void    stopMusic(float) override;
+    void    setBusVolume(AudioBus, float) override;                  // remembered, so busVolume() is consistent
+    float   busVolume(AudioBus) const override;
+    void    setListener(Vec2, float) override;
+    void    update() override;
+private:
+    std::array<float, 4> volumes_{1, 1, 1, 1};
+};
+
+class NullNetwork final : public INetwork {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "null"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext&) override; void shutdown() noexcept override;
+    Result<void> openUdp(uint16_t) override;                         // succeeds, nothing bound
+    void closeUdp() override;
+    void sendUdp(const Endpoint&, std::span<const std::byte>) override;   // drops
+    void setReceiver(std::move_only_function<void(Datagram&&)>) override; // never called
+    Result<void> listenTcp(uint16_t) override;
+    Result<uint32_t> connectTcp(const Endpoint&) override;           // NetworkError "offline"
+    void sendTcp(uint32_t, std::span<const std::byte>) override;
+    void setTcpReceiver(std::move_only_function<void(uint32_t, std::span<const std::byte>)>) override;
+    void closeTcp(uint32_t) override;
+};
+
+class NullScripting final : public IScripting {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "null"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext&) override; void shutdown() noexcept override;
+    Result<void>         bind(ScriptHost&) override;                 // succeeds
+    Result<ScriptHandle> load(const std::filesystem::path&) override;   // ScriptError "scripting disabled"
+    void                 unload(ScriptHandle) override;
+    Result<void>         reload(ScriptHandle) override;
+    Result<void>         call(ScriptHandle, std::string_view, Entity, Context&) override;
+    bool                 has(ScriptHandle, std::string_view) const override;   // false
+};
 
 std::unique_ptr<IPlugin> makeNullPlugin(PluginKind kind);   // used by ModuleManager for the name "null"'''),
 ]),
@@ -498,10 +545,39 @@ void benchAddRemove(benchmark::State&);'''),
 tests/headless/config.yaml      role: client, game: testgame, scripting: ""'''),
 ]),
 'ENG-58': dict(extra=[
-    ('plugins/platform_raylib/RaylibPlatform.hpp', 'cpp', '''class RaylibPlatform final : public IPlatform { /* same methods as SfmlPlatform; pollEvents converts
-                                                   raylib polling (IsKeyPressed…) into RawInputEvent */ };
-class RaylibRenderer final : public IRenderer   { /* same methods as SfmlRenderer; supports(Render3D) == true */ };
+    ('plugins/platform_raylib/RaylibPlatform.hpp', 'cpp', '''class RaylibPlatform final : public IPlatform {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "raylib"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext& ctx) override; void shutdown() noexcept override;
+    Result<void> openWindow(const WindowDesc& desc) override;   // InitWindow
+    void closeWindow() override;
+    bool windowOpen() const override;                           // !WindowShouldClose()
+    void pollEvents(InputMap& input, EventBus& events) override;// raylib polling (IsKeyPressed…) → RawInputEvent
+    IRenderer& renderer() override;
+    void setWindow(const WindowDesc& desc) override;
+    void beginDebugUi() override; void endDebugUi() override;   // rlImGui
+    void setClipboard(std::string_view) override; std::string clipboard() const override;
+private:
+    RaylibRenderer renderer_;
+    std::array<bool, 512> previousKeys_{};                      // to turn polling into edges
+};
 ENGINE_PLUGIN(RaylibPlatform)'''),
+    ('plugins/platform_raylib/RaylibRenderer.hpp', 'cpp', '''class RaylibRenderer final : public IRenderer {
+public:
+    Result<TextureHandle> createTexture(std::span<const std::byte> encodedImage, std::string_view debugName) override;
+    void   destroyTexture(TextureHandle) override;
+    Vec2   textureSize(TextureHandle) const override;
+    Result<FontHandle> createFont(std::span<const std::byte> fontFile, std::string_view debugName) override;
+    void   destroyFont(FontHandle) override;
+    void   submit(const RenderFrame& frame) override;           // BeginDrawing / DrawTexturePro / EndDrawing
+    bool   supports(Feature f) const override;                  // Render3D: true
+    void   setColorFilter(ColorFilter f) override;
+    RenderStats stats() const override;
+private:
+    std::vector<Texture2D> textures_;
+    std::vector<Font>      fonts_;
+};'''),
 ]),
 'ENG-59': dict(note='Part 2: the editor classes are designed when Track 1 opens. Expected pieces: an Editor role, a hierarchy panel, an inspector driven by TypeRegistry, scene save through SceneLoader::save.'),
 # ================================================================ SERVER

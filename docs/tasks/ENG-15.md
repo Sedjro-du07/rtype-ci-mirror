@@ -49,9 +49,56 @@ private:
     NullRenderer renderer_;
 };
 
-class NullAudio final : public IAudio { /* every IPlugin + IAudio method; play() returns 0 */ };
-class NullNetwork final : public INetwork { /* every IPlugin + INetwork method; send drops, receive nothing */ };
-class NullScripting final : public IScripting { /* every IPlugin + IScripting method; load() returns ScriptError "scripting disabled" */ };
+class NullAudio final : public IAudio {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "null"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext&) override; void shutdown() noexcept override;
+    Result<SoundHandle> createSound(std::span<const std::byte>, std::string_view) override;  // valid handle
+    void   destroySound(SoundHandle) override;
+    Result<MusicHandle> openMusic(const std::filesystem::path&) override;
+    void   closeMusic(MusicHandle) override;
+    VoiceId play(SoundHandle, const PlayParams&) override;           // returns 0
+    void    stop(VoiceId) override;
+    void    setVoiceVolume(VoiceId, float) override;
+    void    playMusic(MusicHandle, float) override;
+    void    stopMusic(float) override;
+    void    setBusVolume(AudioBus, float) override;                  // remembered, so busVolume() is consistent
+    float   busVolume(AudioBus) const override;
+    void    setListener(Vec2, float) override;
+    void    update() override;
+private:
+    std::array<float, 4> volumes_{1, 1, 1, 1};
+};
+
+class NullNetwork final : public INetwork {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "null"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext&) override; void shutdown() noexcept override;
+    Result<void> openUdp(uint16_t) override;                         // succeeds, nothing bound
+    void closeUdp() override;
+    void sendUdp(const Endpoint&, std::span<const std::byte>) override;   // drops
+    void setReceiver(std::move_only_function<void(Datagram&&)>) override; // never called
+    Result<void> listenTcp(uint16_t) override;
+    Result<uint32_t> connectTcp(const Endpoint&) override;           // NetworkError "offline"
+    void sendTcp(uint32_t, std::span<const std::byte>) override;
+    void setTcpReceiver(std::move_only_function<void(uint32_t, std::span<const std::byte>)>) override;
+    void closeTcp(uint32_t) override;
+};
+
+class NullScripting final : public IScripting {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "null"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext&) override; void shutdown() noexcept override;
+    Result<void>         bind(ScriptHost&) override;                 // succeeds
+    Result<ScriptHandle> load(const std::filesystem::path&) override;   // ScriptError "scripting disabled"
+    void                 unload(ScriptHandle) override;
+    Result<void>         reload(ScriptHandle) override;
+    Result<void>         call(ScriptHandle, std::string_view, Entity, Context&) override;
+    bool                 has(ScriptHandle, std::string_view) const override;   // false
+};
 
 std::unique_ptr<IPlugin> makeNullPlugin(PluginKind kind);   // used by ModuleManager for the name "null"
 ```
