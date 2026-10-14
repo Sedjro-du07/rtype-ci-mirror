@@ -68,6 +68,7 @@ struct Reconnected          { };                                             ENG
 ## Read first
 
 - [ADR 0043](../adr/0043-protocol-v1-game-api.md)
+- [RFC §6.7](../network/rfc.md) (RTEP v1.0)
 
 ## To implement
 

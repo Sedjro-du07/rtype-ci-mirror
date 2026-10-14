@@ -92,7 +92,7 @@ public:
 - [ADR 0033](../adr/0033-engine-networking.md)
 - [ADR 0037](../adr/0037-game-facing-networking.md)
 - [reference 10](../engine/reference/10-network.md)
-- protocol RFC (Network part, not written yet)
+- [RFC §4, §6.5, §11](../network/rfc.md) (RTEP v1.0)
 
 ## To implement
 

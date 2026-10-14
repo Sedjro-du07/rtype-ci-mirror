@@ -37,7 +37,8 @@ local function heuristic(buffer, pinfo, tree) end   -- registered for udp and tc
 
 ## Read first
 
-- RFC (all) · network step 7
+- [RFC (all)](../network/rfc.md) (RTEP v1.0)
+- [network step 7](../network/07-prototypes.md)
 
 ## To implement
 

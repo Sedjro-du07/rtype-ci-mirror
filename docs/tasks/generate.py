@@ -84,8 +84,12 @@ def ref_links(ref, base_docs):
         name = next((n for n in os.listdir(os.path.join(ROOT, 'docs/engine/guide')) if n.startswith(num)), None)
         if name:
             out.append(f'[guide {num}]({base_docs}engine/guide/{name})')
-    if 'protocol RFC' in ref:
-        out.append('protocol RFC (Network part, not written yet)')
+    m = re.search(r'RFC( \(all\)|(?: §[\d.]+,?)+)?', ref)
+    if m:
+        out.append(f'[RFC{(m.group(1) or "").rstrip(",")}]({base_docs}network/rfc.md) (RTEP v1.0)')
+    for step, page in (('step 1', '01-scope.md'), ('step 7', '07-prototypes.md')):
+        if step in ref:
+            out.append(f'[network {step}]({base_docs}network/{page})')
     return out
 
 

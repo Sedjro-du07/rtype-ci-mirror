@@ -36,7 +36,8 @@ benchmarks/net/  SnapshotSizeBench (bytes per entity and per snapshot for R-Type
 
 ## Read first
 
-- network step 1 budgets · step 7
+- [network step 1](../network/01-scope.md)
+- [network step 7](../network/07-prototypes.md)
 
 ## To implement
 

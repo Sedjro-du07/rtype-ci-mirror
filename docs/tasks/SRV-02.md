@@ -81,6 +81,7 @@ public:
 - [ADR 0037](../adr/0037-game-facing-networking.md)
 - [ADR 0042](../adr/0042-admission-by-the-game.md)
 - [ADR 0043](../adr/0043-protocol-v1-game-api.md)
+- [RFC §6](../network/rfc.md) (RTEP v1.0)
 
 ## To implement
 

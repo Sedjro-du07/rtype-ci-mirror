@@ -72,7 +72,9 @@ void registerNetSystems(Scheduler& s); // called by registerEngineSystems
 ## Read first
 
 - [ADR 0033](../adr/0033-engine-networking.md)
-- protocol RFC (Network part, not written yet)
+- [ADR 0041](../adr/0041-netcode-means-in-engine-policy-in-game.md)
+- [reference 10](../engine/reference/10-network.md)
+- [RFC §9](../network/rfc.md) (RTEP v1.0)
 
 ## To implement
 
