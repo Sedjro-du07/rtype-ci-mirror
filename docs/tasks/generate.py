@@ -134,6 +134,8 @@ def api_blocks(t):
             if f.endswith('.cpp'):                     # a source implements its public header
                 wanted.append(f[:-4].removeprefix('src/') + '.hpp')
         for key, lang, code in REF_BLOCKS:
+            if key in spec.get('skip', []):
+                continue
             if any(w == key or (key.endswith('/') and w.startswith(key)) for w in wanted):
                 blocks.append((full_path(key), lang, code))
     blocks += spec.get('extra', [])

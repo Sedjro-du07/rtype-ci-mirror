@@ -49,13 +49,51 @@ public:
 };
 ```
 
-### `include/engine/core/math/`
+### `include/engine/core/Hash.hpp`
 
 ```cpp
-struct Vec2  { float x = 0, y = 0; /* +, -, * scalar, dot, length, normalized, lerp */ };
-struct Rect  { float x = 0, y = 0, w = 0, h = 0; bool contains(Vec2) const; bool intersects(const Rect&) const; };
-struct Color { uint8_t r = 255, g = 255, b = 255, a = 255; static constexpr Color white(); /* black, red… */ };
-constexpr uint64_t fnv1a64(std::string_view) noexcept;   // core/Hash.hpp: compile-time hash for type, event and action keys
+constexpr uint64_t fnv1a64(std::string_view text) noexcept;   // compile-time hash for type, event and action keys
+```
+
+### `include/engine/core/math/Vec2.hpp`
+
+```cpp
+struct Vec2 {
+    float x = 0, y = 0;
+    constexpr Vec2 operator+(Vec2 o) const;   constexpr Vec2 operator-(Vec2 o) const;
+    constexpr Vec2 operator*(float k) const;  constexpr Vec2 operator/(float k) const;
+    constexpr Vec2& operator+=(Vec2 o);       constexpr Vec2& operator-=(Vec2 o);
+    constexpr Vec2& operator*=(float k);
+    constexpr bool operator==(const Vec2&) const = default;
+    constexpr float dot(Vec2 o) const;
+    float length() const;
+    Vec2  normalized() const;                 // {0, 0} stays {0, 0}
+    static constexpr Vec2 lerp(Vec2 a, Vec2 b, float t);
+};
+```
+
+### `include/engine/core/math/Rect.hpp`
+
+```cpp
+struct Rect {
+    float x = 0, y = 0, w = 0, h = 0;
+    constexpr bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
+    constexpr bool intersects(const Rect& o) const;  // touching edges do not intersect
+    constexpr Vec2 center() const;
+    constexpr bool operator==(const Rect&) const = default;
+};
+```
+
+### `include/engine/core/math/Color.hpp`
+
+```cpp
+struct Color {
+    uint8_t r = 255, g = 255, b = 255, a = 255;
+    static constexpr Color white(); static constexpr Color black();
+    static constexpr Color red();   static constexpr Color green(); static constexpr Color blue();
+    static constexpr Color transparent();
+    constexpr bool operator==(const Color&) const = default;
+};
 ```
 
 ## Depends on

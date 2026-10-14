@@ -8,6 +8,7 @@ generate.py builds the "Classes and methods" section of every task page from two
 
 API[id] = dict(auto=True|False, extra=[(file, language, code), ...], note="...")
   auto=False  → only the extra declarations are shown (used when the auto block is too broad).
+  skip=[keys] → leave out these reference sections (replaced by more precise extra declarations).
 """
 
 API = {
@@ -43,6 +44,36 @@ int                                probeToUnderlying();          // std::to_unde
 [[noreturn]] void                  probeUnreachable();           // std::unreachable'''),
     ('cmake/EngineOptions.cmake', 'cmake', '''try_compile(ENGINE_HAS_STD_EXPECTED ... SOURCES cmake/FeatureProbe.cpp ...)
 # if FALSE: target_compile_definitions(engine PUBLIC ENGINE_USE_TL_EXPECTED)'''),
+]),
+# ---------------------------------------------------------------- 01 Core
+'ENG-04': dict(skip=['core/math/'], extra=[
+    ('include/engine/core/Hash.hpp', 'cpp', '''constexpr uint64_t fnv1a64(std::string_view text) noexcept;   // compile-time hash for type, event and action keys'''),
+    ('include/engine/core/math/Vec2.hpp', 'cpp', '''struct Vec2 {
+    float x = 0, y = 0;
+    constexpr Vec2 operator+(Vec2 o) const;   constexpr Vec2 operator-(Vec2 o) const;
+    constexpr Vec2 operator*(float k) const;  constexpr Vec2 operator/(float k) const;
+    constexpr Vec2& operator+=(Vec2 o);       constexpr Vec2& operator-=(Vec2 o);
+    constexpr Vec2& operator*=(float k);
+    constexpr bool operator==(const Vec2&) const = default;
+    constexpr float dot(Vec2 o) const;
+    float length() const;
+    Vec2  normalized() const;                 // {0, 0} stays {0, 0}
+    static constexpr Vec2 lerp(Vec2 a, Vec2 b, float t);
+};'''),
+    ('include/engine/core/math/Rect.hpp', 'cpp', '''struct Rect {
+    float x = 0, y = 0, w = 0, h = 0;
+    constexpr bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
+    constexpr bool intersects(const Rect& o) const;  // touching edges do not intersect
+    constexpr Vec2 center() const;
+    constexpr bool operator==(const Rect&) const = default;
+};'''),
+    ('include/engine/core/math/Color.hpp', 'cpp', '''struct Color {
+    uint8_t r = 255, g = 255, b = 255, a = 255;
+    static constexpr Color white(); static constexpr Color black();
+    static constexpr Color red();   static constexpr Color green(); static constexpr Color blue();
+    static constexpr Color transparent();
+    constexpr bool operator==(const Color&) const = default;
+};'''),
 ]),
 # ---------------------------------------------------------------- 02 Modules
 'ENG-15': dict(extra=[
