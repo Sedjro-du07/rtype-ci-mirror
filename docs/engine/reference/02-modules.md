@@ -64,7 +64,7 @@ public:
 class IGameModule {
 public:
     virtual ~IGameModule() = default;
-    virtual void registerTypes(TypeRegistry& types) = 0;               // components, events, enums the game invents
+    virtual void registerTypes(TypeRegistry& types) = 0;               // every type the game invents (add<T>)
     virtual void registerSystems(Role role, Scheduler& scheduler) = 0; // the game's systems for this role
     virtual std::string_view firstScene() const = 0;                   // path relative to the game root
     virtual void onStart(Context& ctx) {}                              // once, after the first scene, before the loop

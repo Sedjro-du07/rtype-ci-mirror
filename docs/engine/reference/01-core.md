@@ -189,7 +189,7 @@ public:
     AssetManager&      assets();            // textures, sounds, music, fonts, scripts by path
     RenderQueue&       render();            // describe what to draw this frame
     IAudio&            audio();             // NullAudio on the server
-    NetworkSession&    network();           // connections, send, stats (block 10)
+    NetworkSession&    network();           // players, messages, stats (block 10)
     const Time&        time() const;        // fixedDelta, tick, alpha, total
     Logger&            log();
     CVars&             cvars();
