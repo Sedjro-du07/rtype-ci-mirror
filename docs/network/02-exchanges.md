@@ -11,7 +11,7 @@ must arrive, whether order matters, transport. Groups follow a player's life:
 | 4 | Entering and leaving a room | validated |
 | 5 | In game: inputs, snapshots, spawns and destructions, game messages | validated |
 | 6 | End of game, back to the lobby, failed room | validated |
-| 7 | Reconnection | next |
+| 7 | Reconnection | validated |
 
 ## Group 1 · Connection
 
@@ -462,3 +462,79 @@ A server-to-server channel, reserved for Part 2 and inventoried then.
     `moveToLobby(party)` take no reason; the game should be able to give it (as for admission, kick).
 31. Room results to clients: forwarded by the engine (`RoomFinished` already holds them), or always a
     game message?
+
+## Group 7 · Reconnection
+
+Already decided (Server part, round 4): the mechanism is in the engine (token, grace period, events),
+the policy in the game; minimal rule: a party always has a leader. The subject asks for it
+(track2_4: disconnect → rejoin with the token).
+
+### Short cut (under the timeout)
+
+Packets resume before 5 s: no event, the game goes on; losses are absorbed by group 5.
+
+### The UDP address changes without a TCP cut (NAT rebinding)
+
+```
+Client                                         Server
+  │══ Input ═══ UDP (new address) ══════════▶  ✕ unknown address → dropped
+  │── UdpLink (token) ═════════════════ UDP ═▶│  the token proves it is them → new address kept
+  │══ Input ═══════════════════════════ UDP ═▶│  works again
+```
+
+### Long cut, back within the grace period
+
+```
+Client                                         Server
+  │  ✕ cut (timeout, or TCP closed without Bye)  │  the player becomes "disconnected", not removed
+  │                                              │  game: PlayerDisconnected{p} → its policy
+  │                                              │  (wait, pause, AI, end…)
+  │   … the client connects again …              │
+  │── Hello (… + reconnection token) ─── TCP ──▶│  the engine recognises the player
+  │◀───────────────── Challenge / UdpLink ──────▶│  (as group 1)
+  │◀──────────── Accepted (same PlayerId) ─ TCP ─│  game: PlayerReconnected{p}
+  │◀──────────── PartyUpdated, EnteredRoom ─ TCP ─│  back in their party and room
+  │◀═════════════ full snapshot ═════════════ UDP │  the world again
+```
+
+### Grace period expires
+
+Final leave: `PlayerLeft{Timeout}`; the room receives `PlayerLeftRoom`, the party is updated and gets a
+new leader if needed.
+
+### The client crashed and restarts
+
+The token was in memory and is lost, unless saved; without it, a normal connection (group 1) and a new
+player.
+
+### The server restarted
+
+Tokens are lost on the server: normal connection.
+
+### Inventory
+
+| Exchange | Direction | When | Size | Must arrive | Order | Transport |
+|---|---|---|---|---|---|---|
+| Reconnection token | S → C | inside Accepted | small | yes | yes | TCP |
+| Hello with token | C → S | on return | small | yes | yes | TCP |
+| UdpLink (new address) | C → S | repeated until answered | tiny | no: repeated | no | UDP |
+| Accepted (resumed) | S → C | once | small | yes | yes | TCP |
+| PartyUpdated, EnteredRoom | S → C | after resuming | small | yes | yes | TCP |
+| Full snapshot | S → C | after resuming | up to ~3 KB | yes (at least one) | — | UDP |
+
+### Questions for step 4
+
+32. Grace period length: a setting the game chooses (ADR 0041); default value?
+33. Events for the game: `PlayerDisconnected`, `PlayerReconnected` (new names), in the room and the
+    lobby; what other players see: an engine message or the game's?
+34. UDP address change: how the client knows it must send UdpLink again (server silence, or a TCP
+    signal)?
+35. Token after a client crash: saved on disk, or a crash means a new player?
+36. Admission on reconnection: does the returning player go through the game's admission again
+    (ADR 0042)? They may have been banned meanwhile.
+37. Token theft: it travels in clear (encryption out of scope); at least unpredictable, single use,
+    bound to the player.
+
+## Step 2 complete
+
+Seven groups, 37 questions for step 4. Next: step 3, layers.

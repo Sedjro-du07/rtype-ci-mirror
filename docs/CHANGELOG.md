@@ -7,6 +7,14 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 2 complete: reconnection
+
+### Added
+
+- `docs/network/02-exchanges.md`, group 7 (reconnection): short cut, UDP address change, return
+  within the grace period, grace expired, client or server restart; questions 32 to 37. Step 2 is
+  complete: seven groups, 37 questions for step 4.
+
 ## [2026-10-14] — network part, step 2: end of game
 
 ### Added
