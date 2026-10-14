@@ -74,6 +74,10 @@ struct InviteReceived       { PlayerId from; PartyId party; };                EN
 struct RoomListReceived     { std::vector<RoomInfo> rooms; };                 ENGINE_EVENT(RoomListReceived)
 struct EnteredRoom          { RoomId room; RoomSettings settings; };          ENGINE_EVENT(EnteredRoom)
 struct ReturnedToLobby      { RoomId room; std::string reason; };             ENGINE_EVENT(ReturnedToLobby)
+struct RoomInterrupted      { RoomId room; };                                 ENGINE_EVENT(RoomInterrupted)  // the room failed (ADR 0043)
+struct OnlinePlayersChanged { };                                              ENGINE_EVENT(OnlinePlayersChanged)
+enum class LobbyRequest : uint8_t { Invite = 1, InviteAnswer, LeaveParty, RoomList, Game };       ENGINE_ENUM(LobbyRequest)
+struct RequestRefused       { LobbyRequest request; std::string reason; };     ENGINE_EVENT(RequestRefused)
 ```
 
 ## Depends on

@@ -49,18 +49,22 @@ public:
     Result<void> startServer(std::optional<uint16_t> port = {});
     void stopServer();
     Result<void> connectTo(std::string_view host, uint16_t port, std::string_view playerName);
+    template <class T> Result<void> connectTo(std::string_view host, uint16_t port,
+                                              std::string_view playerName, const T& admissionData);
     void disconnect();
     std::span<const PlayerId> players() const;
     PlayerId         localPlayer() const;
     std::string_view name(PlayerId p) const;
-    void             kick(PlayerId p, std::string_view reason);
+    void             kick(PlayerId p, std::string_view reason);    // Kicked{message} (RFC §6.3.6)
     double           ping(PlayerId p) const;
     ConnectionStats  stats(PlayerId p) const;
 private:
     PlayerTable players_;
     PlayerId    localPlayer_ = 0;
     void onPlayerAccepted(ConnectionId c, std::string name);       // publishes PlayerJoined / JoinedServer
-    void onConnectionClosed(ConnectionId c, DisconnectReason r);   // publishes PlayerLeft / LeftServer
+    void onConnectionClosed(ConnectionId c, DisconnectReason r, std::string message);
+                                                                   // PlayerLeft / LeftServer with message;
+                                                                   // ConnectionLost / Timeout go to SRV-16 (grace)
 };
 ```
 
@@ -70,7 +74,7 @@ private:
 
 ## Unlocks
 
-- [SRV-02](SRV-02.md) — Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link
+- [SRV-02](SRV-02.md) — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 - [SRV-03](SRV-03.md) — Typed messages: MessageDispatcher, send / broadcast / on<T>
 - [SRV-07](SRV-07.md) — Tests: players, handshake, messages, codec, malformed input
 
@@ -84,11 +88,13 @@ private:
 - [ ] `PlayerTable` (private): PlayerId ↔ ConnectionId, names, allocation, removal
 - [ ] `startServer(port)`, `stopServer()`, `connectTo(host, port, name)`, `disconnect()` on NetworkSession
 - [ ] `players`, `localPlayer`, `name`, `kick`, `ping`, `stats(PlayerId)`
-- [ ] Publish `PlayerJoined`, `PlayerLeft`, `JoinedServer`, `LeftServer`
+- [ ] Publish `PlayerJoined`, `PlayerLeft{reason, message}`, `JoinedServer`, `LeftServer{reason, message}`
+- [ ] `connectTo` overload with admission data; `Bye`, `Kicked{message}`, `ServerShutdown{message}`, TCP `KeepAlive` after 10 s (RFC §6.3.6)
+- [ ] `DisconnectReason` values of RFC §6.8
 
 ## Done when
 
-- Headless server + two clients: both PlayerJoined received, names correct, kick produces PlayerLeft{Kicked}
+- Headless server + two clients: both PlayerJoined received, names correct, kick produces PlayerLeft{Kicked} and LeftServer with the kick text
 
 ## Watch out
 

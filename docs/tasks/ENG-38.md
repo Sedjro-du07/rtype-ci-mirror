@@ -32,13 +32,17 @@ public:
                                                            // (default: NetConfig::port, i.e. --port / config)
     void stopServer();                                     // tells every player (ServerShutdown), closes
     Result<void> connectTo(std::string_view host, uint16_t port, std::string_view playerName); // client
+    template <class T> Result<void> connectTo(std::string_view host, uint16_t port,
+                                              std::string_view playerName, const T& admissionData); // T: ENGINE_MESSAGE (ADR 0042)
     void disconnect();                                     // client: leave (Quit)
 
     // ---- Game API: players ----
     std::span<const PlayerId> players() const;             // server: connected players
     PlayerId         localPlayer() const;                  // client: my id (0 before JoinedServer)
     std::string_view name(PlayerId p) const;               // name given to connectTo
-    void             kick(PlayerId p, std::string_view reason); // server
+    void             kick(PlayerId p, std::string_view reason); // server; reason reaches LeftServer::message
+    template <class T> void admission(std::move_only_function<Admission(const AdmissionRequest&, const T&)> fn);
+                                                           // server (lobby code): accept or refuse joining players (ADR 0042)
     double           ping(PlayerId p) const;               // round-trip time in ms
     ConnectionStats  stats(PlayerId p) const;              // lagometer, console "net"
     bool isServer() const; bool connected() const;
@@ -58,6 +62,14 @@ public:
                                // decode messages → call on<T> callbacks → publish player events
     void sendRaw(ConnectionId to, Transport t, uint16_t messageId, std::span<const std::byte> payload);
 };
+
+struct AdmissionRequest { std::string_view name; Endpoint from; bool reconnecting; };
+class Admission {                                          // returned by the admission callback
+public:
+    static Admission accept();
+    static Admission refuse(std::string reason);           // ≤ 128 bytes, shown to the player
+    bool accepted() const; std::string_view reason() const;
+};
 ```
 
 ## Depends on
@@ -72,7 +84,7 @@ public:
 - [ENG-39](ENG-39.md) — Replication: NetworkIdMap, net components, snapshot and input systems
 - [ENG-55](ENG-55.md) — Unit tests: scheduler, events, input, scenes, session
 - [SRV-01](SRV-01.md) — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping
-- [SRV-05](SRV-05.md) — ReliableChannel: acknowledged and resent UDP messages
+- [SRV-05](SRV-05.md) — ReliableChannel: packet acks, RTT and loss, reliable ordered messages
 
 ## Read first
 
@@ -85,8 +97,10 @@ public:
 ## To implement
 
 - [ ] Bounded, mutex-protected inbox (`maxQueuedDatagrams`)
-- [ ] `poll` skeleton: drain, size and header validation, route to connections
-- [ ] Connections: heartbeats, timeouts, stats (RTT, loss, bytes)
+- [ ] `poll`: validation order of RFC §4.6 (size, magic, version, kind, session key) before routing
+- [ ] 16-byte UDP header and Data packets with several messages (RFC §4.2); packing once per tick
+- [ ] Connections: heartbeat = empty Data packet after 0.5 s idle, 5 s timeout, stats (RTT, loss, bytes)
+- [ ] Counters and limits of RFC §11 (rate cap, invalid-packet limit)
 - [ ] `attach`, `sendRaw`, `isServer`, `connected`
 
 ## Done when

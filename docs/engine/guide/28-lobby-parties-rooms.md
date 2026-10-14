@@ -67,7 +67,10 @@ struct PlayRequest {};  ENGINE_MESSAGE(PlayRequest)          // client → serve
 // server, lobby code
 playSub_ = lobbyCtx.network().on<PlayRequest>([](engine::LobbyContext& ctx, engine::PlayerId from, const PlayRequest&) {
     auto& party = ctx.lobby().partyOf(from);
-    if (party.leader != from) return;                         // only the leader starts
+    if (party.leader != from) {                               // only the leader starts
+        ctx.lobby().refuse(from, engine::LobbyRequest::Game, "only the leader can start");
+        return;
+    }
     if (party.size() == 1 && !kSoloAllowed) return;           // solo allowed? your rule
     auto room = ctx.lobby().createRoom({ .name = "Stage 1", .level = "scenes/level1.yaml", .maxPlayers = 4 });
     if (room) ctx.lobby().moveParty(party.id, room);
@@ -118,13 +121,22 @@ ctx.room().reportFinished(GameResult{ true, 12400 });
 // lobby code (onLobbyStart)
 endSub_ = lobbyCtx.events().subscribe<engine::RoomFinished>([&lobbyCtx](const engine::RoomFinished& e) {
     auto result = e.resultAs<GameResult>();
-    lobbyCtx.lobby().closeRoom(e.room);                       // parties go back to the lobby
+    lobbyCtx.lobby().closeRoom(e.room, "victory!");           // parties go back to the lobby
 });
 ```
 
-Clients receive `ReturnedToLobby` and switch back to their lobby scene. If a system throws in a room,
-that room stops, the lobby receives `RoomFailed{room, error}`, the other rooms keep running, and your
-lobby code decides (usually `closeRoom`).
+Send results as a `reliable()` message before `closeRoom`: they arrive before `ReturnedToLobby{room,
+reason}` (same ordered stream, RFC §8.4). Clients then switch back to their lobby scene. If a system
+throws in a room, that room stops, its clients receive `RoomInterrupted`, the lobby receives
+`RoomFailed{room, error}`, the other rooms keep running, and your lobby code decides (usually
+`closeRoom`).
+
+## Who is online, refused requests
+
+On the client, `ctx.lobby().onlinePlayers()` and `name(p)` list connected players (event
+`OnlinePlayersChanged`; turn off with `net.shareOnlinePlayers: false`). When your lobby code says no,
+call `lobby().refuse(player, request, reason)`: the client receives `RequestRefused{request, reason}`.
+Staying silent is also allowed.
 
 ## Network inside a room
 

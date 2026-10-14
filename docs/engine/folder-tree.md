@@ -6,7 +6,8 @@ task: `ENG-xx` on the engine board, `SRV-xx` on the server board (see [`tasks.md
 ```
 engine/
 ├── benchmarks/
-│   └── ecs_storage/                                      ENG-56
+│   ├── ecs_storage/                                      ENG-56
+│   └── net/                                              SRV-20
 ├── cmake/
 │   ├── EngineModules.cmake                               ENG-02
 │   ├── EngineOptions.cmake                               ENG-01
@@ -178,8 +179,12 @@ engine/
 │   │   ├── NetworkSession.cpp                            ENG-38, SRV-01
 │   │   ├── PlayerTable.cpp                               SRV-01
 │   │   ├── PlayerTable.hpp                               SRV-01
+│   │   ├── Reconnection.cpp                              SRV-16
+│   │   ├── Reconnection.hpp                              SRV-16
 │   │   ├── ReliableChannel.cpp                           SRV-05
 │   │   ├── ReliableChannel.hpp                           SRV-05
+│   │   ├── ReplicationState.cpp                          SRV-17
+│   │   ├── ReplicationState.hpp                          SRV-17
 │   │   ├── RoomNetwork.cpp                               SRV-14
 │   │   ├── StreamFramer.cpp                              SRV-06
 │   │   └── StreamFramer.hpp                              SRV-06
@@ -244,6 +249,7 @@ engine/
 │   ├── input/                                            ENG-55
 │   ├── module/                                           ENG-53
 │   ├── net/                                              ENG-55
+│   │   ├── fuzz/                                         SRV-18
 │   │   ├── messages/                                     SRV-07
 │   │   └── players/                                      SRV-07
 │   ├── reflection/                                       ENG-54
@@ -253,7 +259,9 @@ engine/
 │   ├── scheduler/                                        ENG-55
 │   └── CMakeLists.txt                                    ENG-53
 ├── tools/
-│   └── editor/                                           ENG-59
+│   ├── editor/                                           ENG-59
+│   └── wireshark/
+│       └── rtep.lua                                      SRV-19
 └── CMakeLists.txt                                        ENG-01
 ```
 

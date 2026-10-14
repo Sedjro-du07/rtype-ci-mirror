@@ -228,6 +228,18 @@
     "title": "Network · 04 Design choices"
   },
   {
+    "file": "network/rfc.md",
+    "title": "Network · RTEP v1.0 — the protocol RFC"
+  },
+  {
+    "file": "network/06-scenarios.md",
+    "title": "Network · 06 Validation on scenarios"
+  },
+  {
+    "file": "network/07-prototypes.md",
+    "title": "Network · 07 Prototypes and measurements"
+  },
+  {
     "file": "tasks/README.md",
     "title": "Tasks — details (one page per task)"
   },
@@ -410,6 +422,10 @@
   {
     "file": "adr/0042-admission-by-the-game.md",
     "title": "ADR 0042 — Admission: engine checks decoding, game decides who joins"
+  },
+  {
+    "file": "adr/0043-protocol-v1-game-api.md",
+    "title": "ADR 0043 — Protocol v1: what the game sees of it"
   },
   {
     "file": "../benchmark-graphics-rtype.md",

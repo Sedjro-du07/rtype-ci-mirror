@@ -73,9 +73,13 @@ Dispatch points: after each `FixedUpdate` step (after `Commands::apply`) and aft
 | `SceneLoaded` | `std::string name` | `SceneManager` | after a scene finished loading |
 | `SceneUnloading` | `std::string name` | `SceneManager` | before a scene is cleared |
 | `PlayerJoined` | `PlayerId player` | `NetworkSession` | server: a player completed the handshake (ADR 0037) |
-| `PlayerLeft` | `PlayerId player; DisconnectReason reason` | `NetworkSession` | server: quit, timeout, kick or error |
+| `PlayerLeft` | `PlayerId player; DisconnectReason reason; std::string message` | `NetworkSession` | server: quit, kick, error, or end of the grace period |
+| `PlayerDisconnected` | `PlayerId player; DisconnectReason reason` | `NetworkSession` | server: connection lost, grace period starts (ADR 0043); also in the player's room |
+| `PlayerReconnected` | `PlayerId player` | `NetworkSession` | server: came back with its token; also in the player's room |
 | `JoinedServer` | `PlayerId me` | `NetworkSession` | client: accepted by the server |
-| `LeftServer` | `DisconnectReason reason` | `NetworkSession` | client: left, kicked, timed out, refused or server shut down |
+| `LeftServer` | `DisconnectReason reason; std::string message` | `NetworkSession` | client: left, kicked, refused, server shut down, or gave up reconnecting |
+| `ConnectionInterrupted` | `DisconnectReason reason` | `NetworkSession` | client: connection lost, reconnecting by itself |
+| `Reconnected` | — | `NetworkSession` | client: back in the same session |
 | `Caption` | `std::string text; float seconds` | `IAudio::play` with a caption | accessibility: visual cue for a sound |
 | `ConsoleCommand` | `std::string line` | `Console` | a command was executed |
 
@@ -83,6 +87,7 @@ Lobby, party and room events (`PartyChanged`, `InviteRequested`, `RoomFinished`,
 `EnteredRoom`…) are listed in reference 14. On the server, every room has its own `EventBus`; the lobby
 has another one. An event published in a room is never seen by another room or by the lobby.
 
-`DisconnectReason`: `Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`, `ServerFull`, `FormatMismatch`.
+`DisconnectReason`: `Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`, `ServerFull`, `FormatMismatch`,
+`ProtocolMismatch`, `WrongGame`, `InvalidName`, `RefusedByGame`, `ConnectionLost` (meanings: RFC §6.8).
 
 Events never leave the process. To tell other machines, use a network message (`ENGINE_MESSAGE`, block 10).

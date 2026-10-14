@@ -31,7 +31,11 @@
 | script stopped with "instruction limit" | infinite or very long loop in a hook | split the work over several `on_update` calls |
 | a server system disappears from `systems` timings | it threw and was disabled | read the log line naming it; fix and restart |
 | clients never connect | wrong host or port, firewall, server not started | `net` on the server; check `server.yaml` and the client command line |
-| `PlayerLeft{Timeout}` while the client runs | no packet for `net_timeout` seconds (debugger pause, frozen client) | expected; raise `net_timeout` only while debugging |
+| `PlayerDisconnected{Timeout}` while the client runs | no packet for `net_timeout` seconds (debugger pause, frozen client) | expected; the client comes back by itself within `net.reconnectGraceSeconds`; raise `net_timeout` only while debugging |
+| client gets `LeftServer{ProtocolMismatch}` | client and server built with different engine versions | update the engine on both sides |
+| client gets `LeftServer{WrongGame}` | the server runs another game | check `--game` / `game:` on both sides |
+| client gets `LeftServer{RefusedByGame}` | the game's admission refused it; `message` says why | follow the message (version, password…) |
+| entities never appear on a client that joined a room | the client never finished switching scene after `EnteredRoom`, so `RoomReady` was not sent | switch scene in the `EnteredRoom` handler; check the log for a scene load error |
 | works on Linux, crashes at load on Windows | plugin or game built with another compiler or runtime | rebuild everything with the same Visual Studio and `/MD` (page 24) |
 | client gets `LeftServer{FormatMismatch}` | client and server built from different versions of the game types | rebuild both from the same commit |
 | client gets `LeftServer{ServerFull}` | `maxClients` players already connected | raise `net.maxClients` in `server.yaml` or wait |

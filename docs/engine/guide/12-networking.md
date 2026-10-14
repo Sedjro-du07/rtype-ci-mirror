@@ -46,9 +46,42 @@ The game sees players, never connections:
 | `players()`, `name(p)`, `ping(p)`, `kick(p, reason)` | `localPlayer()`, `connected()` |
 
 `reason` is one of `Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`, `ServerFull`,
-`FormatMismatch`. Your game will also be able to refuse a player with its own reason (version,
-password, bans…) through an admission step, after the engine's checks (ADR 0042; API with the protocol
-RFC). A crashed client times out after `net_timeout` seconds and is reported as `PlayerLeft{Timeout}`.
+`FormatMismatch`, `ProtocolMismatch` (other engine version), `WrongGame`, `InvalidName`,
+`RefusedByGame`, `ConnectionLost`; `message` carries the kick or refusal text.
+
+## Who may join
+
+The engine refuses what it cannot decode (engine version, game, types). The rest is your rule (ADR
+0042): declare an admission message, send it with `connectTo`, decide in lobby code.
+
+```cpp
+struct JoinInfo { std::string version; };  ENGINE_MESSAGE(JoinInfo)
+types.add<JoinInfo>().field("version", &JoinInfo::version).maxLength(16);
+
+// client
+ctx.network().connectTo("127.0.0.1", 4242, "Sedjro", JoinInfo{"1.3"});
+
+// server, onLobbyStart
+lobbyCtx.network().admission<JoinInfo>([](const engine::AdmissionRequest& req, const JoinInfo& info) {
+    if (info.version != "1.3") return engine::Admission::refuse("update R-Type to 1.3");
+    return engine::Admission::accept();
+});
+```
+
+The client receives `LeftServer{RefusedByGame, "update R-Type to 1.3"}`. Admission runs again when a
+player reconnects (`req.reconnecting`).
+
+## Losing the connection
+
+A client whose connection drops (cable, Wi-Fi, crash of the network) is not removed at once:
+
+| Moment | Server | Client |
+|---|---|---|
+| silence for `net_timeout` (5 s), or TCP lost | `PlayerDisconnected{player, reason}` (lobby and room) | `ConnectionInterrupted{reason}`, retries every 2 s |
+| back within `net.reconnectGraceSeconds` (30 s) | `PlayerReconnected{player}`: same `PlayerId`, party, room | `Reconnected`, then `EnteredRoom` again if in a game |
+| grace over | `PlayerLeft{player, reason}` | `LeftServer{reason}` |
+
+What the ship does meanwhile is your policy: keep it, make it invulnerable, pause, or `kick`.
 
 ```cpp
 // server, in onStart: give each new player a ship
@@ -159,6 +192,27 @@ connection. If someone changed a type on one side only, the client is refused wi
 
 With rooms, a game's systems see only the players of their room through `ctx.network()`, and
 replication sends each player only the entities of their room. Lobby, parties and rooms: page 28.
+
+## Bandwidth: your settings
+
+The engine sends only what changed and what a client has not acknowledged yet. To go further (the
+subject tests at 5 KB/s), tune it (ADR 0041, 0043):
+
+| Setting | Effect |
+|---|---|
+| `net.sendBudgetBytesPerSecond` | bytes of snapshots per player per second; the rest waits |
+| `NetPriority{weight}` on an entity | sent earlier when over budget (ships before stars) |
+| `ctx.network().setRelevance(fn)` in a room | a player receives only what `fn(player, entity)` allows |
+| `.quantize(min, max)` after a float or `Vec2` field | 2 bytes instead of 4 per value |
+| `net.snapshotRate`, `net.interpolationDelay`, `net.inputRedundancy` | rates and smoothing |
+
+```cpp
+// a replicated component of your game, positions within the level plus a margin
+types.add<Bullet>().field("pos", &Bullet::pos).quantize(-64.f, 1344.f).flags(engine::Replicated);
+```
+
+To predict your own ship, run its movement system in `shared/` on both sides and compare with
+`lastInputProcessed` (RFC §9.4); the engine gives the data, the prediction is yours.
 
 ## Diagnostics
 

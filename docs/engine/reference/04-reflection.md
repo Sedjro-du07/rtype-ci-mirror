@@ -72,6 +72,7 @@ struct FieldInfo {
     FieldKind           element{};            // when kind == List: kind of the elements
     uint64_t            elementType = 0;      // when kind == List or Struct: key of the struct type
     uint32_t            maxLength = 0;        // String and List: limit checked before any allocation
+    float               quantMin = 0, quantMax = 0;   // Float and Vec2: quantised on the wire when min < max
                                               // (0 = default: 256 characters, 64 elements)
     std::string         tooltip;       // optional, shown in the inspector
 };
@@ -131,6 +132,8 @@ public:
     Self& field(this Self& self, std::string_view name, M T::*member, std::string_view tooltip = {});
     template <class Self>
     Self& maxLength(this Self& self, uint32_t n);   // limit of the last String or List field declared
+    template <class Self>
+    Self& quantize(this Self& self, float min, float max);   // last Float or Vec2 field travels as u16 (RFC §5, §9.6)
 };
 
 template <class T> class ComponentBuilder : public FieldsBuilder<T> {

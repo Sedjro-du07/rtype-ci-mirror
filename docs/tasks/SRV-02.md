@@ -1,4 +1,4 @@
-# SRV-02 · Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link
+# SRV-02 · Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 
 Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **01 Players** · **Wave 7** · status and owner live on the board.
 
@@ -22,29 +22,46 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ```cpp
 enum class HandshakeState : uint8_t { Idle, Hello, Challenge, LinkUdp, Accepted, Refused };
 
-class ServerHandshake {                       // one per pending connection
+struct ServerIdentity { uint64_t fingerprint; std::string gameName; };
+using AdmissionFn = std::move_only_function<Admission(const AdmissionRequest&, uint16_t dataId,
+                                                       std::span<const std::byte> data)>;   // set by admission<T>
+
+class ServerHandshake {                       // one per pending connection (RFC §6.1–6.4)
 public:
-    ServerHandshake(const NetConfig& cfg, uint64_t serverFingerprint, size_t playersNow);
-    // Each method reads or writes one handshake message; the bytes come from the protocol RFC.
-    Result<void> onHello(ByteReader& in);     // name, fingerprint → Refused(ServerFull | FormatMismatch | bad name) or Challenge
-    void         writeChallenge(ByteWriter& out);   // the token the client must echo on UDP
-    Result<void> onUdpLink(ByteReader& in, const Endpoint& from);   // token matches → Accepted
+    ServerHandshake(const NetConfig& cfg, const ServerIdentity& self, double startedAt);
+    bool         onPreamble(std::span<const std::byte, 3> bytes);   // false → Refused(ProtocolMismatch)
+    // Checks of RFC §6.4.1 in order; a valid reconnection token is returned for SRV-16 to resume.
+    Result<void> onHello(ByteReader& in, size_t playersNow, AdmissionFn* admission,
+                         std::function<bool(const ReconnectToken&)> isDisconnected);
+    void         writeChallenge(ByteWriter& out);       // random linkToken (OS secure random)
+    bool         onUdpLink(uint64_t linkToken, const Endpoint& from);   // token matches → Accepted
+    void         writeAccepted(ByteWriter& out, PlayerId id, uint32_t sessionKey, const ReconnectToken& next, bool resumed);
+    void         writeRefused(ByteWriter& out) const;   // frozen layout (RFC §4.1)
+    bool         expired(double now) const;             // net.handshakeSeconds
     HandshakeState state() const;
-    DisconnectReason refusal() const;
+    DisconnectReason refusal() const; std::string_view refusalMessage() const;
     const std::string& playerName() const;
     const Endpoint& udpEndpoint() const;
+    std::optional<ReconnectToken> resumeToken() const;
 };
 
 class ClientHandshake {
 public:
-    ClientHandshake(std::string playerName, uint64_t clientFingerprint);
-    void         writeHello(ByteWriter& out);
-    Result<void> onChallenge(ByteReader& in);   // keeps the token
-    void         writeUdpLink(ByteWriter& out); // sent on UDP until Accepted
-    Result<void> onResult(ByteReader& in);      // Accepted with my PlayerId, or Refused with a reason
+    ClientHandshake(std::string playerName, uint64_t fingerprint, std::string gameName,
+                    std::optional<ReconnectToken> token, uint16_t dataId, std::vector<std::byte> data);
+    void         writePreambleAndHello(ByteWriter& out);
+    Result<void> onChallenge(ByteReader& in);   // keeps the link token
+    void         writeUdpLink(ByteWriter& out); // 24-byte UDP packet, every 100 ms until Accepted
+    Result<void> onResult(ByteReader& in);      // Accepted (id, session key, token, timings) or Refused (reason, message)
     HandshakeState state() const;
-    PlayerId me() const;
-    DisconnectReason refusal() const;
+    PlayerId me() const; uint32_t sessionKey() const; const ReconnectToken& nextToken() const;
+    DisconnectReason refusal() const; std::string_view refusalMessage() const;
+};
+
+class PendingLimiter {                        // RFC §11: 16 pending, 4 per address
+public:
+    explicit PendingLimiter(uint32_t maxPending, uint32_t perAddress = 4);
+    bool tryAdd(const Endpoint& from);  void remove(const Endpoint& from);
 };
 ```
 
@@ -57,29 +74,32 @@ public:
 ## Unlocks
 
 - [SRV-07](SRV-07.md) — Tests: players, handshake, messages, codec, malformed input
+- [SRV-16](SRV-16.md) — Reconnection: grace period, single-use tokens, client auto-reconnect, UDP relink
 
 ## Read first
 
 - [ADR 0037](../adr/0037-game-facing-networking.md)
-- [reference 10](../engine/reference/10-network.md)
-- protocol RFC (Network part, not written yet)
+- [ADR 0042](../adr/0042-admission-by-the-game.md)
+- [ADR 0043](../adr/0043-protocol-v1-game-api.md)
 
 ## To implement
 
-- [ ] `Handshake` (private) state machine on both sides
-- [ ] Carry the player name (≤ `maxNameLength`) and `TypeRegistry::formatFingerprint()`
-- [ ] Refuse with `ServerFull`, `FormatMismatch`, invalid name
-- [ ] Link the player's TCP stream and UDP endpoint (token given on TCP, echoed on UDP)
+- [ ] `Handshake` (private) state machines of RFC §6.1 on both sides; preamble on both streams
+- [ ] Hello: name, fingerprint, game name, reconnection token, admission data (RFC §6.3.1)
+- [ ] Checks in the order of RFC §6.4.1: ProtocolMismatch, WrongGame, FormatMismatch, InvalidName, resume, ServerFull, game admission
+- [ ] `admission<T>(fn)` on NetworkSession, `Admission`, `AdmissionRequest` (ADR 0042, 0043)
+- [ ] Challenge with a random link token; UdpLink every 100 ms; Accepted (id, session key, token, timings); Refused (reason, message)
+- [ ] Flood limits: 16 pending, 4 per address, 5 s deadline (`PendingLimiter`)
 
 ## Done when
 
-- Tests: mismatched fingerprint refused with a clear log line on the client; full server refused
+- Tests: each refusal reason with its log line on the client; game admission refuses with its text; handshake times out at 5 s; the 17th pending connection is closed
 
 ## Watch out
 
-- Bytes and token format come from the protocol RFC
-- Unauthenticated UDP from an unknown endpoint is dropped
-- Admission by the game comes after the engine's checks (ADR 0042); its stage follows the RFC
+- Never answer an unauthenticated UDP packet (RFC §6.2)
+- The Refused frame layout is frozen across versions (RFC §4.1)
+- Tokens and keys from the OS secure random source, never std::rand
 
 ## Workflow
 

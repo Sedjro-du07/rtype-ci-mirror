@@ -76,18 +76,23 @@ Board: [Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d) · ta
 
 | Wave | ID | Phase | Task | Depends on |
 |---|---|---|---|---|
+| 1 | [SRV-19](SRV-19.md) | 04 Tests | Wireshark dissector for RTEP (Lua) | — |
 | 4 | [SRV-04](SRV-04.md) | 02 Messages | Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits | [ENG-22](ENG-22.md), [ENG-24](ENG-24.md) |
 | 5 | [SRV-06](SRV-06.md) | 03 Transports | StreamFramer: TCP message framing with size limit | [ENG-37](ENG-37.md) |
 | 5 | [SRV-08](SRV-08.md) | 05 Rooms | Room types and events: PartyId, RoomId, RoomSettings, Party, RoomInfo, lobby / room / client events | [ENG-22](ENG-22.md), [ENG-27](ENG-27.md), [ENG-36](ENG-36.md) |
 | 6 | [SRV-01](SRV-01.md) | 01 Players | Players: PlayerTable, startServer / connectTo, player events, names, kick, ping | [ENG-38](ENG-38.md) |
-| 6 | [SRV-05](SRV-05.md) | 03 Transports | ReliableChannel: acknowledged and resent UDP messages | [ENG-38](ENG-38.md) |
+| 6 | [SRV-05](SRV-05.md) | 03 Transports | ReliableChannel: packet acks, RTT and loss, reliable ordered messages | [ENG-38](ENG-38.md) |
 | 6 | [SRV-10](SRV-10.md) | 05 Rooms | PartyTable and RoomDirectory: parties, leaders, room records, maxRooms | [SRV-08](SRV-08.md) |
-| 7 | [SRV-02](SRV-02.md) | 01 Players | Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link | [SRV-01](SRV-01.md), [SRV-06](SRV-06.md), [ENG-22](ENG-22.md) |
+| 7 | [SRV-02](SRV-02.md) | 01 Players | Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits | [SRV-01](SRV-01.md), [SRV-06](SRV-06.md), [ENG-22](ENG-22.md) |
 | 7 | [SRV-03](SRV-03.md) | 02 Messages | Typed messages: MessageDispatcher, send / broadcast / on<T> | [SRV-01](SRV-01.md), [SRV-04](SRV-04.md), [SRV-05](SRV-05.md), [SRV-06](SRV-06.md) |
 | 8 | [SRV-07](SRV-07.md) | 04 Tests | Tests: players, handshake, messages, codec, malformed input | [SRV-01](SRV-01.md), [SRV-02](SRV-02.md), [SRV-03](SRV-03.md), [SRV-04](SRV-04.md), [SRV-05](SRV-05.md), [SRV-06](SRV-06.md) |
+| 8 | [SRV-16](SRV-16.md) | 01 Players | Reconnection: grace period, single-use tokens, client auto-reconnect, UDP relink | [SRV-02](SRV-02.md), [SRV-05](SRV-05.md) |
 | 9 | [SRV-09](SRV-09.md) | 05 Rooms | Contexts: ServiceContext, LobbyContext, one Context per room | [SRV-08](SRV-08.md), [ENG-40](ENG-40.md), [ENG-44](ENG-44.md), [ENG-45](ENG-45.md), [ENG-47](ENG-47.md) |
 | 12 | [SRV-11](SRV-11.md) | 05 Rooms | RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages | [ENG-09](ENG-09.md), [ENG-18](ENG-18.md), [ENG-20](ENG-20.md), [ENG-26](ENG-26.md), [ENG-27](ENG-27.md), [ENG-39](ENG-39.md), [ENG-43](ENG-43.md), [SRV-09](SRV-09.md) |
 | 13 | [SRV-12](SRV-12.md) | 05 Rooms | WorkerPool, IRoomHost and ThreadPoolRoomHost: rooms in parallel on a thread pool | [SRV-11](SRV-11.md) |
 | 14 | [SRV-13](SRV-13.md) | 05 Rooms | Lobby and RoomHandle: the server game API and the server loop | [SRV-10](SRV-10.md), [SRV-12](SRV-12.md), [SRV-03](SRV-03.md) |
 | 15 | [SRV-14](SRV-14.md) | 05 Rooms | Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset | [SRV-13](SRV-13.md), [ENG-39](ENG-39.md) |
 | 16 | [SRV-15](SRV-15.md) | 04 Tests | Tests: parallel rooms, isolation, crash in a room, party and room flows | [SRV-13](SRV-13.md), [SRV-14](SRV-14.md) |
+| 16 | [SRV-17](SRV-17.md) | 03 Transports | Replication v1: send until acknowledged, budget, NetPriority, relevance, quantize | [ENG-39](ENG-39.md), [SRV-05](SRV-05.md), [SRV-14](SRV-14.md) |
+| 17 | [SRV-18](SRV-18.md) | 04 Tests | Fuzz tests: UDP packets, TCP frames, handshake, snapshot and input decoding | [SRV-07](SRV-07.md), [SRV-17](SRV-17.md) |
+| 17 | [SRV-20](SRV-20.md) | 04 Tests | Network measurements: snapshot sizes, bandwidth under netem (5 KB/s), reliable latency | [SRV-16](SRV-16.md), [SRV-17](SRV-17.md) |

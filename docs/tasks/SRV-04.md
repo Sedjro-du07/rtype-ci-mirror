@@ -61,7 +61,8 @@ uint64_t     fingerprint(std::span<const TypeInfo* const> types);    // used by 
 ## Watch out
 
 - A decode failure rejects the whole value
-- Byte order and integer widths from the protocol RFC
+- Encodings of RFC §5: big-endian, str = u16 length, list = u16 count, Entity = u32 NetworkId
+- `.quantize(min, max)` fields travel as u16
 
 ## Workflow
 

@@ -1,6 +1,6 @@
 # 10 · Network (engine side)
 
-Status: **Locked**. ADRs 0011, 0033, 0037 (players, typed messages, transports). Resolves E-03 (entity identity on the wire).
+Status: **Locked**. ADRs 0011, 0033, 0037 (players, typed messages, transports), 0041–0043 (protocol v1). Resolves E-03 (entity identity on the wire).
 Folder: `engine/include/engine/net/`, `engine/src/net/`, `engine/plugins/network_asio/`.
 
 ## Role
@@ -8,7 +8,8 @@ Folder: `engine/include/engine/net/`, `engine/src/net/`, `engine/plugins/network
 Everything an online Pong would also need (ADR 0011): transport, connections, heartbeats and
 timeouts, a network thread, packet bounds, replication of components, sending player actions.
 **This block fixes classes, threads and responsibilities. The bytes (header layout, message ids,
-reliability scheme, byte order) are defined by the protocol RFC in the Network part.**
+reliability scheme, byte order) are defined by the protocol RFC, [`docs/network/rfc.md`](../../network/rfc.md)
+(RTEP v1.0); section numbers below (RFC §n) point into it.**
 
 What the game sees (ADR 0037): it opens the server or connects explicitly, deals with **players**
 (`PlayerId`) and **typed messages**. Sockets, threads, connections, bytes and message ids stay
@@ -26,7 +27,8 @@ struct Endpoint { std::array<uint8_t, 16> address{}; uint16_t port = 0; bool v6 
 struct Datagram { Endpoint from; std::vector<std::byte> bytes; };
 // Transport (Unreliable, Reliable, Stream) is declared in reflection/TypeInfo.hpp and chosen per message.
 enum class DisconnectReason : uint8_t { Quit, Timeout, Kicked, ProtocolError, ServerShutdown,
-                                        ServerFull, FormatMismatch };   // the last two: refused at handshake
+                                        ServerFull, FormatMismatch, ProtocolMismatch, WrongGame,
+                                        InvalidName, RefusedByGame, ConnectionLost };   // codes: RFC §6.8
 
 struct NetConfig {
     uint16_t port = 4242;
@@ -38,6 +40,14 @@ struct NetConfig {
     double   snapshotRate = 20.0;         // replication snapshots per second
     uint32_t maxNameLength = 16;          // player names longer than this are refused at handshake
     uint32_t maxStreamMessageBytes = 65536; // TCP: a larger announced message closes the stream
+    double   handshakeSeconds = 5.0;      // TCP connect → Accepted, else Refused(Timeout) (RFC §6.2)
+    uint32_t maxPendingHandshakes = 16;   // and 4 per address (RFC §11)
+    double   reconnectGraceSeconds = 30.0;// lost session kept this long for its token; 0 = none (RFC §6.7)
+    bool     autoReconnect = true;        // client: retry every 2 s during the grace period
+    uint32_t sendBudgetBytesPerSecond = 65536; // snapshot bytes per player (RFC §9.6)
+    double   interpolationDelay = 0.1;    // client: other entities drawn this far behind (RFC §9.5)
+    uint32_t inputRedundancy = 3;         // copies of each input, 1 to 4 (RFC §9.4)
+    bool     shareOnlinePlayers = true;   // send the online players list to lobby clients (RFC §8.1.8)
 };
 
 struct ConnectionStats { double rttMs; double lossPercent; uint64_t bytesIn, bytesOut;
@@ -81,13 +91,17 @@ public:
                                                            // (default: NetConfig::port, i.e. --port / config)
     void stopServer();                                     // tells every player (ServerShutdown), closes
     Result<void> connectTo(std::string_view host, uint16_t port, std::string_view playerName); // client
+    template <class T> Result<void> connectTo(std::string_view host, uint16_t port,
+                                              std::string_view playerName, const T& admissionData); // T: ENGINE_MESSAGE (ADR 0042)
     void disconnect();                                     // client: leave (Quit)
 
     // ---- Game API: players ----
     std::span<const PlayerId> players() const;             // server: connected players
     PlayerId         localPlayer() const;                  // client: my id (0 before JoinedServer)
     std::string_view name(PlayerId p) const;               // name given to connectTo
-    void             kick(PlayerId p, std::string_view reason); // server
+    void             kick(PlayerId p, std::string_view reason); // server; reason reaches LeftServer::message
+    template <class T> void admission(std::move_only_function<Admission(const AdmissionRequest&, const T&)> fn);
+                                                           // server (lobby code): accept or refuse joining players (ADR 0042)
     double           ping(PlayerId p) const;               // round-trip time in ms
     ConnectionStats  stats(PlayerId p) const;              // lagometer, console "net"
     bool isServer() const; bool connected() const;
@@ -106,6 +120,14 @@ public:
                                // handshake (name, format fingerprint), heartbeats, timeouts →
                                // decode messages → call on<T> callbacks → publish player events
     void sendRaw(ConnectionId to, Transport t, uint16_t messageId, std::span<const std::byte> payload);
+};
+
+struct AdmissionRequest { std::string_view name; Endpoint from; bool reconnecting; };
+class Admission {                                          // returned by the admission callback
+public:
+    static Admission accept();
+    static Admission refuse(std::string reason);           // ≤ 128 bytes, shown to the player
+    bool accepted() const; std::string_view reason() const;
 };
 ```
 
@@ -136,8 +158,10 @@ public:
 - Admission (ADR 0042): after the engine's checks (protocol version, format fingerprint), the game
   accepts or refuses the player with its own reason, from the name and data of the game carried by the
   Hello. The extension point is defined with the protocol RFC.
-- Events published (block 6): `PlayerJoined{player}`, `PlayerLeft{player, reason}` on the server;
-  `JoinedServer{me}`, `LeftServer{reason}` on the client.
+- Events published (block 6): `PlayerJoined{player}`, `PlayerLeft{player, reason, message}`,
+  `PlayerDisconnected{player, reason}`, `PlayerReconnected{player}` on the server; `JoinedServer{me}`,
+  `LeftServer{reason, message}`, `ConnectionInterrupted{reason}`, `Reconnected{}` on the client.
+- Order of the server's checks, admission and reconnection: RFC §6.4 and §6.7 (ADR 0042, 0043).
 
 Every datagram is checked against `maxDatagramBytes`, the protocol magic/version and the header
 bounds before any handler runs; every stream message against `maxStreamMessageBytes`. A malformed
@@ -177,12 +201,17 @@ public:
     void dispatch(Context& ctx, PlayerId from, uint16_t id, ByteReader& payload, const WireContext& wire);
 };
 
-class ReliableChannel {
+class ReliableChannel {                                   // RFC §7: packet acks + reliable ordered messages
 public:
-    void     send(uint16_t messageId, std::span<const std::byte> payload, double now);
-    void     onAck(/* ack fields defined by the protocol RFC */);
-    bool     accept(uint32_t sequence);                   // false for duplicates
-    std::vector<Pending> due(double now);                 // to resend
+    uint16_t nextSequence();                              // for an outgoing Data packet
+    void     queue(uint16_t messageId, std::span<const std::byte> payload);   // reliable message
+    void     fill(uint16_t sequence, ByteWriter& out, double now); // writes due and new reliable messages
+    void     writeAcks(ByteWriter& out) const;            // ack, ackBits of the header
+    bool     onPacket(uint16_t sequence, uint16_t ack, uint32_t ackBits, double now); // false: duplicate / too old
+    void     onReliable(uint16_t messageSeq, uint16_t messageId, std::vector<std::byte> payload);
+    std::vector<Delivered> deliverable();                 // in messageSeq order
+    std::vector<uint16_t>  newlyAcked();                  // packet sequences, for replication (RFC §9.3)
+    double   rttMs() const; double lossPercent() const;
 };
 
 class StreamFramer {
@@ -193,8 +222,8 @@ public:
 };
 ```
 
-`Handshake` and `Codec` signatures follow the protocol RFC (bytes) and block 4 (`TypeInfo`); their
-behaviour is fixed above and in ADR 0037.
+`Handshake` follows RFC §6 (messages, order of checks, admission, reconnection); `Codec` follows RFC
+§5 (field encoding) and block 4 (`TypeInfo`).
 
 ## Rooms
 
@@ -214,6 +243,7 @@ struct NetPrefab  { uint32_t prefabKey = 0; };    // fnv1a of the prefab path, t
 struct NetOwner   { PlayerId owner = 0; };        // which player controls this entity
 struct RemoteInput{ ActionState state; uint64_t lastMask = 0; uint32_t lastTick = 0; }; // server side
 struct NetInterpolation { Vec2 from, to; double fromTime = 0, toTime = 0; };              // client side
+struct NetPriority { float weight = 1.0f; };       // server: share of the send budget (RFC §9.6); absent = 1
 ```
 
 ### `class NetworkIdMap` — `net/NetworkIdMap.hpp`
@@ -234,16 +264,18 @@ public:
 | System | Stage | Role | Does |
 |---|---|---|---|
 | `engine.net.assign_ids` | LateUpdate | server | gives a `NetworkId` to new entities that have `NetPrefab` |
-| `engine.net.snapshot` | LateUpdate | server | at `snapshotRate`, encodes every `Replicated` component of networked entities through `TypeInfo::encode`, sends spawn / update / destroy |
+| `engine.net.snapshot` | LateUpdate | server | at `snapshotRate`, per player: spawns, destroys and changed `Replicated` components not yet acknowledged, by priority within the budget, relevant entities only (RFC §9.3, §9.6) |
 | `engine.net.apply_snapshot` | FixedUpdate (first) | client | decodes, maps ids, spawns from `NetPrefab`, writes components, fills `NetInterpolation` |
-| `engine.net.interpolate` | Render (first) | client | positions networked entities between the two last snapshots; a default the game can disable to use its own (ADR 0041) |
+| `engine.net.interpolate` | Render (first) | client | positions networked entities `net.interpolationDelay` behind, between two snapshots; a default the game can disable to use its own (ADR 0041) |
 | `engine.net.send_input` | LateUpdate | client | sends `ActionState::toMask` for the tick |
 | `engine.net.receive_input` | FixedUpdate (first) | server | writes `RemoteInput` of entities owned by each player (`NetOwner`) |
 
 Which components are `Replicated` is declared by the game (block 4 flags). Network optimizations
 (ADR 0041): the engine gives the means (protocol fields such as input sequence numbers and the last
 input processed, settings, extension points), and the game team writes its prediction and
-reconciliation and tunes rates and precision. Which settings and extension points: Network part.
+reconciliation and tunes rates and precision. Settings (ADR 0043, RFC §9.6): `net.snapshotRate`,
+`net.sendBudgetBytesPerSecond`, `NetPriority{weight}`, `RoomNetwork::setRelevance`, `.quantize(min, max)`,
+`net.interpolationDelay`, `net.inputRedundancy`, and the `engine.net.interpolate` switch.
 
 ## Plugin
 

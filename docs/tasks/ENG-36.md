@@ -27,7 +27,8 @@ struct Endpoint { std::array<uint8_t, 16> address{}; uint16_t port = 0; bool v6 
 struct Datagram { Endpoint from; std::vector<std::byte> bytes; };
 // Transport (Unreliable, Reliable, Stream) is declared in reflection/TypeInfo.hpp and chosen per message.
 enum class DisconnectReason : uint8_t { Quit, Timeout, Kicked, ProtocolError, ServerShutdown,
-                                        ServerFull, FormatMismatch };   // the last two: refused at handshake
+                                        ServerFull, FormatMismatch, ProtocolMismatch, WrongGame,
+                                        InvalidName, RefusedByGame, ConnectionLost };   // codes: RFC §6.8
 
 struct NetConfig {
     uint16_t port = 4242;
@@ -39,6 +40,14 @@ struct NetConfig {
     double   snapshotRate = 20.0;         // replication snapshots per second
     uint32_t maxNameLength = 16;          // player names longer than this are refused at handshake
     uint32_t maxStreamMessageBytes = 65536; // TCP: a larger announced message closes the stream
+    double   handshakeSeconds = 5.0;      // TCP connect → Accepted, else Refused(Timeout) (RFC §6.2)
+    uint32_t maxPendingHandshakes = 16;   // and 4 per address (RFC §11)
+    double   reconnectGraceSeconds = 30.0;// lost session kept this long for its token; 0 = none (RFC §6.7)
+    bool     autoReconnect = true;        // client: retry every 2 s during the grace period
+    uint32_t sendBudgetBytesPerSecond = 65536; // snapshot bytes per player (RFC §9.6)
+    double   interpolationDelay = 0.1;    // client: other entities drawn this far behind (RFC §9.5)
+    uint32_t inputRedundancy = 3;         // copies of each input, 1 to 4 (RFC §9.4)
+    bool     shareOnlinePlayers = true;   // send the online players list to lobby clients (RFC §8.1.8)
 };
 
 struct ConnectionStats { double rttMs; double lossPercent; uint64_t bytesIn, bytesOut;

@@ -69,7 +69,7 @@ Exit codes: 0 ok, 1 config, 2 plugin, 3 game module or schedule, 4 scene, 5 clie
 
 | Builder (returned by `add<T>()` for…) | Methods |
 |---|---|
-| all except enums | `field(name, &T::member, tooltip = {})`: one per field read from YAML, shown, saved or sent; `maxLength(n)`: limit of the text or list field just declared (default 256 / 64) |
+| all except enums | `field(name, &T::member, tooltip = {})`: one per field read from YAML, shown, saved or sent; `maxLength(n)`: limit of the text or list field just declared (default 256 / 64); `quantize(min, max)`: the float or `Vec2` field just declared travels as 16 bits |
 | `ComponentBuilder` (`ENGINE_COMPONENT`) | `flags(f)`: `Replicated`, `Transient`, `EditorHidden`, `Tag`; `yaml(read, write)`; `binary(encode, decode)` |
 | `MessageBuilder` (`ENGINE_MESSAGE`) | `unreliable()` (UDP), `reliable()` (UDP + acks, default), `stream()` (TCP); `binary(encode, decode)` |
 | `EventBuilder`, `StructBuilder` | fields only |
@@ -194,7 +194,9 @@ Do not call `emit`, `publishFromAnyThread`, `dispatch` (engine only).
 
 Engine events (`events/EngineEvents.hpp`): `QuitRequested`, `WindowResized{width, height}`,
 `WindowFocusChanged{focused}`, `Collision{a, b}`, `SceneLoaded{name}`, `SceneUnloading{name}`,
-`PlayerJoined{player}`, `PlayerLeft{player, reason}`, `JoinedServer{me}`, `LeftServer{reason}`,
+`PlayerJoined{player}`, `PlayerLeft{player, reason, message}`, `PlayerDisconnected{player, reason}`,
+`PlayerReconnected{player}`, `JoinedServer{me}`, `LeftServer{reason, message}`,
+`ConnectionInterrupted{reason}`, `Reconnected`,
 `Caption{text, seconds}`, `ConsoleCommand{line}`.
 
 ---
@@ -288,15 +290,20 @@ Load sounds through `AssetManager`, not `createSound`. Do not call `update()`. O
 | `NetworkSession` (via `ctx.network()`) | Use |
 |---|---|
 | `startServer(port = config)`, `stopServer()` | server: open (UDP + TCP) and close; nothing opens by itself |
-| `connectTo(host, port, name)`, `disconnect()` | client: join with a player name, leave |
+| `connectTo(host, port, name)`, `connectTo(host, port, name, data)`, `disconnect()` | client: join with a player name (and the game's admission data), leave; reconnects by itself after a loss |
 | `players()`, `name(p)`, `ping(p)`, `stats(p)`, `kick(p, reason)` | server: who is there |
+| `admission<T>(fn(request, data) → Admission::accept() / refuse(text))` | server lobby code: who may join (ADR 0042) |
 | `localPlayer()`, `isServer()`, `connected()` | state |
 | `send(player, msg)`, `broadcast(msg, except)` | server → clients, typed messages |
 | `send(msg)` | client → server |
 | `on<T>(fn(ctx, from, msg))` / `on<T>(fn(ctx, msg))` | receive; returns a `Subscription`; runs at the start of the frame on the game thread |
 
 Types: `PlayerId`, `DisconnectReason` (`Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`,
-`ServerFull`, `FormatMismatch`), `ConnectionStats`. The game never writes bytes: messages are structs
+`ServerFull`, `FormatMismatch`, `ProtocolMismatch`, `WrongGame`, `InvalidName`, `RefusedByGame`,
+`ConnectionLost`), `ConnectionStats`, `AdmissionRequest`, `Admission`, component `NetPriority{weight}`.
+Settings (ADR 0041, 0043): `net.snapshotRate`, `net.sendBudgetBytesPerSecond`, `net.interpolationDelay`,
+`net.inputRedundancy`, `net.reconnectGraceSeconds`, `net.autoReconnect`, `net.shareOnlinePlayers`;
+field option `.quantize(min, max)`. Bytes: RFC [`docs/network/rfc.md`](../network/rfc.md). The game never writes bytes: messages are structs
 (`ENGINE_MESSAGE`) serialized by the engine; `Entity` fields arrive as local entities or
 `Entity::null()`. Replication needs nothing more than the `Replicated` flag and a `NetPrefab`.
 `ByteWriter` / `ByteReader` remain only for a custom `binary()` codec. Bytes, ids, reliability:
@@ -353,17 +360,18 @@ Calls: `self:get(name)`, `self:set(name, t)`, `self:has(name)`, `self:remove(nam
 
 | Where | API |
 |---|---|
-| Server lobby (`LobbyContext::lobby()`) | `Lobby`: `party`, `partyOf`, `parties`, `sendInvite`, `addToParty`, `removeFromParty`, `setLeader`, `sendToParty<T>`, `createRoom(RoomSettings)`, `moveParty`, `moveToLobby`, `closeRoom`, `sendRoomList`, `room`, `rooms` |
+| Server lobby (`LobbyContext::lobby()`) | `Lobby`: `party`, `partyOf`, `parties`, `sendInvite`, `addToParty`, `removeFromParty`, `setLeader`, `sendToParty<T>`, `createRoom(RoomSettings)`, `moveParty`, `moveToLobby(party, reason)`, `closeRoom(room, reason)`, `sendRoomList`, `refuse(player, request, reason)`, `room`, `rooms` |
 | Server room (`Context::room()`) | `RoomHandle`: `id`, `settings`, `players`, `parties`, `keep(Subscription)`, `reportFinished<T>` |
-| Server room (`Context::network()`) | `RoomNetwork`: `players`, `send`, `broadcast`, `on<T>`, `ping` — the room's players only |
-| Client (`Context::lobby()`) | `ClientLobby`: `myParty`, `invite`, `answerInvite`, `leaveParty`, `requestRoomList`, `currentRoom` |
+| Server room (`Context::network()`) | `RoomNetwork`: `players`, `send`, `broadcast`, `on<T>`, `ping`, `setRelevance(fn)` — the room's players only |
+| Client (`Context::lobby()`) | `ClientLobby`: `myParty`, `invite`, `answerInvite`, `leaveParty`, `requestRoomList`, `currentRoom`, `onlinePlayers`, `name(p)`, `connected(p)` |
 | World | `Registry::singleton<T>()`, `trySingleton<T>()`: the state of one game |
 
 Types: `PartyId`, `RoomId`, `RoomState`, `RoomSettings` (`name`, `level`, `maxPlayers`, `listed`), `Party`,
 `RoomInfo`. Lobby events: `PartyChanged`, `InviteRequested`, `InviteAnswered`, `LeavePartyRequested`,
 `RoomListRequested`, `RoomStarted`, `RoomFinished` (`resultAs<T>()`), `RoomFailed`, `RoomClosed`. Room
-events: `PlayerEnteredRoom`, `PlayerLeftRoom`. Client events: `PartyUpdated`, `InviteReceived`,
-`RoomListReceived`, `EnteredRoom`, `ReturnedToLobby`.
+events: `PlayerEnteredRoom`, `PlayerLeftRoom` (plus `PlayerDisconnected`, `PlayerReconnected`). Client
+events: `PartyUpdated`, `InviteReceived`, `RoomListReceived`, `EnteredRoom`, `ReturnedToLobby`,
+`RoomInterrupted`, `RequestRefused{request, reason}`, `OnlinePlayersChanged`.
 
 Where to include (ADR 0040): game `server/` code includes `engine/server/`, game `client/` code includes
 `engine/client/`, game `shared/` code includes neither.

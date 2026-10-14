@@ -25,7 +25,7 @@ Every game receives these without writing them. Engine components are registered
 | `Parent` | `Entity value; Vec2 offset` | | `engine.hierarchy` |
 | `Children` | `std::vector<Entity> list` | Transient | `Registry::children` |
 | `Script` | see block 12 | | `engine.script.*` |
-| `NetworkId`, `NetPrefab`, `NetOwner`, `RemoteInput`, `NetInterpolation` | see block 10 | | `engine.net.*` |
+| `NetworkId`, `NetPrefab`, `NetOwner`, `RemoteInput`, `NetInterpolation`, `NetPriority` | see block 10 | | `engine.net.*` |
 
 ## Systems
 

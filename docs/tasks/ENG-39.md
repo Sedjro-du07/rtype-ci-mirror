@@ -27,6 +27,7 @@ struct NetPrefab  { uint32_t prefabKey = 0; };    // fnv1a of the prefab path, t
 struct NetOwner   { PlayerId owner = 0; };        // which player controls this entity
 struct RemoteInput{ ActionState state; uint64_t lastMask = 0; uint32_t lastTick = 0; }; // server side
 struct NetInterpolation { Vec2 from, to; double fromTime = 0, toTime = 0; };              // client side
+struct NetPriority { float weight = 1.0f; };       // server: share of the send budget (RFC §9.6); absent = 1
 ```
 
 ### `include/engine/net/NetworkIdMap.hpp`
@@ -66,6 +67,7 @@ void registerNetSystems(Scheduler& s); // called by registerEngineSystems
 
 - [SRV-11](SRV-11.md) — RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages
 - [SRV-14](SRV-14.md) — Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset
+- [SRV-17](SRV-17.md) — Replication v1: send until acknowledged, budget, NetPriority, relevance, quantize
 
 ## Read first
 
@@ -77,6 +79,8 @@ void registerNetSystems(Scheduler& s); // called by registerEngineSystems
 - [ ] `NetworkIdMap`
 - [ ] Net components and their registration
 - [ ] Systems assign_ids, snapshot, apply_snapshot, interpolate, send_input, receive_input
+- [ ] Snapshot and Input messages of RFC §9.2 and §9.4 (roomSession, tick, lastInputProcessed; input redundancy and the 4-input buffer)
+- [ ] Client rules: newest tick per entity, unknown updates ignored, destroyed ids remembered
 
 ## Done when
 

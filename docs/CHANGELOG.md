@@ -7,6 +7,31 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part done: RTEP v1.0
+
+### Added
+
+- The team delegated the remaining choices to my recommendations after D1. `docs/network/04-decisions.md`
+  now holds D1–D36, answering the 37 questions of step 2 (frame, session, reliability, replication,
+  lobby and rooms).
+- `docs/network/rfc.md`: RTEP v1.0, the protocol RFC. Part I (engine protocol): conventions, 16-byte
+  UDP header, TCP frames, field encoding, handshake and admission, presence, reconnection, packet acks
+  and ordered reliable messages, lobby and room messages, replication (send until acknowledged,
+  budget, priority, relevance, quantisation), errors, security, why TCP, constants, and byte-exact
+  examples. Part II: R-Type's messages (provisional until the Game part).
+- `docs/network/06-scenarios.md`: 40 scenarios walked through the RFC; four precisions added to it.
+- `docs/network/07-prototypes.md`: Wireshark dissector, fuzz tests and measurements, as tasks.
+- ADR 0043: what the game sees of protocol v1 (new reasons and messages, admission API, reconnection
+  events and settings, online players, refused requests, room reasons, optimisation settings).
+- Tasks SRV-16 (reconnection), SRV-17 (replication v1), SRV-18 (fuzz), SRV-19 (Wireshark), SRV-20
+  (measurements), with skeletons.
+
+### Changed
+
+- References 04, 06, 10, 13, 14, `game-api.md`, guides 12, 15, 27, 28 describe the v1 API.
+- Tasks ENG-22, ENG-38, ENG-39, SRV-01 to SRV-07, SRV-13, SRV-14 point to RFC sections and gain the
+  matching work. Step 8: version 1 frozen.
+
 ## [2026-10-14] — network part, step 4, round 1: byte order
 
 ### Added

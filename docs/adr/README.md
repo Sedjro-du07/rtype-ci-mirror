@@ -50,6 +50,7 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0040](0040-server-client-split.md) | One game code, two builds; server and client folders in the engine and the game | E-12, SRV-10 | Accepted |
 | [0041](0041-netcode-means-in-engine-policy-in-game.md) | Network optimizations: the engine gives the means, the game team optimizes | NET-1 | Accepted (amends 0033) |
 | [0042](0042-admission-by-the-game.md) | Admission: the engine checks it can decode, the game decides who joins | NET-2 | Accepted (amends 0037) |
+| [0043](0043-protocol-v1-game-api.md) | Protocol v1: what the game sees of it | NET-3 | Accepted |
 
 ## Not yet recorded
 

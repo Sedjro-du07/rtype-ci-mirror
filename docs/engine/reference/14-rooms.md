@@ -84,6 +84,10 @@ struct InviteReceived       { PlayerId from; PartyId party; };                EN
 struct RoomListReceived     { std::vector<RoomInfo> rooms; };                 ENGINE_EVENT(RoomListReceived)
 struct EnteredRoom          { RoomId room; RoomSettings settings; };          ENGINE_EVENT(EnteredRoom)
 struct ReturnedToLobby      { RoomId room; std::string reason; };             ENGINE_EVENT(ReturnedToLobby)
+struct RoomInterrupted      { RoomId room; };                                 ENGINE_EVENT(RoomInterrupted)  // the room failed (ADR 0043)
+struct OnlinePlayersChanged { };                                              ENGINE_EVENT(OnlinePlayersChanged)
+enum class LobbyRequest : uint8_t { Invite = 1, InviteAnswer, LeaveParty, RoomList, Game };       ENGINE_ENUM(LobbyRequest)
+struct RequestRefused       { LobbyRequest request; std::string reason; };     ENGINE_EVENT(RequestRefused)
 ```
 
 ## `class Lobby` — `server/Lobby.hpp` (server, game-facing)
@@ -106,8 +110,9 @@ public:
     // Rooms
     RoomId createRoom(const RoomSettings& settings);  // fails (0 + log) when maxRooms is reached
     void   moveParty(PartyId p, RoomId room);         // whole party enters; PlayerEnteredRoom in the room
-    void   moveToLobby(PartyId p);                    // whole party leaves the room; ReturnedToLobby on clients
-    void   closeRoom(RoomId room);                    // parties still inside go back to the lobby
+    void   moveToLobby(PartyId p, std::string_view reason = {});  // whole party leaves the room; ReturnedToLobby{room, reason}
+    void   closeRoom(RoomId room, std::string_view reason = {});  // parties still inside go back to the lobby
+    void   refuse(PlayerId to, LobbyRequest request, std::string_view reason);  // client: RequestRefused (ADR 0043)
     void   sendRoomList(PlayerId to, std::span<const RoomId> rooms);   // answer to RoomListRequested
     const RoomInfo& room(RoomId r) const;
     std::span<const RoomId> rooms() const;
@@ -145,7 +150,13 @@ public:
     void leaveParty();                                // server: LeavePartyRequested
     void requestRoomList();                           // server: RoomListRequested → client: RoomListReceived
     RoomId currentRoom() const;                       // 0 = in the lobby
+    std::span<const PlayerId> onlinePlayers() const;  // if the server shares it (net.shareOnlinePlayers); OnlinePlayersChanged
+    std::string_view name(PlayerId p) const;          // online players and party members
+    bool connected(PlayerId p) const;                 // false while a party member is in their grace period
 };
+
+// Room entry: on EnteredRoom the game switches scene; the engine sends RoomReady by itself once that
+// switch has completed (or at the end of the frame if none), and replication starts (RFC §8.3).
 ```
 
 Starting a game is a game rule: the client sends a game message (for example `PlayRequest`) and the
@@ -197,6 +208,7 @@ public:
     template <class T> void broadcast(const T& msg, std::optional<PlayerId> except = {});   // the room's players
     template <class T> [[nodiscard]] Subscription on(std::move_only_function<void(Context&, PlayerId, const T&)> fn);
     double ping(PlayerId p) const;
+    void setRelevance(std::move_only_function<bool(PlayerId, Entity)> fn);   // server: who receives what (RFC §9.6); default: all
 };
 ```
 

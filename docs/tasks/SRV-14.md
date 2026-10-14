@@ -32,6 +32,22 @@ public:
     void leaveParty();                                // server: LeavePartyRequested
     void requestRoomList();                           // server: RoomListRequested → client: RoomListReceived
     RoomId currentRoom() const;                       // 0 = in the lobby
+    std::span<const PlayerId> onlinePlayers() const;  // if the server shares it (net.shareOnlinePlayers); OnlinePlayersChanged
+    std::string_view name(PlayerId p) const;          // online players and party members
+    bool connected(PlayerId p) const;                 // false while a party member is in their grace period
+};
+
+// Room entry: on EnteredRoom the game switches scene; the engine sends RoomReady by itself once that
+// switch has completed (or at the end of the frame if none), and replication starts (RFC §8.3).
+
+// Additions of protocol v1 (ADR 0043); the rest comes from reference 14.
+class ClientLobby {
+public:
+    std::span<const PlayerId> onlinePlayers() const;  // OnlinePlayers / PlayerOnline / PlayerOffline
+    std::string_view name(PlayerId p) const;
+    bool connected(PlayerId p) const;
+private:
+    void onEnteredRoom(uint16_t roomSession);         // waits for the scene switch, then sends RoomReady
 };
 ```
 
@@ -46,6 +62,7 @@ public:
     template <class T> void broadcast(const T& msg, std::optional<PlayerId> except = {});   // the room's players
     template <class T> [[nodiscard]] Subscription on(std::move_only_function<void(Context&, PlayerId, const T&)> fn);
     double ping(PlayerId p) const;
+    void setRelevance(std::move_only_function<bool(PlayerId, Entity)> fn);   // server: who receives what (RFC §9.6); default: all
 };
 ```
 
@@ -54,8 +71,11 @@ public:
 ```cpp
 class PlayerRouting {
 public:
-    void   setRoom(PlayerId p, RoomId r);             // 0 = lobby
-    RoomId roomOf(PlayerId p) const;
+    uint16_t setRoom(PlayerId p, RoomId r);           // 0 = lobby; returns the new roomSession (RFC §8.3.1)
+    RoomId   roomOf(PlayerId p) const;
+    uint16_t roomSession(PlayerId p) const;
+    void     setReady(PlayerId p, uint16_t roomSession);   // RoomReady: replication may start
+    bool     ready(PlayerId p) const;
     std::span<const PlayerId> playersIn(RoomId r) const;
 };
 ```
@@ -68,6 +88,7 @@ public:
 ## Unlocks
 
 - [SRV-15](SRV-15.md) — Tests: parallel rooms, isolation, crash in a room, party and room flows
+- [SRV-17](SRV-17.md) — Replication v1: send until acknowledged, budget, NetPriority, relevance, quantize
 
 ## Read first
 
@@ -81,15 +102,18 @@ public:
 - [ ] Route game messages to the room's `on<T>` or the lobby's `on<T>`
 - [ ] `RoomNetwork`: players, send, broadcast, on<T>, ping limited to the room
 - [ ] Replication per room: only the room's entities; reset a player's replication state on enter / leave
-- [ ] `ClientLobby`: myParty, invite, answerInvite, leaveParty, requestRoomList, currentRoom; client events
+- [ ] `ClientLobby`: myParty, invite, answerInvite, leaveParty, requestRoomList, currentRoom, onlinePlayers, name, connected; client events
+- [ ] Room transitions on the reliable UDP stream (RFC §8.3): EnteredRoom with a new roomSession, RoomReady after the client's scene switch, ReturnedToLobby, RoomInterrupted
+- [ ] Snapshots and inputs of another roomSession dropped on both sides
 
 ## Done when
 
-- A player in room 1 never receives an entity or a message of room 2; returning to the lobby stops every snapshot
+- A player in room 1 never receives an entity or a message of room 2; returning to the lobby stops every snapshot; results sent reliable arrive before ReturnedToLobby
 
 ## Watch out
 
 - Messages of a player who just left a room must not reach that room any more
+- No snapshot before RoomReady of the current roomSession
 
 ## Workflow
 

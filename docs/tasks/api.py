@@ -661,46 +661,67 @@ public:
     Result<void> startServer(std::optional<uint16_t> port = {});
     void stopServer();
     Result<void> connectTo(std::string_view host, uint16_t port, std::string_view playerName);
+    template <class T> Result<void> connectTo(std::string_view host, uint16_t port,
+                                              std::string_view playerName, const T& admissionData);
     void disconnect();
     std::span<const PlayerId> players() const;
     PlayerId         localPlayer() const;
     std::string_view name(PlayerId p) const;
-    void             kick(PlayerId p, std::string_view reason);
+    void             kick(PlayerId p, std::string_view reason);    // Kicked{message} (RFC §6.3.6)
     double           ping(PlayerId p) const;
     ConnectionStats  stats(PlayerId p) const;
 private:
     PlayerTable players_;
     PlayerId    localPlayer_ = 0;
     void onPlayerAccepted(ConnectionId c, std::string name);       // publishes PlayerJoined / JoinedServer
-    void onConnectionClosed(ConnectionId c, DisconnectReason r);   // publishes PlayerLeft / LeftServer
+    void onConnectionClosed(ConnectionId c, DisconnectReason r, std::string message);
+                                                                   // PlayerLeft / LeftServer with message;
+                                                                   // ConnectionLost / Timeout go to SRV-16 (grace)
 };'''),
 ]),
 'SRV-02': dict(auto=False, extra=[
     ('src/net/Handshake.hpp', 'cpp', '''enum class HandshakeState : uint8_t { Idle, Hello, Challenge, LinkUdp, Accepted, Refused };
 
-class ServerHandshake {                       // one per pending connection
+struct ServerIdentity { uint64_t fingerprint; std::string gameName; };
+using AdmissionFn = std::move_only_function<Admission(const AdmissionRequest&, uint16_t dataId,
+                                                       std::span<const std::byte> data)>;   // set by admission<T>
+
+class ServerHandshake {                       // one per pending connection (RFC §6.1–6.4)
 public:
-    ServerHandshake(const NetConfig& cfg, uint64_t serverFingerprint, size_t playersNow);
-    // Each method reads or writes one handshake message; the bytes come from the protocol RFC.
-    Result<void> onHello(ByteReader& in);     // name, fingerprint → Refused(ServerFull | FormatMismatch | bad name) or Challenge
-    void         writeChallenge(ByteWriter& out);   // the token the client must echo on UDP
-    Result<void> onUdpLink(ByteReader& in, const Endpoint& from);   // token matches → Accepted
+    ServerHandshake(const NetConfig& cfg, const ServerIdentity& self, double startedAt);
+    bool         onPreamble(std::span<const std::byte, 3> bytes);   // false → Refused(ProtocolMismatch)
+    // Checks of RFC §6.4.1 in order; a valid reconnection token is returned for SRV-16 to resume.
+    Result<void> onHello(ByteReader& in, size_t playersNow, AdmissionFn* admission,
+                         std::function<bool(const ReconnectToken&)> isDisconnected);
+    void         writeChallenge(ByteWriter& out);       // random linkToken (OS secure random)
+    bool         onUdpLink(uint64_t linkToken, const Endpoint& from);   // token matches → Accepted
+    void         writeAccepted(ByteWriter& out, PlayerId id, uint32_t sessionKey, const ReconnectToken& next, bool resumed);
+    void         writeRefused(ByteWriter& out) const;   // frozen layout (RFC §4.1)
+    bool         expired(double now) const;             // net.handshakeSeconds
     HandshakeState state() const;
-    DisconnectReason refusal() const;
+    DisconnectReason refusal() const; std::string_view refusalMessage() const;
     const std::string& playerName() const;
     const Endpoint& udpEndpoint() const;
+    std::optional<ReconnectToken> resumeToken() const;
 };
 
 class ClientHandshake {
 public:
-    ClientHandshake(std::string playerName, uint64_t clientFingerprint);
-    void         writeHello(ByteWriter& out);
-    Result<void> onChallenge(ByteReader& in);   // keeps the token
-    void         writeUdpLink(ByteWriter& out); // sent on UDP until Accepted
-    Result<void> onResult(ByteReader& in);      // Accepted with my PlayerId, or Refused with a reason
+    ClientHandshake(std::string playerName, uint64_t fingerprint, std::string gameName,
+                    std::optional<ReconnectToken> token, uint16_t dataId, std::vector<std::byte> data);
+    void         writePreambleAndHello(ByteWriter& out);
+    Result<void> onChallenge(ByteReader& in);   // keeps the link token
+    void         writeUdpLink(ByteWriter& out); // 24-byte UDP packet, every 100 ms until Accepted
+    Result<void> onResult(ByteReader& in);      // Accepted (id, session key, token, timings) or Refused (reason, message)
     HandshakeState state() const;
-    PlayerId me() const;
-    DisconnectReason refusal() const;
+    PlayerId me() const; uint32_t sessionKey() const; const ReconnectToken& nextToken() const;
+    DisconnectReason refusal() const; std::string_view refusalMessage() const;
+};
+
+class PendingLimiter {                        // RFC §11: 16 pending, 4 per address
+public:
+    explicit PendingLimiter(uint32_t maxPending, uint32_t perAddress = 4);
+    bool tryAdd(const Endpoint& from);  void remove(const Endpoint& from);
 };'''),
 ]),
 'SRV-03': dict(auto=False, extra=[
@@ -739,15 +760,23 @@ uint64_t     fingerprint(std::span<const TypeInfo* const> types);    // used by 
 }'''),
 ]),
 'SRV-05': dict(auto=False, extra=[
-    ('src/net/ReliableChannel.hpp', 'cpp', '''class ReliableChannel {                    // one per connection, for reliable() messages over UDP
+    ('src/net/ReliableChannel.hpp', 'cpp', '''// RFC §7: packet sequence + ack/ackBits on every Data packet, reliable messages ordered per direction.
+struct Delivered { uint16_t messageId; std::vector<std::byte> payload; };
+
+class ReliableChannel {                    // one per session
 public:
-    struct Pending { uint32_t sequence; uint16_t messageId; std::vector<std::byte> payload; double sentAt; int tries; };
-    explicit ReliableChannel(double resendSeconds = 0.2, int maxTries = 10);
-    uint32_t send(uint16_t messageId, std::span<const std::byte> payload, double now);   // returns its sequence
-    void     onAck(/* ack fields defined by the protocol RFC */);
-    bool     accept(uint32_t sequence);                       // false for duplicates
-    std::vector<Pending*> due(double now);                    // to resend now
-    bool     failed() const;                                  // maxTries reached → connection is dropped
+    uint16_t nextSequence();                                         // numbers an outgoing Data packet, from 1
+    void     queue(uint16_t messageId, std::span<const std::byte> payload);   // ≤ 1024 bytes (RFC §4.4)
+    void     fill(uint16_t sequence, ByteWriter& out, double now);   // due resends then new messages, recorded per packet
+    void     writeAcks(uint16_t& ack, uint32_t& ackBits) const;
+    bool     onPacket(uint16_t sequence, uint16_t ack, uint32_t ackBits, double now); // false: duplicate or > 32 behind
+    void     onReliable(uint16_t messageSeq, uint16_t messageId, std::vector<std::byte> payload);
+    std::vector<Delivered> deliverable();                            // in messageSeq order, each once
+    std::vector<uint16_t>  newlyAcked();                             // acknowledged packet sequences (replication, SRV-17)
+    bool     ackOnlyDue(double now) const;                           // reliable data received, nothing sent for 33 ms
+    double   rttMs() const; double lossPercent() const;
+private:
+    // resend after clamp(1.5 × rtt, 50 ms, 1 s); 256 in flight, the rest queued; receive window 256
 };'''),
 ]),
 'SRV-06': dict(auto=False, extra=[
@@ -764,8 +793,10 @@ private:
 ]),
 'SRV-07': dict(extra=[
     ('tests/', 'text', '''tests/net/players/        JoinLeaveTest, KickTest, TimeoutTest, NamesTest
-tests/net/players/        HandshakeTest (FormatMismatch, ServerFull, bad name, UDP link)
-tests/net/messages/       UnreliableTest, ReliableUnderLossTest (20 % loss), StreamTest, CallbackExceptionTest
+tests/net/players/        HandshakeTest (ProtocolMismatch, WrongGame, FormatMismatch, InvalidName, ServerFull,
+                          RefusedByGame, UDP link, 5 s deadline, pending limits)
+tests/net/messages/       UnreliableTest, ReliableUnderLossTest (20 % loss, reorder, duplicates: once, in order),
+                          StreamTest, CallbackExceptionTest, AggregationTest (several messages per datagram)
 tests/reflection/codec/   RoundTripTest (every FieldKind), LimitsTest, EntityMappingTest, FuzzTest (10 000 inputs)'''),
 ]),
 
@@ -851,10 +882,100 @@ private:
 'SRV-14': dict(extra=[
     ('src/server/PlayerRouting.hpp', 'cpp', '''class PlayerRouting {
 public:
-    void   setRoom(PlayerId p, RoomId r);             // 0 = lobby
-    RoomId roomOf(PlayerId p) const;
+    uint16_t setRoom(PlayerId p, RoomId r);           // 0 = lobby; returns the new roomSession (RFC §8.3.1)
+    RoomId   roomOf(PlayerId p) const;
+    uint16_t roomSession(PlayerId p) const;
+    void     setReady(PlayerId p, uint16_t roomSession);   // RoomReady: replication may start
+    bool     ready(PlayerId p) const;
     std::span<const PlayerId> playersIn(RoomId r) const;
 };'''),
+    ('include/engine/client/ClientLobby.hpp', 'cpp', '''// Additions of protocol v1 (ADR 0043); the rest comes from reference 14.
+class ClientLobby {
+public:
+    std::span<const PlayerId> onlinePlayers() const;  // OnlinePlayers / PlayerOnline / PlayerOffline
+    std::string_view name(PlayerId p) const;
+    bool connected(PlayerId p) const;
+private:
+    void onEnteredRoom(uint16_t roomSession);         // waits for the scene switch, then sends RoomReady
+};'''),
+]),
+'SRV-16': dict(extra=[
+    ('src/net/Reconnection.hpp', 'cpp', '''using ReconnectToken = std::array<std::byte, 16>;
+
+class GraceTable {                            // server: lost sessions kept for net.reconnectGraceSeconds (RFC §6.7)
+public:
+    explicit GraceTable(double graceSeconds);
+    ReconnectToken issue(PlayerId p);                    // new single-use token, OS secure random
+    void     disconnected(PlayerId p, DisconnectReason why, double now);   // → PlayerDisconnected
+    std::optional<PlayerId> claim(const ReconnectToken& t);                // matches a disconnected player, consumes it
+    std::vector<std::pair<PlayerId, DisconnectReason>> expired(double now); // → PlayerLeft
+    bool     isDisconnected(PlayerId p) const;
+};
+
+class ClientReconnector {                     // client: Interrupted → retry every 2 s while the grace lasts
+public:
+    ClientReconnector(double graceSeconds, bool enabled);
+    void interrupted(DisconnectReason why, double now);  // → ConnectionInterrupted
+    bool shouldRetry(double now);
+    bool givenUp(double now) const;                      // → LeftServer
+    void succeeded();                                    // → Reconnected
+};
+
+class UdpRelink {                             // client: 1 s of UDP silence with TCP open → UdpLink every 100 ms (RFC §6.7.3)
+public:
+    bool due(double lastUdpReceived, bool tcpOpen, double now);
+};'''),
+    ('include/engine/events/EngineEvents.hpp', 'cpp', '''struct PlayerDisconnected   { PlayerId player; DisconnectReason reason; };   ENGINE_EVENT(PlayerDisconnected)
+struct PlayerReconnected    { PlayerId player; };                            ENGINE_EVENT(PlayerReconnected)
+struct ConnectionInterrupted{ DisconnectReason reason; };                    ENGINE_EVENT(ConnectionInterrupted)
+struct Reconnected          { };                                             ENGINE_EVENT(Reconnected)'''),
+]),
+'SRV-17': dict(extra=[
+    ('src/net/ReplicationState.hpp', 'cpp', '''// RFC §9.3: per client, what it has acknowledged; snapshots carry only what is missing.
+class ReplicationState {                      // one per player in a room
+public:
+    void recordSent(uint16_t packetSeq, std::span<const SentItem> items);   // spawns, destroys, component hashes
+    void onPacketAcked(uint16_t packetSeq);
+    bool spawnAcked(uint32_t networkId) const;
+    bool componentDiffers(uint32_t networkId, uint16_t componentIndex, uint64_t bytesHash) const;
+    bool destroyPending(uint32_t networkId) const;
+    void reset();                                        // new roomSession
+};
+
+class SnapshotWriter {                        // builds the Snapshot messages of one player for one tick
+public:
+    SnapshotWriter(uint16_t roomSession, uint32_t tick, uint32_t lastInputProcessed, uint32_t budgetBytes);
+    bool add(const EntityEntry& e, float priority);      // false when the budget is reached
+    std::vector<std::vector<std::byte>> finish();        // self-contained parts of ≤ 1024 bytes (RFC §4.4)
+};
+
+class PriorityAccumulator {                   // NetPriority: weight added each snapshot an entity misses
+public:
+    float bump(uint32_t networkId, float weight);  void sent(uint32_t networkId);
+};'''),
+    ('include/engine/net/NetComponents.hpp', 'cpp', '''struct NetPriority { float weight = 1.0f; };   ENGINE_COMPONENT(NetPriority)'''),
+    ('include/engine/net/RoomNetwork.hpp', 'cpp', '''void setRelevance(std::move_only_function<bool(PlayerId, Entity)> fn);   // default: every entity of the room'''),
+]),
+'SRV-18': dict(extra=[
+    ('tests/net/fuzz/', 'text', '''tests/net/fuzz/  UdpPacketFuzzTest (random and mutated valid packets: header, every message id),
+                 TcpStreamFuzzTest (random frames, split reads, huge lengths),
+                 HandshakeFuzzTest, SnapshotDecodeFuzzTest, InputDecodeFuzzTest
+                 — 100 000 inputs each, ASan + UBSan; seed corpus = the RFC §15 examples;
+                 property: never crashes, never allocates beyond the limits, never reaches game code'''),
+]),
+'SRV-19': dict(extra=[
+    ('tools/wireshark/rtep.lua', 'lua', '''-- Wireshark dissector for RTEP v1.0 (heuristic on magic 0x5254 + version 1, UDP and TCP)
+local rtep = Proto("rtep", "R-Type Engine Protocol")
+-- fields: header (kind, sessionKey, sequence, ack, ackBits), messages (id → name from RFC §8.5,
+-- messageSeq for reliable ids, length), Hello / Accepted / Refused / Snapshot / Input payloads
+function rtep.dissector(buffer, pinfo, tree) end
+local function heuristic(buffer, pinfo, tree) end   -- registered for udp and tcp'''),
+]),
+'SRV-20': dict(extra=[
+    ('benchmarks/net/', 'text', '''benchmarks/net/  SnapshotSizeBench (bytes per entity and per snapshot for R-Type rooms of 50 / 100 / 200 entities),
+                 BandwidthUnderNetemBench (scripts/netem.sh: 150 ms, 2 % loss, duplicates, 5 KB/s; clumsy on Windows),
+                 ReliableLatencyBench (delivery time under 5 % and 20 % loss)
+                 — results written to docs/network/07-measurements.md'''),
 ]),
 'SRV-15': dict(extra=[
     ('tests/room/', 'text', '''tests/room/  ParallelRoomsTest (no shared entities, events, ids), RoomCrashTest (RoomFailed, others continue),

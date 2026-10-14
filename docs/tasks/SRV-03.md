@@ -54,7 +54,7 @@ private:
 
 - [SRV-01](SRV-01.md) — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping
 - [SRV-04](SRV-04.md) — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits
-- [SRV-05](SRV-05.md) — ReliableChannel: acknowledged and resent UDP messages
+- [SRV-05](SRV-05.md) — ReliableChannel: packet acks, RTT and loss, reliable ordered messages
 - [SRV-06](SRV-06.md) — StreamFramer: TCP message framing with size limit
 
 ## Unlocks

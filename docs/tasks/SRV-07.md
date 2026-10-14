@@ -22,23 +22,25 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 ```text
 tests/net/players/        JoinLeaveTest, KickTest, TimeoutTest, NamesTest
-tests/net/players/        HandshakeTest (FormatMismatch, ServerFull, bad name, UDP link)
-tests/net/messages/       UnreliableTest, ReliableUnderLossTest (20 % loss), StreamTest, CallbackExceptionTest
+tests/net/players/        HandshakeTest (ProtocolMismatch, WrongGame, FormatMismatch, InvalidName, ServerFull,
+                          RefusedByGame, UDP link, 5 s deadline, pending limits)
+tests/net/messages/       UnreliableTest, ReliableUnderLossTest (20 % loss, reorder, duplicates: once, in order),
+                          StreamTest, CallbackExceptionTest, AggregationTest (several messages per datagram)
 tests/reflection/codec/   RoundTripTest (every FieldKind), LimitsTest, EntityMappingTest, FuzzTest (10 000 inputs)
 ```
 
 ## Depends on
 
 - [SRV-01](SRV-01.md) — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping
-- [SRV-02](SRV-02.md) — Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link
+- [SRV-02](SRV-02.md) — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 - [SRV-03](SRV-03.md) — Typed messages: MessageDispatcher, send / broadcast / on<T>
 - [SRV-04](SRV-04.md) — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits
-- [SRV-05](SRV-05.md) — ReliableChannel: acknowledged and resent UDP messages
+- [SRV-05](SRV-05.md) — ReliableChannel: packet acks, RTT and loss, reliable ordered messages
 - [SRV-06](SRV-06.md) — StreamFramer: TCP message framing with size limit
 
 ## Unlocks
 
-- no task waits for this one
+- [SRV-18](SRV-18.md) — Fuzz tests: UDP packets, TCP frames, handshake, snapshot and input decoding
 
 ## Read first
 
@@ -48,8 +50,8 @@ tests/reflection/codec/   RoundTripTest (every FieldKind), LimitsTest, EntityMap
 ## To implement
 
 - [ ] Players: join, leave, kick, timeout
-- [ ] Handshake: mismatch, full, bad name
-- [ ] Messages on the three transports
+- [ ] Handshake: every refusal of RFC §6.4.1, deadline, pending limits
+- [ ] Messages on the three transports, several per datagram
 - [ ] Codec fuzzing and malformed input
 
 ## Done when

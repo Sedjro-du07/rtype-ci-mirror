@@ -39,8 +39,9 @@ public:
     // Rooms
     RoomId createRoom(const RoomSettings& settings);  // fails (0 + log) when maxRooms is reached
     void   moveParty(PartyId p, RoomId room);         // whole party enters; PlayerEnteredRoom in the room
-    void   moveToLobby(PartyId p);                    // whole party leaves the room; ReturnedToLobby on clients
-    void   closeRoom(RoomId room);                    // parties still inside go back to the lobby
+    void   moveToLobby(PartyId p, std::string_view reason = {});  // whole party leaves the room; ReturnedToLobby{room, reason}
+    void   closeRoom(RoomId room, std::string_view reason = {});  // parties still inside go back to the lobby
+    void   refuse(PlayerId to, LobbyRequest request, std::string_view reason);  // client: RequestRefused (ADR 0043)
     void   sendRoomList(PlayerId to, std::span<const RoomId> rooms);   // answer to RoomListRequested
     const RoomInfo& room(RoomId r) const;
     std::span<const RoomId> rooms() const;
@@ -100,10 +101,12 @@ private:
 - [ ] `RoomHandle`: id, settings, players, parties, `keep(Subscription)`, `reportFinished<T>`
 - [ ] Call `IGameModule::onLobbyStart` once and `onRoomStart` for every room after its level is loaded
 - [ ] `ServerLoop` (private, `src/server/`): the main-thread loop of the server, started by `Engine::run()` when role is Server: network poll, lobby events, room host collect
+- [ ] Lobby messages of RFC §8.1: PartyUpdated with names and connected flags, OnlinePlayers / PlayerOnline / PlayerOffline (`net.shareOnlinePlayers`), `refuse` → RequestRefused
+- [ ] `moveToLobby(party, reason)`, `closeRoom(room, reason)`; RoomInterrupted to the room's players as soon as it fails
 
 ## Done when
 
-- Headless server: two parties create two rooms, play in parallel, one reports finished, the game closes it, its party is back in the lobby
+- Headless server: two parties create two rooms, play in parallel, one reports finished, the game closes it with a reason, its party is back in the lobby
 
 ## Watch out
 

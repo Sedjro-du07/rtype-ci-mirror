@@ -38,14 +38,13 @@ private:
 
 ## Unlocks
 
-- [SRV-02](SRV-02.md) — Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link
+- [SRV-02](SRV-02.md) — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 - [SRV-03](SRV-03.md) — Typed messages: MessageDispatcher, send / broadcast / on<T>
 - [SRV-07](SRV-07.md) — Tests: players, handshake, messages, codec, malformed input
 
 ## Read first
 
 - [ADR 0037](../adr/0037-game-facing-networking.md)
-- protocol RFC (Network part, not written yet)
 
 ## To implement
 
@@ -58,6 +57,7 @@ private:
 ## Watch out
 
 - Never allocate the announced size before checking the limit
+- Frame = length u32 (id + payload), id u16, payload; preamble first (RFC §4.3)
 
 ## Workflow
 

@@ -60,6 +60,7 @@ struct FieldInfo {
     FieldKind           element{};            // when kind == List: kind of the elements
     uint64_t            elementType = 0;      // when kind == List or Struct: key of the struct type
     uint32_t            maxLength = 0;        // String and List: limit checked before any allocation
+    float               quantMin = 0, quantMax = 0;   // Float and Vec2: quantised on the wire when min < max
                                               // (0 = default: 256 characters, 64 elements)
     std::string         tooltip;       // optional, shown in the inspector
 };
@@ -112,6 +113,8 @@ public:
     Self& field(this Self& self, std::string_view name, M T::*member, std::string_view tooltip = {});
     template <class Self>
     Self& maxLength(this Self& self, uint32_t n);   // limit of the last String or List field declared
+    template <class Self>
+    Self& quantize(this Self& self, float min, float max);   // last Float or Vec2 field travels as u16 (RFC §5, §9.6)
 };
 
 template <class T> class ComponentBuilder : public FieldsBuilder<T> {
@@ -174,7 +177,7 @@ public:
 - [ENG-27](ENG-27.md) — EventBus: queued, immediate, thread inbox; engine events
 - [ENG-39](ENG-39.md) — Replication: NetworkIdMap, net components, snapshot and input systems
 - [ENG-54](ENG-54.md) — Unit tests: ECS, reflection, commands, hooks
-- [SRV-02](SRV-02.md) — Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link
+- [SRV-02](SRV-02.md) — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 - [SRV-04](SRV-04.md) — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits
 - [SRV-08](SRV-08.md) — Room types and events: PartyId, RoomId, RoomSettings, Party, RoomInfo, lobby / room / client events
 
@@ -188,8 +191,8 @@ public:
 
 - [ ] `TypeCategory`, `TypeName<T>`, `HasTypeName`, `typeKey<T>`
 - [ ] Macros `ENGINE_COMPONENT`, `ENGINE_EVENT`, `ENGINE_MESSAGE`, `ENGINE_STRUCT`, `ENGINE_ENUM` (qualified name → last part)
-- [ ] `FieldKind` (with List, Struct), `FieldInfo` (maxLength, element kind), `TypeFlags`, `Transport`, `TypeInfo`
-- [ ] `FieldsBuilder<T>` (`field` with deducing this, `maxLength`) and the five builders with their options
+- [ ] `FieldKind` (with List, Struct), `FieldInfo` (maxLength, quantMin / quantMax, element kind), `TypeFlags`, `Transport`, `TypeInfo`
+- [ ] `FieldsBuilder<T>` (`field` with deducing this, `maxLength`, `quantize`) and the five builders with their options
 - [ ] `TypeRegistry::add<T>()` choosing the builder with `if constexpr`; `id`, `find`, `findByKey`, `info`, `all`, `messages`, `formatFingerprint`, `closestName`, `clearGameTypes`
 
 ## Done when
