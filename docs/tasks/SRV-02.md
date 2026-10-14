@@ -79,6 +79,7 @@ public:
 
 - Bytes and token format come from the protocol RFC
 - Unauthenticated UDP from an unknown endpoint is dropped
+- Admission by the game comes after the engine's checks (ADR 0042); its stage follows the RFC
 
 ## Workflow
 

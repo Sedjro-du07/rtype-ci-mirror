@@ -46,7 +46,9 @@ The game sees players, never connections:
 | `players()`, `name(p)`, `ping(p)`, `kick(p, reason)` | `localPlayer()`, `connected()` |
 
 `reason` is one of `Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`, `ServerFull`,
-`FormatMismatch`. A crashed client times out after `net_timeout` seconds and is reported as `PlayerLeft{Timeout}`.
+`FormatMismatch`. Your game will also be able to refuse a player with its own reason (version,
+password, bans…) through an admission step, after the engine's checks (ADR 0042; API with the protocol
+RFC). A crashed client times out after `net_timeout` seconds and is reported as `PlayerLeft{Timeout}`.
 
 ```cpp
 // server, in onStart: give each new player a ship

@@ -1,6 +1,6 @@
 # ADR 0037: The game sees players and typed messages, never sockets or bytes
 
-- Status: Accepted
+- Status: Accepted, amended by [ADR 0042](0042-admission-by-the-game.md)
 - Date: 2026-10-14
 - Deciders: the R-Type team
 - Discussion id: SRV-1 to SRV-4 (Server part, round 1)

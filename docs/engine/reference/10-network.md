@@ -133,6 +133,9 @@ public:
   client whose fingerprint differs (`FormatMismatch`), whose name is empty or too long, or when
   `maxClients` players are connected to the whole server, lobby included (`ServerFull`); the client receives `LeftServer{reason}` with a log line
   explaining what to rebuild or change.
+- Admission (ADR 0042): after the engine's checks (protocol version, format fingerprint), the game
+  accepts or refuses the player with its own reason, from the name and data of the game carried by the
+  Hello. The extension point is defined with the protocol RFC.
 - Events published (block 6): `PlayerJoined{player}`, `PlayerLeft{player, reason}` on the server;
   `JoinedServer{me}`, `LeftServer{reason}` on the client.
 

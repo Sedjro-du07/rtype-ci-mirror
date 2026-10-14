@@ -7,6 +7,17 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 2: connection
+
+### Added
+
+- `docs/network/02-exchanges.md`, group 1 (connection): our handshake Hello → Challenge → UdpLink →
+  Accepted or Refused, on top of TCP's, its failure paths, the inventory table and six questions for
+  step 4.
+- ADR 0042: the engine checks only what it needs to decode (protocol version, format fingerprint),
+  automatically; the game decides admission (version, password, bans…) with its own reason, through
+  an extension point designed in step 4. Amends ADR 0037; reference 10, guides 12 and 27, SRV-02 updated.
+
 ## [2026-10-14] — network part, step 1: scope and who optimizes
 
 ### Added

@@ -372,7 +372,8 @@ DETAILS = {
     todo=["`Handshake` (private) state machine on both sides", "Carry the player name (≤ `maxNameLength`) and `TypeRegistry::formatFingerprint()`",
           "Refuse with `ServerFull`, `FormatMismatch`, invalid name", "Link the player's TCP stream and UDP endpoint (token given on TCP, echoed on UDP)"],
     done=["Tests: mismatched fingerprint refused with a clear log line on the client; full server refused"],
-    watch=["Bytes and token format come from the protocol RFC", "Unauthenticated UDP from an unknown endpoint is dropped"]),
+    watch=["Bytes and token format come from the protocol RFC", "Unauthenticated UDP from an unknown endpoint is dropped",
+           "Admission by the game comes after the engine's checks (ADR 0042); its stage follows the RFC"]),
 'SRV-03': dict(
     goal="Typed messages for games: send, broadcast and on<T> callbacks.",
     todo=["`MessageDispatcher` (private): message id ↔ TypeInfo, callback lists per id",

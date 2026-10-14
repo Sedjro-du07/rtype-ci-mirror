@@ -216,6 +216,10 @@
     "title": "Network · 01 Scope"
   },
   {
+    "file": "network/02-exchanges.md",
+    "title": "Network · 02 Inventory of exchanges"
+  },
+  {
     "file": "tasks/README.md",
     "title": "Tasks — details (one page per task)"
   },
@@ -394,6 +398,10 @@
   {
     "file": "adr/0041-netcode-means-in-engine-policy-in-game.md",
     "title": "ADR 0041 — Network optimizations: engine means, game team optimizes"
+  },
+  {
+    "file": "adr/0042-admission-by-the-game.md",
+    "title": "ADR 0042 — Admission: engine checks decoding, game decides who joins"
   },
   {
     "file": "../benchmark-graphics-rtype.md",

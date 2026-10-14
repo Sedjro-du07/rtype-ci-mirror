@@ -44,11 +44,12 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0034](0034-scenes-prefabs-assets.md) | One active scene, prefabs with overrides, handle-based assets | Block 11 | Accepted |
 | [0035](0035-services-and-tools.md) | Logger, CVars, console, metrics and the scripting interface | Block 12 | Accepted |
 | [0036](0036-one-add-and-type-categories.md) | One `add<T>()`, the type category comes from the macro | SRV-A | Accepted (amends 0027) |
-| [0037](0037-game-facing-networking.md) | The game sees players and typed messages, never sockets or bytes | SRV-1 to SRV-4 | Accepted (amends 0033) |
+| [0037](0037-game-facing-networking.md) | The game sees players and typed messages, never sockets or bytes | SRV-1 to SRV-4 | Accepted (amends 0033), amended by 0042 |
 | [0038](0038-rooms-shared-host.md) | Several games on one server: rooms, hosted in-process first | SRV-5 | Accepted |
 | [0039](0039-room-api.md) | Room API: lobby, parties, rooms, contexts | SRV-6 to SRV-9 | Accepted (amends 0022) |
 | [0040](0040-server-client-split.md) | One game code, two builds; server and client folders in the engine and the game | E-12, SRV-10 | Accepted |
 | [0041](0041-netcode-means-in-engine-policy-in-game.md) | Network optimizations: the engine gives the means, the game team optimizes | NET-1 | Accepted (amends 0033) |
+| [0042](0042-admission-by-the-game.md) | Admission: the engine checks it can decode, the game decides who joins | NET-2 | Accepted (amends 0037) |
 
 ## Not yet recorded
 
