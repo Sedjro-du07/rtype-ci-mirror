@@ -5,7 +5,7 @@
 // Board: Notion › R-Type — Architecture › Server — folder tree & tasks (self-assign)
 // Status: not implemented yet. Claim the task on the board before editing this file.
 
-#include "engine/core/ServiceContext.hpp"
+#include "engine/ServiceContext.hpp"
 
 namespace engine {
 

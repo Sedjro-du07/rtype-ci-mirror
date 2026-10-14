@@ -25,8 +25,11 @@ engine_add_plugin(<kind>_<name> SOURCES ... [DEPENDS <targets>])
 # SHARED or STATIC per ENGINE_DYNAMIC_MODULES; links engine; output to <bin>/plugins;
 # hidden visibility; defines ENGINE_BUILDING_PLUGIN.
 
-engine_add_game_module(<name> SOURCES ... [DEPENDS <targets>])
-# Same for a game; output to <bin>/games.
+engine_add_game_module(<name> [SHARED_SOURCES ...] [SERVER_SOURCES ...] [CLIENT_SOURCES ...]
+                       [SOURCES ...] [DEPENDS <targets>])
+# ADR 0040. With SERVER_SOURCES / CLIENT_SOURCES: builds lib<name>_server (shared + server) and
+# lib<name>_client (shared + client) in <bin>/games. With SOURCES only: one lib<name> for every role.
+# Defines ENGINE_GAME_SERVER or ENGINE_GAME_CLIENT in the role builds.
 
 engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
 # Builds engine/launcher/main.cpp with ENGINE_DEFAULT_CONFIG="<file.yaml>"; copies the config next
@@ -54,7 +57,7 @@ engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
 ## To implement
 
 - [ ] `engine_add_plugin(<kind>_<name> SOURCES … [DEPENDS …])`: SHARED or STATIC per option, output to `<bin>/plugins`, hidden visibility, `ENGINE_BUILDING_PLUGIN`
-- [ ] `engine_add_game_module(<name> …)`: same, output to `<bin>/games`
+- [ ] `engine_add_game_module(<name> SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES …)`: builds `lib<name>_server` and `lib<name>_client` in `<bin>/games` (or one `lib<name>` with `SOURCES`), defines `ENGINE_GAME_SERVER` / `ENGINE_GAME_CLIENT` (ADR 0040)
 - [ ] `engine_add_launcher(<exe> CONFIG <file> [GAME <name>])`: builds `launcher/main.cpp` with `ENGINE_DEFAULT_CONFIG`, copies the config, links plugins and the game in static mode
 
 ## Done when

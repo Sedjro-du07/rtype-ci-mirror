@@ -33,7 +33,8 @@ public:
 
     // Loads "<kind>_<name>" (e.g. platform_sfml), checks apiVersion and kind, calls init().
     template <class I> Result<I*> loadPlugin(PluginKind kind, std::string_view name, const PluginContext& ctx);
-    Result<IGameModule*> loadGame(std::string_view name);     // checks game_api_version, calls create_game
+    Result<IGameModule*> loadGame(std::string_view name, Role role); // lib<name>_<role> first, then lib<name>;
+                                                              // checks game_api_version, calls create_game
     void unloadGame();                                        // destroy_game, then close the library
     void unloadAll() noexcept;                                // reverse load order: shutdown, destroy, close
     std::span<const LoadedModule> loaded() const;             // for the "modules" console command
@@ -60,7 +61,7 @@ public:
 ## To implement
 
 - [ ] `loadPlugin<I>(kind, name, ctx)`: `null` → built-in Null Object; else library + version + kind check + `init`
-- [ ] `loadGame(name)`
+- [ ] `loadGame(name, role)`: `lib<name>_<role>` first, then `lib<name>` (ADR 0040)
 - [ ] `unloadGame`, `unloadAll` in reverse load order
 - [ ] `loaded()` for the console
 

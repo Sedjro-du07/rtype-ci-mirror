@@ -124,7 +124,8 @@ public:
 
     // Loads "<kind>_<name>" (e.g. platform_sfml), checks apiVersion and kind, calls init().
     template <class I> Result<I*> loadPlugin(PluginKind kind, std::string_view name, const PluginContext& ctx);
-    Result<IGameModule*> loadGame(std::string_view name);     // checks game_api_version, calls create_game
+    Result<IGameModule*> loadGame(std::string_view name, Role role); // lib<name>_<role> first, then lib<name>;
+                                                              // checks game_api_version, calls create_game
     void unloadGame();                                        // destroy_game, then close the library
     void unloadAll() noexcept;                                // reverse load order: shutdown, destroy, close
     std::span<const LoadedModule> loaded() const;             // for the "modules" console command
@@ -160,8 +161,11 @@ engine_add_plugin(<kind>_<name> SOURCES ... [DEPENDS <targets>])
 # SHARED or STATIC per ENGINE_DYNAMIC_MODULES; links engine; output to <bin>/plugins;
 # hidden visibility; defines ENGINE_BUILDING_PLUGIN.
 
-engine_add_game_module(<name> SOURCES ... [DEPENDS <targets>])
-# Same for a game; output to <bin>/games.
+engine_add_game_module(<name> [SHARED_SOURCES ...] [SERVER_SOURCES ...] [CLIENT_SOURCES ...]
+                       [SOURCES ...] [DEPENDS <targets>])
+# ADR 0040. With SERVER_SOURCES / CLIENT_SOURCES: builds lib<name>_server (shared + server) and
+# lib<name>_client (shared + client) in <bin>/games. With SOURCES only: one lib<name> for every role.
+# Defines ENGINE_GAME_SERVER or ENGINE_GAME_CLIENT in the role builds.
 
 engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
 # Builds engine/launcher/main.cpp with ENGINE_DEFAULT_CONFIG="<file.yaml>"; copies the config next

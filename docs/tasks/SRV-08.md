@@ -10,14 +10,14 @@ The vocabulary of several games on one server: ids, records and events shared by
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `include/engine/room/RoomTypes.hpp`
-- `include/engine/room/RoomEvents.hpp`
+- `include/engine/net/RoomTypes.hpp`
+- `include/engine/net/RoomEvents.hpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `include/engine/room/RoomTypes.hpp`
+### `include/engine/net/RoomTypes.hpp`
 
 ```cpp
 using PartyId = uint32_t;                          // 0 = none
@@ -49,7 +49,7 @@ struct RoomInfo {
 };
 ```
 
-### `include/engine/room/RoomEvents.hpp`
+### `include/engine/net/RoomEvents.hpp`
 
 ```cpp
 // Lobby (server, published on the lobby EventBus, received with a LobbyContext)

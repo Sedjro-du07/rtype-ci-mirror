@@ -1,26 +1,27 @@
-# SRV-13 · Lobby and RoomHandle: the server game API, lobby loop in Engine
+# SRV-13 · Lobby and RoomHandle: the server game API and the server loop
 
 Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **05 Rooms** · **Wave 14** · status and owner live on the board.
 
 ## Goal
 
-The server-side game API for parties and rooms, and the lobby loop of the server.
+The server-side game API for parties and rooms, and the server loop (`src/server/`).
 
 ## Files
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `include/engine/room/Lobby.hpp`
-- `src/room/Lobby.cpp`
-- `include/engine/room/RoomHandle.hpp`
-- `src/room/RoomHandle.cpp`
-- `src/core/Engine.cpp` (shared with [ENG-08](ENG-08.md))
+- `include/engine/server/Lobby.hpp`
+- `src/server/Lobby.cpp`
+- `include/engine/server/RoomHandle.hpp`
+- `src/server/RoomHandle.cpp`
+- `src/server/ServerLoop.hpp`
+- `src/server/ServerLoop.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `include/engine/room/Lobby.hpp`
+### `include/engine/server/Lobby.hpp`
 
 ```cpp
 class Lobby {
@@ -46,7 +47,7 @@ public:
 };
 ```
 
-### `include/engine/room/RoomHandle.hpp`
+### `include/engine/server/RoomHandle.hpp`
 
 ```cpp
 class RoomHandle {
@@ -62,12 +63,17 @@ public:
 };
 ```
 
-### `src/core/Engine.cpp`
+### `src/server/ServerLoop.hpp`
 
 ```cpp
-// Server part of Engine (shared file with ENG-08)
-void Engine::runLobbyLoop();      // main thread: network poll, lobby events (LobbyContext), roomHost.collect(), console
-void Engine::onRoomMessage(RoomId room, RoomMessage&& m);   // Finished / Failed → RoomFinished / RoomFailed events
+// The server's main-thread loop, called by Engine::run() when role == Server (ADR 0040)
+class ServerLoop {
+public:
+    ServerLoop(EngineServices services, NetworkSession& network, Lobby& lobby, IRoomHost& rooms, IGameModule& game);
+    void run(const std::atomic_bool& running);   // network poll, lobby events (LobbyContext), rooms.collect(), console
+private:
+    void onRoomMessage(RoomId room, RoomMessage&& m);   // Finished / Failed → RoomFinished / RoomFailed events
+};
 ```
 
 ## Depends on
@@ -93,7 +99,7 @@ void Engine::onRoomMessage(RoomId room, RoomMessage&& m);   // Finished / Failed
 - [ ] Publish the lobby events; turn client requests into `InviteRequested` / `InviteAnswered` / `LeavePartyRequested` / `RoomListRequested`
 - [ ] `RoomHandle`: id, settings, players, parties, `keep(Subscription)`, `reportFinished<T>`
 - [ ] Call `IGameModule::onLobbyStart` once and `onRoomStart` for every room after its level is loaded
-- [ ] Server `Engine` loop on the main thread: network poll, lobby events, room host collect (shared file with ENG-08)
+- [ ] `ServerLoop` (private, `src/server/`): the main-thread loop of the server, started by `Engine::run()` when role is Server: network poll, lobby events, room host collect
 
 ## Done when
 

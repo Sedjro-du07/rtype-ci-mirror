@@ -1,8 +1,12 @@
 # 14 · Lobby, parties and rooms (server side of several games)
 
-Status: **Locked**. ADRs 0038 (rooms, shared host), 0039 (room API).
-Folder: `engine/include/engine/room/`, `engine/src/room/` (private classes),
-`engine/include/engine/ServiceContext.hpp`, `engine/include/engine/LobbyContext.hpp`.
+Status: **Locked**. ADRs 0038 (rooms, shared host), 0039 (room API), 0040 (server and client folders).
+Folders (ADR 0040): `include/engine/net/` (vocabulary shared by both sides), `include/engine/server/` and
+`src/server/` (server features), `include/engine/client/` and `src/client/` (client features),
+`include/engine/ServiceContext.hpp`.
+
+Inclusion rule: game `server/` code may include `engine/server/`, game `client/` code may include
+`engine/client/`, game `shared/` code includes neither.
 
 ## Role
 
@@ -23,7 +27,7 @@ and the rooms communicate only through messages (ADR 0038, rule 3).
 
 ---
 
-## Identifiers and records — `room/RoomTypes.hpp`
+## Identifiers and records — `net/RoomTypes.hpp`
 
 ```cpp
 using PartyId = uint32_t;                          // 0 = none
@@ -55,7 +59,7 @@ struct RoomInfo {
 };
 ```
 
-## Events — `room/RoomEvents.hpp`
+## Events — `net/RoomEvents.hpp`
 
 ```cpp
 // Lobby (server, published on the lobby EventBus, received with a LobbyContext)
@@ -82,7 +86,7 @@ struct EnteredRoom          { RoomId room; RoomSettings settings; };          EN
 struct ReturnedToLobby      { RoomId room; std::string reason; };             ENGINE_EVENT(ReturnedToLobby)
 ```
 
-## `class Lobby` — `room/Lobby.hpp` (server, game-facing)
+## `class Lobby` — `server/Lobby.hpp` (server, game-facing)
 
 Reached with `LobbyContext::lobby()`. Main thread only.
 
@@ -110,7 +114,7 @@ public:
 };
 ```
 
-## `class RoomHandle` — `room/RoomHandle.hpp` (in a room, game-facing)
+## `class RoomHandle` — `server/RoomHandle.hpp` (in a room, game-facing)
 
 Reached with `Context::room()` on the server.
 
@@ -128,7 +132,7 @@ public:
 };
 ```
 
-## `class ClientLobby` — `room/ClientLobby.hpp` (client, game-facing)
+## `class ClientLobby` — `client/ClientLobby.hpp` (client, game-facing)
 
 Reached with `Context::lobby()` on the client. Every call is a request; answers come back as events.
 
@@ -147,7 +151,7 @@ public:
 Starting a game is a game rule: the client sends a game message (for example `PlayRequest`) and the
 game's lobby code decides.
 
-## Contexts — `ServiceContext.hpp`, `Context.hpp`, `LobbyContext.hpp`
+## Contexts — `ServiceContext.hpp`, `Context.hpp`, `server/LobbyContext.hpp`
 
 ADR 0022 is kept: the game reaches the engine only through a context. There are now three types so
 that the compiler refuses world access where there is no world.
@@ -179,7 +183,7 @@ The engine builds one `Context` per room when the room is created and passes it 
 that room at each tick; it builds one `LobbyContext` at server start and passes it to lobby callbacks.
 Game code never creates or stores a context.
 
-## `class RoomNetwork` — `room/RoomNetwork.hpp`
+## `class RoomNetwork` — `net/RoomNetwork.hpp`
 
 The network as seen from a room: the same typed-message API as `NetworkSession` (ADR 0037), limited
 to the players of the room.
@@ -226,18 +230,19 @@ std::vector<SystemFn> instantiate(Stage stage) const;          // engine only: o
 
 ---
 
-## Internal structure (engine only) — `engine/src/room/`
+## Internal structure (engine only) — `engine/src/server/`
 
 | Class | File | Responsibility |
 |---|---|---|
-| `PartyTable` | `src/room/PartyTable.hpp` | parties, leaders, membership; one party per player; party of 1 on join |
-| `RoomDirectory` | `src/room/RoomDirectory.hpp` | room records, which player and party is in which room, `maxRooms` |
-| `RoomRuntime` | `src/room/RoomRuntime.hpp` | one game: world (SceneManager), Commands, EventBus, Time, NetworkIdMap, system instances, its Context, mailboxes |
-| `RoomMailbox` | `src/room/RoomMailbox.hpp` | thread-safe message queue lobby → room and room → lobby |
-| `IRoomHost` | `src/room/IRoomHost.hpp` | start, stop and post to rooms; hides where a room runs |
-| `ThreadPoolRoomHost` | `src/room/ThreadPoolRoomHost.hpp` | shared host (Part 1): ticks every room on the worker pool at the room's tick rate |
-| `WorkerPool` | `src/room/WorkerPool.hpp` | fixed pool of threads running jobs |
-| `PlayerRouting` | `src/net/PlayerRouting.hpp` | where each player is (lobby or room) for message routing and replication |
+| `PartyTable` | `src/server/PartyTable.hpp` | parties, leaders, membership; one party per player; party of 1 on join |
+| `RoomDirectory` | `src/server/RoomDirectory.hpp` | room records, which player and party is in which room, `maxRooms` |
+| `RoomRuntime` | `src/server/RoomRuntime.hpp` | one game: world (SceneManager), Commands, EventBus, Time, NetworkIdMap, system instances, its Context, mailboxes |
+| `RoomMailbox` | `src/server/RoomMailbox.hpp` | thread-safe message queue lobby → room and room → lobby |
+| `IRoomHost` | `src/server/IRoomHost.hpp` | start, stop and post to rooms; hides where a room runs |
+| `ThreadPoolRoomHost` | `src/server/ThreadPoolRoomHost.hpp` | shared host (Part 1): ticks every room on the worker pool at the room's tick rate |
+| `WorkerPool` | `src/server/WorkerPool.hpp` | fixed pool of threads running jobs |
+| `PlayerRouting` | `src/server/PlayerRouting.hpp` | where each player is (lobby or room) for message routing and replication |
+| `ServerLoop` | `src/server/ServerLoop.hpp` | the server's main-thread loop (network poll, lobby events, room host), started by `Engine::run()` when the role is Server |
 
 ```cpp
 class PartyTable {

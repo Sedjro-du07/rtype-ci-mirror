@@ -47,9 +47,8 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0037](0037-game-facing-networking.md) | The game sees players and typed messages, never sockets or bytes | SRV-1 to SRV-4 | Accepted (amends 0033) |
 | [0038](0038-rooms-shared-host.md) | Several games on one server: rooms, hosted in-process first | SRV-5 | Accepted |
 | [0039](0039-room-api.md) | Room API: lobby, parties, rooms, contexts | SRV-6 to SRV-9 | Accepted (amends 0022) |
+| [0040](0040-server-client-split.md) | One game code, two builds; server and client folders in the engine and the game | E-12, SRV-10 | Accepted |
 
 ## Not yet recorded
 
-| Discussion id | Topic | Status |
-|---|---|---|
-| E-12 | Game module split (one module with a role, or shared / server / client) | Belongs to the Server part (not engine architecture) |
+Nothing pending: E-12 is recorded as ADR 0040.

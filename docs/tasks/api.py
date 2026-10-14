@@ -771,7 +771,7 @@ tests/reflection/codec/   RoundTripTest (every FieldKind), LimitsTest, EntityMap
 
 # ================================================================ ROOMS (ADR 0038, 0039)
 'SRV-10': dict(extra=[
-    ('src/room/PartyTable.hpp', 'cpp', '''class PartyTable {
+    ('src/server/PartyTable.hpp', 'cpp', '''class PartyTable {
 public:
     PartyId createSolo(PlayerId p);                   // on PlayerJoined
     void    move(PlayerId p, PartyId to);             // dissolves the old party if empty
@@ -780,7 +780,7 @@ public:
     const Party& get(PartyId p) const;  PartyId of(PlayerId p) const;
     std::span<const PartyId> all() const;
 };'''),
-    ('src/room/RoomDirectory.hpp', 'cpp', '''class RoomDirectory {
+    ('src/server/RoomDirectory.hpp', 'cpp', '''class RoomDirectory {
 public:
     explicit RoomDirectory(uint32_t maxRooms);
     std::optional<RoomId> add(const RoomSettings& s);
@@ -792,11 +792,11 @@ public:
 };'''),
 ]),
 'SRV-11': dict(extra=[
-    ('src/room/RoomRuntime.hpp', 'cpp', '''struct EngineServices {           // the shared, thread-safe services a room may use (ADR 0039)
+    ('src/server/RoomRuntime.hpp', 'cpp', '''struct EngineServices {           // the shared, thread-safe services a room may use (ADR 0039)
     const TypeRegistry& types;  Logger& log;  const CVars& cvars;  AssetManager& assets;  Metrics& metrics;
     const EngineConfig& config;
 };'''),
-    ('src/room/RoomMailbox.hpp', 'cpp', '''struct RoomMessage { enum class Kind : uint8_t { PlayerEntered, PlayerLeft, NetMessage, Finished, Failed, Close };
+    ('src/server/RoomMailbox.hpp', 'cpp', '''struct RoomMessage { enum class Kind : uint8_t { PlayerEntered, PlayerLeft, NetMessage, Finished, Failed, Close };
                      Kind kind; PlayerId player = 0; uint16_t messageId = 0; std::vector<std::byte> payload; };
 
 class RoomMailbox {                                   // multi-producer, single-consumer
@@ -804,7 +804,7 @@ public:
     void push(RoomMessage m);
     std::vector<RoomMessage> drain();
 };'''),
-    ('src/room/RoomRuntime.hpp', 'cpp', '''class RoomRuntime {
+    ('src/server/RoomRuntime.hpp', 'cpp', '''class RoomRuntime {
 public:
     RoomRuntime(RoomId id, const RoomSettings& s, const EngineServices& services, const Scheduler& prototypes);
     Result<void> start();                             // loads settings.level, instantiates systems
@@ -814,14 +814,14 @@ public:
 };'''),
 ]),
 'SRV-12': dict(extra=[
-    ('src/room/WorkerPool.hpp', 'cpp', '''class WorkerPool {
+    ('src/server/WorkerPool.hpp', 'cpp', '''class WorkerPool {
 public:
     explicit WorkerPool(unsigned threads);            // 0 = std::thread::hardware_concurrency()
     ~WorkerPool();                                    // joins
     void submit(std::move_only_function<void()> job);
     unsigned size() const;
 };'''),
-    ('src/room/IRoomHost.hpp', 'cpp', '''class IRoomHost {
+    ('src/server/IRoomHost.hpp', 'cpp', '''class IRoomHost {
 public:
     virtual ~IRoomHost() = default;
     virtual Result<void> start(std::unique_ptr<RoomRuntime> room) = 0;
@@ -829,7 +829,7 @@ public:
     virtual void post(RoomId room, RoomMessage m) = 0;
     virtual void collect(std::move_only_function<void(RoomId, RoomMessage&&)> toLobby) = 0;   // lobby thread
 };'''),
-    ('src/room/ThreadPoolRoomHost.hpp', 'cpp', '''class ThreadPoolRoomHost final : public IRoomHost {
+    ('src/server/ThreadPoolRoomHost.hpp', 'cpp', '''class ThreadPoolRoomHost final : public IRoomHost {
 public:
     ThreadPoolRoomHost(WorkerPool& pool, double tickRate, Logger& log);
     Result<void> start(std::unique_ptr<RoomRuntime> room) override;
@@ -839,12 +839,17 @@ public:
 };'''),
 ]),
 'SRV-13': dict(extra=[
-    ('src/core/Engine.cpp', 'cpp', '''// Server part of Engine (shared file with ENG-08)
-void Engine::runLobbyLoop();      // main thread: network poll, lobby events (LobbyContext), roomHost.collect(), console
-void Engine::onRoomMessage(RoomId room, RoomMessage&& m);   // Finished / Failed → RoomFinished / RoomFailed events'''),
+    ('src/server/ServerLoop.hpp', 'cpp', '''// The server's main-thread loop, called by Engine::run() when role == Server (ADR 0040)
+class ServerLoop {
+public:
+    ServerLoop(EngineServices services, NetworkSession& network, Lobby& lobby, IRoomHost& rooms, IGameModule& game);
+    void run(const std::atomic_bool& running);   // network poll, lobby events (LobbyContext), rooms.collect(), console
+private:
+    void onRoomMessage(RoomId room, RoomMessage&& m);   // Finished / Failed → RoomFinished / RoomFailed events
+};'''),
 ]),
 'SRV-14': dict(extra=[
-    ('src/net/PlayerRouting.hpp', 'cpp', '''class PlayerRouting {
+    ('src/server/PlayerRouting.hpp', 'cpp', '''class PlayerRouting {
 public:
     void   setRoom(PlayerId p, RoomId r);             // 0 = lobby
     RoomId roomOf(PlayerId p) const;

@@ -17,6 +17,8 @@ engine/
 │       │   └── AssetManager.hpp                          ENG-40
 │       ├── audio/
 │       │   └── IAudio.hpp                                ENG-34
+│       ├── client/
+│       │   └── ClientLobby.hpp                           SRV-14
 │       ├── components/
 │       │   ├── Animation.hpp                             ENG-25
 │       │   ├── Collider.hpp                              ENG-25
@@ -68,7 +70,10 @@ engine/
 │       │   ├── NetComponents.hpp                         ENG-39
 │       │   ├── NetTypes.hpp                              ENG-36
 │       │   ├── NetworkIdMap.hpp                          ENG-39
-│       │   └── NetworkSession.hpp                        ENG-38, SRV-01
+│       │   ├── NetworkSession.hpp                        ENG-38, SRV-01
+│       │   ├── RoomEvents.hpp                            SRV-08
+│       │   ├── RoomNetwork.hpp                           SRV-14
+│       │   └── RoomTypes.hpp                             SRV-08
 │       ├── reflection/
 │       │   ├── ByteStream.hpp                            ENG-24
 │       │   ├── TypeBuilder.hpp                           ENG-22
@@ -84,13 +89,6 @@ engine/
 │       │   ├── IRenderer.hpp                             ENG-30
 │       │   ├── RenderQueue.hpp                           ENG-30
 │       │   └── WindowDesc.hpp                            ENG-30
-│       ├── room/
-│       │   ├── ClientLobby.hpp                           SRV-14
-│       │   ├── Lobby.hpp                                 SRV-13
-│       │   ├── RoomEvents.hpp                            SRV-08
-│       │   ├── RoomHandle.hpp                            SRV-13
-│       │   ├── RoomNetwork.hpp                           SRV-14
-│       │   └── RoomTypes.hpp                             SRV-08
 │       ├── scene/
 │       │   ├── Prefab.hpp                                ENG-41
 │       │   ├── Scene.hpp                                 ENG-43
@@ -102,6 +100,10 @@ engine/
 │       │   └── System.hpp                                ENG-26
 │       ├── script/
 │       │   └── IScripting.hpp                            ENG-48
+│       ├── server/
+│       │   ├── Lobby.hpp                                 SRV-13
+│       │   ├── LobbyContext.hpp                          SRV-09
+│       │   └── RoomHandle.hpp                            SRV-13
 │       ├── services/
 │       │   ├── Console.hpp                               ENG-46
 │       │   ├── CVars.hpp                                 ENG-45
@@ -110,7 +112,6 @@ engine/
 │       ├── Context.hpp                                   ENG-09, SRV-09
 │       ├── Engine.hpp                                    ENG-08
 │       ├── EngineConfig.hpp                              ENG-07
-│       ├── LobbyContext.hpp                              SRV-09
 │       └── ServiceContext.hpp                            SRV-09
 ├── launcher/
 │   └── main.cpp                                          ENG-10
@@ -144,12 +145,13 @@ engine/
 │   │   └── AssetManager.cpp                              ENG-40
 │   ├── audio/
 │   │   └── AudioCaptions.cpp                             ENG-34
+│   ├── client/
+│   │   └── ClientLobby.cpp                               SRV-14
 │   ├── core/
 │   │   ├── Context.cpp                                   ENG-09
-│   │   ├── Engine.cpp                                    ENG-08, SRV-13
+│   │   ├── Engine.cpp                                    ENG-08
 │   │   ├── EngineConfig.cpp                              ENG-07
 │   │   ├── Error.cpp                                     ENG-04
-│   │   ├── LobbyContext.cpp                              SRV-09
 │   │   ├── ServiceContext.cpp                            SRV-09
 │   │   └── Time.cpp                                      ENG-05
 │   ├── ecs/
@@ -174,12 +176,11 @@ engine/
 │   │   ├── MessageDispatcher.hpp                         SRV-03
 │   │   ├── NetworkIdMap.cpp                              ENG-39
 │   │   ├── NetworkSession.cpp                            ENG-38, SRV-01
-│   │   ├── PlayerRouting.cpp                             SRV-14
-│   │   ├── PlayerRouting.hpp                             SRV-14
 │   │   ├── PlayerTable.cpp                               SRV-01
 │   │   ├── PlayerTable.hpp                               SRV-01
 │   │   ├── ReliableChannel.cpp                           SRV-05
 │   │   ├── ReliableChannel.hpp                           SRV-05
+│   │   ├── RoomNetwork.cpp                               SRV-14
 │   │   ├── StreamFramer.cpp                              SRV-06
 │   │   └── StreamFramer.hpp                              SRV-06
 │   ├── reflection/
@@ -191,24 +192,6 @@ engine/
 │   ├── render/
 │   │   ├── Camera2D.cpp                                  ENG-30
 │   │   └── RenderQueue.cpp                               ENG-30
-│   ├── room/
-│   │   ├── ClientLobby.cpp                               SRV-14
-│   │   ├── IRoomHost.hpp                                 SRV-12
-│   │   ├── Lobby.cpp                                     SRV-13
-│   │   ├── PartyTable.cpp                                SRV-10
-│   │   ├── PartyTable.hpp                                SRV-10
-│   │   ├── RoomDirectory.cpp                             SRV-10
-│   │   ├── RoomDirectory.hpp                             SRV-10
-│   │   ├── RoomHandle.cpp                                SRV-13
-│   │   ├── RoomMailbox.cpp                               SRV-11
-│   │   ├── RoomMailbox.hpp                               SRV-11
-│   │   ├── RoomNetwork.cpp                               SRV-14
-│   │   ├── RoomRuntime.cpp                               SRV-11
-│   │   ├── RoomRuntime.hpp                               SRV-11
-│   │   ├── ThreadPoolRoomHost.cpp                        SRV-12
-│   │   ├── ThreadPoolRoomHost.hpp                        SRV-12
-│   │   ├── WorkerPool.cpp                                SRV-12
-│   │   └── WorkerPool.hpp                                SRV-12
 │   ├── scene/
 │   │   ├── PrefabLibrary.cpp                             ENG-41
 │   │   ├── SceneLoader.cpp                               ENG-42
@@ -217,6 +200,27 @@ engine/
 │   │   └── Scheduler.cpp                                 ENG-26
 │   ├── script/
 │   │   └── ScriptSystems.cpp                             ENG-48
+│   ├── server/
+│   │   ├── IRoomHost.hpp                                 SRV-12
+│   │   ├── Lobby.cpp                                     SRV-13
+│   │   ├── LobbyContext.cpp                              SRV-09
+│   │   ├── PartyTable.cpp                                SRV-10
+│   │   ├── PartyTable.hpp                                SRV-10
+│   │   ├── PlayerRouting.cpp                             SRV-14
+│   │   ├── PlayerRouting.hpp                             SRV-14
+│   │   ├── RoomDirectory.cpp                             SRV-10
+│   │   ├── RoomDirectory.hpp                             SRV-10
+│   │   ├── RoomHandle.cpp                                SRV-13
+│   │   ├── RoomMailbox.cpp                               SRV-11
+│   │   ├── RoomMailbox.hpp                               SRV-11
+│   │   ├── RoomRuntime.cpp                               SRV-11
+│   │   ├── RoomRuntime.hpp                               SRV-11
+│   │   ├── ServerLoop.cpp                                SRV-13
+│   │   ├── ServerLoop.hpp                                SRV-13
+│   │   ├── ThreadPoolRoomHost.cpp                        SRV-12
+│   │   ├── ThreadPoolRoomHost.hpp                        SRV-12
+│   │   ├── WorkerPool.cpp                                SRV-12
+│   │   └── WorkerPool.hpp                                SRV-12
 │   ├── services/
 │   │   ├── Console.cpp                                   ENG-46
 │   │   ├── CVars.cpp                                     ENG-45
@@ -268,7 +272,9 @@ engine/
 | `engine/include/engine/input/` | Keys, raw events, actions, InputMap. |
 | `engine/include/engine/render/` | Rendering API: handles, draw commands, IRenderer, IPlatform. |
 | `engine/include/engine/audio/` | IAudio. |
-| `engine/include/engine/net/` | Transport interface, NetworkSession, replication types. |
+| `engine/include/engine/net/` | Transport interface, NetworkSession, replication types, and the lobby vocabulary shared by both sides (`RoomTypes`, `RoomEvents`, `RoomNetwork`). |
+| `engine/include/engine/server/`, `engine/src/server/` | Server features (ADR 0040): `Lobby`, `RoomHandle`, `LobbyContext`, parties, rooms, room host, routing, `ServerLoop`. |
+| `engine/include/engine/client/`, `engine/src/client/` | Client features (ADR 0040): `ClientLobby`; the UI later. |
 | `engine/include/engine/scene/` | Scenes, prefabs, loader. |
 | `engine/include/engine/assets/` | AssetManager. |
 | `engine/include/engine/services/` | Logger, CVars, Console, Metrics. |
@@ -288,6 +294,8 @@ engine/
 - A plugin folder never includes another plugin. Only `engine/include/` is shared.
 - Games live outside `engine/` (`games/rtype/`, later `games/pong/`) and use only the public headers.
 - New files go to the folder of their block; a new block needs an ADR.
+- Game code includes by role (ADR 0040): game `shared/` → common headers and `engine/net/`; game `server/` → also
+  `engine/server/`; game `client/` → also `engine/client/`.
 - A header that only the engine uses is **private**: it lives next to its source in `engine/src/<block>/`, not in
   `include/`, so games cannot include it (example: `src/net/PlayerTable.hpp`).
 - The tree, the task tables, the per-task pages and the folder READMEs are generated from

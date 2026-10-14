@@ -10,16 +10,16 @@ One isolated game: its own world, commands, events, time, network ids and system
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `src/room/RoomRuntime.hpp`
-- `src/room/RoomRuntime.cpp`
-- `src/room/RoomMailbox.hpp`
-- `src/room/RoomMailbox.cpp`
+- `src/server/RoomRuntime.hpp`
+- `src/server/RoomRuntime.cpp`
+- `src/server/RoomMailbox.hpp`
+- `src/server/RoomMailbox.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `src/room/RoomRuntime.hpp`
+### `src/server/RoomRuntime.hpp`
 
 ```cpp
 struct EngineServices {           // the shared, thread-safe services a room may use (ADR 0039)
@@ -37,7 +37,7 @@ public:
 };
 ```
 
-### `src/room/RoomMailbox.hpp`
+### `src/server/RoomMailbox.hpp`
 
 ```cpp
 struct RoomMessage { enum class Kind : uint8_t { PlayerEntered, PlayerLeft, NetMessage, Finished, Failed, Close };

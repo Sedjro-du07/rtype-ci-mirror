@@ -88,6 +88,6 @@ Board: [Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d) · ta
 | 9 | [SRV-09](SRV-09.md) | 05 Rooms | Contexts: ServiceContext, LobbyContext, one Context per room | [SRV-08](SRV-08.md), [ENG-40](ENG-40.md), [ENG-44](ENG-44.md), [ENG-45](ENG-45.md), [ENG-47](ENG-47.md) |
 | 12 | [SRV-11](SRV-11.md) | 05 Rooms | RoomRuntime and RoomMailbox: one isolated game, lobby ↔ room messages | [ENG-09](ENG-09.md), [ENG-18](ENG-18.md), [ENG-20](ENG-20.md), [ENG-26](ENG-26.md), [ENG-27](ENG-27.md), [ENG-39](ENG-39.md), [ENG-43](ENG-43.md), [SRV-09](SRV-09.md) |
 | 13 | [SRV-12](SRV-12.md) | 05 Rooms | WorkerPool, IRoomHost and ThreadPoolRoomHost: rooms in parallel on a thread pool | [SRV-11](SRV-11.md) |
-| 14 | [SRV-13](SRV-13.md) | 05 Rooms | Lobby and RoomHandle: the server game API, lobby loop in Engine | [SRV-10](SRV-10.md), [SRV-12](SRV-12.md), [SRV-03](SRV-03.md) |
+| 14 | [SRV-13](SRV-13.md) | 05 Rooms | Lobby and RoomHandle: the server game API and the server loop | [SRV-10](SRV-10.md), [SRV-12](SRV-12.md), [SRV-03](SRV-03.md) |
 | 15 | [SRV-14](SRV-14.md) | 05 Rooms | Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset | [SRV-13](SRV-13.md), [ENG-39](ENG-39.md) |
 | 16 | [SRV-15](SRV-15.md) | 04 Tests | Tests: parallel rooms, isolation, crash in a room, party and room flows | [SRV-13](SRV-13.md), [SRV-14](SRV-14.md) |

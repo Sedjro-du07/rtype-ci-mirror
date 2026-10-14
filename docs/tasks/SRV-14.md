@@ -10,18 +10,18 @@ Make the network follow players between the lobby and the rooms.
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `src/net/PlayerRouting.hpp`
-- `src/net/PlayerRouting.cpp`
-- `include/engine/room/RoomNetwork.hpp`
-- `src/room/RoomNetwork.cpp`
-- `include/engine/room/ClientLobby.hpp`
-- `src/room/ClientLobby.cpp`
+- `src/server/PlayerRouting.hpp`
+- `src/server/PlayerRouting.cpp`
+- `include/engine/net/RoomNetwork.hpp`
+- `src/net/RoomNetwork.cpp`
+- `include/engine/client/ClientLobby.hpp`
+- `src/client/ClientLobby.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `include/engine/room/ClientLobby.hpp`
+### `include/engine/client/ClientLobby.hpp`
 
 ```cpp
 class ClientLobby {
@@ -35,7 +35,7 @@ public:
 };
 ```
 
-### `include/engine/room/RoomNetwork.hpp`
+### `include/engine/net/RoomNetwork.hpp`
 
 ```cpp
 class RoomNetwork {
@@ -49,7 +49,7 @@ public:
 };
 ```
 
-### `src/net/PlayerRouting.hpp`
+### `src/server/PlayerRouting.hpp`
 
 ```cpp
 class PlayerRouting {
@@ -62,7 +62,7 @@ public:
 
 ## Depends on
 
-- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API, lobby loop in Engine
+- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API and the server loop
 - [ENG-39](ENG-39.md) — Replication: NetworkIdMap, net components, snapshot and input systems
 
 ## Unlocks

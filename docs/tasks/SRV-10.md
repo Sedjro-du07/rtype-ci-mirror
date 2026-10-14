@@ -10,16 +10,16 @@ Keep track of parties and rooms on the lobby thread, with the fixed rules of the
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `src/room/PartyTable.hpp`
-- `src/room/PartyTable.cpp`
-- `src/room/RoomDirectory.hpp`
-- `src/room/RoomDirectory.cpp`
+- `src/server/PartyTable.hpp`
+- `src/server/PartyTable.cpp`
+- `src/server/RoomDirectory.hpp`
+- `src/server/RoomDirectory.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `src/room/PartyTable.hpp`
+### `src/server/PartyTable.hpp`
 
 ```cpp
 class PartyTable {
@@ -33,7 +33,7 @@ public:
 };
 ```
 
-### `src/room/RoomDirectory.hpp`
+### `src/server/RoomDirectory.hpp`
 
 ```cpp
 class RoomDirectory {
@@ -54,7 +54,7 @@ public:
 
 ## Unlocks
 
-- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API, lobby loop in Engine
+- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API and the server loop
 
 ## Read first
 

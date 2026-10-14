@@ -7,8 +7,12 @@ cmake_minimum_required(VERSION 3.25)
 project(mygame CXX)
 find_package(engine REQUIRED)                       # or add_subdirectory(engine) inside the monorepo
 
-engine_add_game_module(mygame
-    SOURCES src/MyGameModule.cpp src/Systems.cpp)   # → games/libmygame.so (or static)
+engine_add_game_module(mygame                       # one code, two builds (ADR 0040)
+    SHARED_SOURCES shared/Types.cpp shared/Movement.cpp
+    SERVER_SOURCES server/ServerModule.cpp server/Waves.cpp
+    CLIENT_SOURCES client/ClientModule.cpp client/Hud.cpp)
+# → games/libmygame_server.so (shared + server) and games/libmygame_client.so (shared + client)
+# A simple game can write SOURCES … instead: one games/libmygame.so for every role.
 
 engine_add_launcher(mygame_client CONFIG client.yaml GAME mygame)
 engine_add_launcher(mygame_server CONFIG server.yaml GAME mygame)
@@ -16,7 +20,7 @@ engine_add_launcher(mygame_server CONFIG server.yaml GAME mygame)
 
 | Function | Does |
 |---|---|
-| `engine_add_game_module(name SOURCES … [DEPENDS …])` | builds the game as a module, shared or static per `ENGINE_DYNAMIC_MODULES`, output in `games/` |
+| `engine_add_game_module(name SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES … [DEPENDS …])` | builds `lib<name>_server` and `lib<name>_client` (or one `lib<name>` with `SOURCES`), shared or static per `ENGINE_DYNAMIC_MODULES`, output in `games/`; the engine loads the one of its role |
 | `engine_add_launcher(exe CONFIG file [GAME name])` | builds the engine's `main()` under that name, copies the config next to it |
 | `engine_add_plugin(kind_name SOURCES …)` | builds a plugin (see 14) |
 

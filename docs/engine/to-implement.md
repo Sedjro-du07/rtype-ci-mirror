@@ -187,17 +187,17 @@ Totals: **9 interfaces**, **~65 classes and structs** (6 private to the server l
 | `StreamFramer` | class | `src/net/StreamFramer.hpp`, `.cpp` | SRV-06 | `feed`, `next`, size limit |
 | Server tests | tests | `tests/net/players/`, `tests/net/messages/`, `tests/reflection/codec/` | SRV-07 | players, handshake, messages on three transports, codec fuzzing |
 
-## Rooms (lobby, parties, rooms) — SRV-08 to SRV-15 · [reference 14](reference/14-rooms.md) · [server tasks](../server/tasks.md)
+## Server and client features (lobby, parties, rooms) — SRV-08 to SRV-15 · folders `net/`, `server/`, `client/` (ADR 0040) · [reference 14](reference/14-rooms.md) · [server tasks](../server/tasks.md)
 
 | Item | Kind | File | Task | To implement |
 |---|---|---|---|---|
-| `PartyId`, `RoomId`, `RoomState`, `RoomSettings`, `Party`, `RoomInfo`, room events | types, events | `inc/room/RoomTypes.hpp`, `inc/room/RoomEvents.hpp` | SRV-08 | fields, `RoomFinished::resultAs<T>`, registration |
-| `ServiceContext`, `LobbyContext` (+ `Context` base change) | class | `inc/ServiceContext.hpp`, `inc/LobbyContext.hpp`, `src/core/*Context.cpp` | SRV-09 | accessors; private constructors |
-| `PartyTable`, `RoomDirectory` | private class | `src/room/` | SRV-10 | `createSolo`, `move`, `remove`, `setLeader`…; `add`, `remove`, `setState`, `enter`, `leave`, `roomOf` |
-| `RoomRuntime`, `RoomMailbox` | private class | `src/room/` | SRV-11 | `start`, `tick`, mailboxes; system instances per room |
-| `WorkerPool`, `IRoomHost`, `ThreadPoolRoomHost` | private class | `src/room/` | SRV-12 | `submit`; `start`, `stop`, `post`, `collect` |
-| `Lobby`, `RoomHandle`, server lobby loop | class | `inc/room/Lobby.hpp`, `inc/room/RoomHandle.hpp`, `src/core/Engine.cpp` | SRV-13 | every `Lobby` method, `keep`, `reportFinished<T>`, module hooks |
-| `PlayerRouting`, `RoomNetwork`, `ClientLobby` | class | `src/net/PlayerRouting.hpp`, `inc/room/RoomNetwork.hpp`, `inc/room/ClientLobby.hpp` | SRV-14 | routing, per-room replication, client requests |
+| `PartyId`, `RoomId`, `RoomState`, `RoomSettings`, `Party`, `RoomInfo`, room events | types, events | `inc/net/RoomTypes.hpp`, `inc/net/RoomEvents.hpp` | SRV-08 | fields, `RoomFinished::resultAs<T>`, registration |
+| `ServiceContext`, `LobbyContext` (+ `Context` base change) | class | `inc/ServiceContext.hpp`, `inc/server/LobbyContext.hpp`, `src/core/ServiceContext.cpp`, `src/server/LobbyContext.cpp` | SRV-09 | accessors; private constructors |
+| `PartyTable`, `RoomDirectory` | private class | `src/server/` | SRV-10 | `createSolo`, `move`, `remove`, `setLeader`…; `add`, `remove`, `setState`, `enter`, `leave`, `roomOf` |
+| `RoomRuntime`, `RoomMailbox` | private class | `src/server/` | SRV-11 | `start`, `tick`, mailboxes; system instances per room |
+| `WorkerPool`, `IRoomHost`, `ThreadPoolRoomHost` | private class | `src/server/` | SRV-12 | `submit`; `start`, `stop`, `post`, `collect` |
+| `Lobby`, `RoomHandle`, `ServerLoop` | class | `inc/server/Lobby.hpp`, `inc/server/RoomHandle.hpp`, `src/server/ServerLoop.hpp` | SRV-13 | every `Lobby` method, `keep`, `reportFinished<T>`, module hooks |
+| `PlayerRouting`, `RoomNetwork`, `ClientLobby` | class | `src/server/PlayerRouting.hpp`, `inc/net/RoomNetwork.hpp`, `inc/client/ClientLobby.hpp` | SRV-14 | routing, per-room replication, client requests |
 | Room tests | tests | `tests/room/` | SRV-15 | isolation, crash, party and room flows (ThreadSanitizer) |
 
 Also changed: `Registry::singleton<T>` (ENG-18), `Scheduler::add` per-room copies / `addFactory` / `instantiate` (ENG-26),

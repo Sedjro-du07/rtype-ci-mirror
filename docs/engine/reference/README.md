@@ -20,7 +20,7 @@ Flat lists: [`../to-implement.md`](../to-implement.md) (what to code) and [`../g
 | 11 | Scenes, prefabs, assets | [11-scenes-assets.md](11-scenes-assets.md) | `engine` · `scene/`, `assets/` |
 | 12 | Services, tools, scripting | [12-services.md](12-services.md) | `engine` · `services/`, `script/` |
 | — | Built-in components and systems | [13-components-systems.md](13-components-systems.md) | `engine` · `components/`, `systems/` |
-| 14 | Lobby, parties and rooms | [14-rooms.md](14-rooms.md) | `engine` · `room/` |
+| 14 | Lobby, parties and rooms | [14-rooms.md](14-rooms.md) | `engine` · `net/`, `server/`, `client/` |
 
 ## Conventions used in every page
 

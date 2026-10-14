@@ -22,7 +22,7 @@ DETAILS = {
 'ENG-02': dict(
     goal="Give games and plugins one-line CMake functions so nobody copies build boilerplate.",
     todo=["`engine_add_plugin(<kind>_<name> SOURCES … [DEPENDS …])`: SHARED or STATIC per option, output to `<bin>/plugins`, hidden visibility, `ENGINE_BUILDING_PLUGIN`",
-          "`engine_add_game_module(<name> …)`: same, output to `<bin>/games`",
+          "`engine_add_game_module(<name> SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES …)`: builds `lib<name>_server` and `lib<name>_client` in `<bin>/games` (or one `lib<name>` with `SOURCES`), defines `ENGINE_GAME_SERVER` / `ENGINE_GAME_CLIENT` (ADR 0040)",
           "`engine_add_launcher(<exe> CONFIG <file> [GAME <name>])`: builds `launcher/main.cpp` with `ENGINE_DEFAULT_CONFIG`, copies the config, links plugins and the game in static mode"],
     done=["A test plugin and a test game (ENG-53 fixtures) build in both modes",
           "`ENGINE_DYNAMIC_MODULES=OFF` produces one executable with no `.so` / `.dll` next to it"],
@@ -106,7 +106,7 @@ DETAILS = {
 'ENG-14': dict(
     goal="Load plugins by kind and name and the game module, check versions, unload in reverse order.",
     todo=["`loadPlugin<I>(kind, name, ctx)`: `null` → built-in Null Object; else library + version + kind check + `init`",
-          "`loadGame(name)`", "`unloadGame`, `unloadAll` in reverse load order", "`loaded()` for the console"],
+          "`loadGame(name, role)`: `lib<name>_<role>` first, then `lib<name>` (ADR 0040)", "`unloadGame`, `unloadAll` in reverse load order", "`loaded()` for the console"],
     done=["Tests: version mismatch → ApiMismatch, wrong kind, null plugin, unload order logged"],
     watch=["A client whose platform plugin fails stops with code 2: never fall back to NullPlatform"]),
 'ENG-15': dict(
@@ -442,12 +442,12 @@ DETAILS = {
           "A slow room does not delay the others"],
     watch=["`ProcessRoomHost` (dedicated) will implement the same interface in Part 2: keep it free of thread assumptions"]),
 'SRV-13': dict(
-    goal="The server-side game API for parties and rooms, and the lobby loop of the server.",
+    goal="The server-side game API for parties and rooms, and the server loop (`src/server/`).",
     todo=["`Lobby`: parties (party, partyOf, sendInvite, addToParty, removeFromParty, setLeader, sendToParty) and rooms (createRoom, moveParty, moveToLobby, closeRoom, sendRoomList, room, rooms)",
           "Publish the lobby events; turn client requests into `InviteRequested` / `InviteAnswered` / `LeavePartyRequested` / `RoomListRequested`",
           "`RoomHandle`: id, settings, players, parties, `keep(Subscription)`, `reportFinished<T>`",
           "Call `IGameModule::onLobbyStart` once and `onRoomStart` for every room after its level is loaded",
-          "Server `Engine` loop on the main thread: network poll, lobby events, room host collect (shared file with ENG-08)"],
+          "`ServerLoop` (private, `src/server/`): the main-thread loop of the server, started by `Engine::run()` when role is Server: network poll, lobby events, room host collect"],
     done=["Headless server: two parties create two rooms, play in parallel, one reports finished, the game closes it, its party is back in the lobby"],
     watch=["The engine never applies a game rule (who may start, solo allowed…): it only publishes events and executes calls"]),
 'SRV-14': dict(

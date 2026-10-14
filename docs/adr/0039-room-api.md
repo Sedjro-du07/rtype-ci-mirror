@@ -53,7 +53,7 @@ which state becomes per room and which stays shared.
 
 ## Consequences
 
-- New block `room/` (reference 14) and server tasks SRV-08 to SRV-15.
+- New block (reference 14) and server tasks SRV-08 to SRV-15; its files sit in `net/`, `server/` and `client/` (ADR 0040).
 - `Engine` on the server runs a lobby loop on the main thread and rooms on the worker pool; the client
   is unchanged except for `ClientLobby` and the new events.
 - Game code written for one game keeps working: systems still read `ctx.world()`, now the room's.

@@ -26,7 +26,7 @@ tests/room/  ParallelRoomsTest (no shared entities, events, ids), RoomCrashTest 
 
 ## Depends on
 
-- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API, lobby loop in Engine
+- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API and the server loop
 - [SRV-14](SRV-14.md) — Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset
 
 ## Unlocks

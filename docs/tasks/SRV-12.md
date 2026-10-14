@@ -10,17 +10,17 @@ Run every room in parallel on a fixed pool of threads, each room sequentially.
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `src/room/WorkerPool.hpp`
-- `src/room/WorkerPool.cpp`
-- `src/room/IRoomHost.hpp`
-- `src/room/ThreadPoolRoomHost.hpp`
-- `src/room/ThreadPoolRoomHost.cpp`
+- `src/server/WorkerPool.hpp`
+- `src/server/WorkerPool.cpp`
+- `src/server/IRoomHost.hpp`
+- `src/server/ThreadPoolRoomHost.hpp`
+- `src/server/ThreadPoolRoomHost.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `src/room/WorkerPool.hpp`
+### `src/server/WorkerPool.hpp`
 
 ```cpp
 class WorkerPool {
@@ -32,7 +32,7 @@ public:
 };
 ```
 
-### `src/room/IRoomHost.hpp`
+### `src/server/IRoomHost.hpp`
 
 ```cpp
 class IRoomHost {
@@ -45,7 +45,7 @@ public:
 };
 ```
 
-### `src/room/ThreadPoolRoomHost.hpp`
+### `src/server/ThreadPoolRoomHost.hpp`
 
 ```cpp
 class ThreadPoolRoomHost final : public IRoomHost {
@@ -64,7 +64,7 @@ public:
 
 ## Unlocks
 
-- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API, lobby loop in Engine
+- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API and the server loop
 
 ## Read first
 

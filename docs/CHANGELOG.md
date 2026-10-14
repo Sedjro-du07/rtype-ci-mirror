@@ -7,6 +7,24 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — server part, round 4: one game code, two builds
+
+### Added
+
+- E-12 decided and recorded as ADR 0040: a game is organised in `shared/`, `server/` and `client/` and
+  `engine_add_game_module` builds `lib<name>_server` and `lib<name>_client`; the engine still loads one
+  game module (the one of its role). The engine gets the same split: `net/` (both sides), `server/`
+  (server features) and `client/` (client features), with an inclusion rule for game code.
+- `ServerLoop` (`src/server/`): the server's main-thread loop leaves `Engine.cpp`.
+
+### Changed
+
+- Room files moved from `room/` to `net/` (`RoomTypes`, `RoomEvents`, `RoomNetwork`), `server/`
+  (`Lobby`, `RoomHandle`, `LobbyContext` and the private classes) and `client/` (`ClientLobby`).
+  Tasks SRV-08 to SRV-15 keep their content with the new paths.
+- Robustness of the server (disconnection during a game, reconnection) moves to the Network part: the
+  engine protocol provides the mechanism (tokens, grace period, events), the game the policy.
+
 ## [2026-10-14] — server part, round 3: room API
 
 ### Added

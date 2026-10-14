@@ -349,7 +349,7 @@ Calls: `self:get(name)`, `self:set(name, t)`, `self:has(name)`, `self:remove(nam
 
 ---
 
-## 16 · Lobby, parties and rooms · `room/*.hpp` · guide [28](guide/28-lobby-parties-rooms.md) · reference [14](reference/14-rooms.md)
+## 16 · Lobby, parties and rooms · `net/Room*.hpp`, `server/*.hpp`, `client/*.hpp` · guide [28](guide/28-lobby-parties-rooms.md) · reference [14](reference/14-rooms.md)
 
 | Where | API |
 |---|---|
@@ -364,6 +364,9 @@ Types: `PartyId`, `RoomId`, `RoomState`, `RoomSettings` (`name`, `level`, `maxPl
 `RoomListRequested`, `RoomStarted`, `RoomFinished` (`resultAs<T>()`), `RoomFailed`, `RoomClosed`. Room
 events: `PlayerEnteredRoom`, `PlayerLeftRoom`. Client events: `PartyUpdated`, `InviteReceived`,
 `RoomListReceived`, `EnteredRoom`, `ReturnedToLobby`.
+
+Where to include (ADR 0040): game `server/` code includes `engine/server/`, game `client/` code includes
+`engine/client/`, game `shared/` code includes neither.
 
 Rules: game state lives in the room (singletons, components), never in module members or globals;
 rooms are created through the lobby; starting a game is a game message (`PlayRequest`); systems with

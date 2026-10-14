@@ -12,8 +12,8 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/ServiceContext.hpp`
 - `src/core/ServiceContext.cpp`
-- `include/engine/LobbyContext.hpp`
-- `src/core/LobbyContext.cpp`
+- `include/engine/server/LobbyContext.hpp`
+- `src/server/LobbyContext.cpp`
 - `include/engine/Context.hpp` (shared with [ENG-09](ENG-09.md))
 
 ## Classes and methods
