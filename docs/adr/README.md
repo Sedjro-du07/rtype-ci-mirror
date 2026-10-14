@@ -34,15 +34,17 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0024](0024-error-handling-policy.md) | Boot errors stop cleanly, system errors never stop the server | Block 1 | Accepted |
 | [0025](0025-module-loading.md) | Plugins and games load through one ModuleManager | Block 2 | Accepted |
 | [0026](0026-registry-api.md) | Registry API, views, commands and hooks | Block 3 | Accepted |
-| [0027](0027-reflection-by-name.md) | Types are identified by name hash and described by registration | Block 4 | Accepted |
+| [0027](0027-reflection-by-name.md) | Types are identified by name hash and described by registration | Block 4 | Amended by 0036 |
 | [0028](0028-named-ordered-systems.md) | Systems are named and ordered by constraints inside fixed stages | Block 5 | Accepted |
 | [0029](0029-queued-event-bus.md) | Events are typed, queued and unsubscribed by RAII | Block 6 | Accepted |
 | [0030](0030-actions-and-input-map.md) | Input is read as named actions with accessibility options | Block 7 | Accepted |
 | [0031](0031-render-api.md) | Rendering API: handles, draw commands, camera and accessibility filters | Block 8 | Accepted |
 | [0032](0032-audio-buses-captions.md) | Audio has buses, positional sound and captions | Block 9 | Accepted |
-| [0033](0033-engine-networking.md) | Engine networking: transport plugin, session, replication | Block 10 | Accepted |
+| [0033](0033-engine-networking.md) | Engine networking: transport plugin, session, replication | Block 10 | Amended by 0037 |
 | [0034](0034-scenes-prefabs-assets.md) | One active scene, prefabs with overrides, handle-based assets | Block 11 | Accepted |
 | [0035](0035-services-and-tools.md) | Logger, CVars, console, metrics and the scripting interface | Block 12 | Accepted |
+| [0036](0036-one-add-and-type-categories.md) | One `add<T>()`, the type category comes from the macro | SRV-A | Accepted (amends 0027) |
+| [0037](0037-game-facing-networking.md) | The game sees players and typed messages, never sockets or bytes | SRV-1 to SRV-4 | Accepted (amends 0033) |
 
 ## Not yet recorded
 

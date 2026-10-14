@@ -6,7 +6,7 @@
 struct PlayerDied { engine::Entity player; int lives; };
 ENGINE_EVENT(PlayerDied)
 
-void MyGameModule::registerTypes(engine::TypeRegistry& t) { t.addEvent<PlayerDied>(); }
+void MyGameModule::registerTypes(engine::TypeRegistry& t) { t.add<PlayerDied>(); }
 ```
 
 ## Publish
@@ -42,9 +42,10 @@ Subscribe in `onStart` or in a system's constructor; keep the `Subscription` ali
 | `WindowFocusChanged` | `focused` |
 | `Collision` | `a, b` (once per overlapping pair per tick) |
 | `SceneLoaded`, `SceneUnloading` | `name` |
-| `ClientConnected` | `id` (server) |
-| `ClientDisconnected` | `id, reason` (server) |
-| `ConnectedToServer`, `DisconnectedFromServer` | `reason` (client) |
+| `PlayerJoined` | `player` (server) |
+| `PlayerLeft` | `player, reason` (server) |
+| `JoinedServer` | `me` (client) |
+| `LeftServer` | `reason` (client) |
 | `Caption` | `text, seconds` (accessibility) |
 | `ConsoleCommand` | `line` |
 
@@ -52,3 +53,5 @@ Subscribe in `onStart` or in a system's constructor; keep the `Subscription` ali
 
 Use an event when the sender should not know who reacts (damage → sound, score, network, FX).
 Call code directly when one system owns the whole behaviour.
+
+Events stay inside the process. To tell the other machines, send a network message (page 12).

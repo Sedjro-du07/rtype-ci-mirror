@@ -33,7 +33,7 @@ build/bin/
 ## Run
 
 ```bash
-./build/bin/r-type_server                       # headless, listens on the port from server.yaml
+./build/bin/r-type_server                       # headless; the game calls startServer() → port from server.yaml
 ./build/bin/r-type_client                       # opens the window
 ./build/bin/r-type_client --platform raylib     # same game on another backend
 ./build/bin/r-type_client --set r_debug_colliders=1

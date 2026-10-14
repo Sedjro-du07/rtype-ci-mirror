@@ -348,6 +348,14 @@
     "title": "ADR 0035 — Logger, CVars, console, metrics and the scripting interface"
   },
   {
+    "file": "adr/0036-one-add-and-type-categories.md",
+    "title": "ADR 0036 — One add<T>(), the type category comes from the macro"
+  },
+  {
+    "file": "adr/0037-game-facing-networking.md",
+    "title": "ADR 0037 — The game sees players and typed messages, never sockets or bytes"
+  },
+  {
     "file": "../benchmark-graphics-rtype.md",
     "title": "Graphics library benchmark (FR)"
   },

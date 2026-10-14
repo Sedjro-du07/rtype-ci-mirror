@@ -1,6 +1,6 @@
 # ADR 0033: Engine networking: transport plugin, session, replication
 
-- Status: Accepted
+- Status: Accepted, amended by [ADR 0037](0037-game-facing-networking.md)
 - Date: 2026-10-09
 - Deciders: the R-Type team
 - Discussion id: Block 10

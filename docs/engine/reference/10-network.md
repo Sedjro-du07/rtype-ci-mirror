@@ -1,6 +1,6 @@
 # 10 · Network (engine side)
 
-Status: **Locked**. ADRs 0011, 0033. Resolves E-03 (entity identity on the wire).
+Status: **Locked**. ADRs 0011, 0033, 0037 (players, typed messages, transports). Resolves E-03 (entity identity on the wire).
 Folder: `engine/include/engine/net/`, `engine/src/net/`, `engine/plugins/network_asio/`.
 
 ## Role
@@ -10,17 +10,23 @@ timeouts, a network thread, packet bounds, replication of components, sending pl
 **This block fixes classes, threads and responsibilities. The bytes (header layout, message ids,
 reliability scheme, byte order) are defined by the protocol RFC in the Network part.**
 
+What the game sees (ADR 0037): it opens the server or connects explicitly, deals with **players**
+(`PlayerId`) and **typed messages**. Sockets, threads, connections, bytes and message ids stay
+inside the engine.
+
 ---
 
 ## Basic types — `net/NetTypes.hpp`
 
 ```cpp
-using ConnectionId = uint32_t;                         // 0 = invalid; assigned by the server
+using PlayerId     = uint32_t;                         // what the game sees; 0 = none; one per connected player
+using ConnectionId = uint32_t;                         // engine-internal: one UDP endpoint and its TCP stream
 struct Endpoint { std::array<uint8_t, 16> address{}; uint16_t port = 0; bool v6 = false;
                   std::string toString() const; static Result<Endpoint> resolve(std::string_view host, uint16_t port); };
 struct Datagram { Endpoint from; std::vector<std::byte> bytes; };
-enum class Channel : uint8_t { Unreliable, Reliable };  // reliable = acknowledged and resent (scheme in the RFC)
-enum class DisconnectReason : uint8_t { Quit, Timeout, Kicked, ProtocolError, ServerShutdown };
+// Transport (Unreliable, Reliable, Stream) is declared in reflection/TypeInfo.hpp and chosen per message.
+enum class DisconnectReason : uint8_t { Quit, Timeout, Kicked, ProtocolError, ServerShutdown,
+                                        ServerFull, FormatMismatch };   // the last two: refused at handshake
 
 struct NetConfig {
     uint16_t port = 4242;
@@ -30,13 +36,15 @@ struct NetConfig {
     uint32_t maxDatagramBytes = 1200;     // larger datagrams are dropped, never allocated
     uint32_t maxQueuedDatagrams = 1024;   // inbox bound per frame; excess is dropped and counted
     double   snapshotRate = 20.0;         // replication snapshots per second
+    uint32_t maxNameLength = 16;          // player names longer than this are refused at handshake
+    uint32_t maxStreamMessageBytes = 65536; // TCP: a larger announced message closes the stream
 };
 
 struct ConnectionStats { double rttMs; double lossPercent; uint64_t bytesIn, bytesOut;
                          uint64_t packetsIn, packetsOut, dropped; };
 ```
 
-## `class INetwork` — `net/INetwork.hpp` (transport plugin)
+## `class INetwork` — `net/INetwork.hpp` (transport plugin, engine only)
 
 Runs its own I/O thread. Only moves bytes; knows nothing about connections or messages.
 
@@ -48,7 +56,7 @@ public:
     virtual void         sendUdp(const Endpoint& to, std::span<const std::byte> bytes) = 0; // thread-safe, copies
     virtual void         setReceiver(std::move_only_function<void(Datagram&&)> onDatagram) = 0; // called on the I/O thread
 
-    // Optional TCP (lobby, login, chat; justified in the Server part). Same shape, stream-based.
+    // TCP, for Stream messages (lobby, room lists, text chat; ADR 0037). Same shape, stream-based.
     virtual Result<void> listenTcp(uint16_t port) = 0;
     virtual Result<uint32_t> connectTcp(const Endpoint& to) = 0;
     virtual void         sendTcp(uint32_t stream, std::span<const std::byte> bytes) = 0;
@@ -59,38 +67,78 @@ public:
 
 ## `class NetworkSession` — `net/NetworkSession.hpp` (core)
 
-Owns connections. The I/O thread pushes datagrams into a bounded, mutex-protected inbox; the loop
-thread drains it in `poll()`. All public methods are loop-thread only.
+Owns connections and players. The I/O thread pushes datagrams and stream data into a bounded,
+mutex-protected inbox; the loop thread drains it in `poll()`. All public methods are loop-thread only.
 
 ```cpp
 class NetworkSession {
 public:
-    NetworkSession(EventBus& events, Logger& log, const NetConfig& config);
-    void attach(INetwork& transport);                      // engine only, after the plugin is loaded
+    NetworkSession(EventBus& events, Logger& log, const NetConfig& config, const TypeRegistry& types);
+    void attach(INetwork& transport, NetworkIdMap& ids);   // engine only, after the plugin is loaded
 
-    Result<void> host();                                   // server: open the port, accept up to maxClients
-    Result<void> connect(std::string_view host, uint16_t port); // client: start the handshake
-    void disconnect(DisconnectReason reason = DisconnectReason::Quit);
-    void kick(ConnectionId id, std::string_view reason);   // server
+    // ---- Game API: opening and closing (ADR 0037, explicit) ----
+    Result<void> startServer(std::optional<uint16_t> port = {}); // server: open UDP + TCP on port
+                                                           // (default: NetConfig::port, i.e. --port / config)
+    void stopServer();                                     // tells every player (ServerShutdown), closes
+    Result<void> connectTo(std::string_view host, uint16_t port, std::string_view playerName); // client
+    void disconnect();                                     // client: leave (Quit)
 
-    void poll();                     // engine only: drain inbox → validate size/header → route to
-                                     // connections → heartbeats, timeouts → publish connection events
-    void send(ConnectionId to, Channel ch, uint16_t messageType, std::span<const std::byte> payload);
-    void broadcast(Channel ch, uint16_t messageType, std::span<const std::byte> payload,
-                   std::optional<ConnectionId> except = {});
-    void onMessage(uint16_t messageType,
-                   std::move_only_function<void(ConnectionId from, ByteReader&)> handler); // loop thread
-
+    // ---- Game API: players ----
+    std::span<const PlayerId> players() const;             // server: connected players
+    PlayerId         localPlayer() const;                  // client: my id (0 before JoinedServer)
+    std::string_view name(PlayerId p) const;               // name given to connectTo
+    void             kick(PlayerId p, std::string_view reason); // server
+    double           ping(PlayerId p) const;               // round-trip time in ms
+    ConnectionStats  stats(PlayerId p) const;              // lagometer, console "net"
     bool isServer() const; bool connected() const;
-    ConnectionId localId() const;                          // client: id given by the server
-    std::span<const ConnectionId> connections() const;
-    ConnectionStats stats(ConnectionId id) const;          // lagometer, console "net"
+
+    // ---- Game API: typed messages (T registered with ENGINE_MESSAGE) ----
+    template <class T> void send(PlayerId to, const T& msg);           // server → one player
+    template <class T> void send(const T& msg);                        // client → server
+    template <class T> void broadcast(const T& msg, std::optional<PlayerId> except = {}); // server → all
+    template <class T> [[nodiscard]] Subscription on(
+        std::move_only_function<void(Context&, PlayerId from, const T&)> fn);   // server (and client)
+    template <class T> [[nodiscard]] Subscription on(
+        std::move_only_function<void(Context&, const T&)> fn);                  // client: from = server
+
+    // ---- Engine only ----
+    void poll(Context& ctx);   // drain inbox → validate size / header → route to connections →
+                               // handshake (name, format fingerprint), heartbeats, timeouts →
+                               // decode messages → call on<T> callbacks → publish player events
+    void sendRaw(ConnectionId to, Transport t, uint16_t messageId, std::span<const std::byte> payload);
 };
 ```
 
+### Messages
+
+- `send` / `broadcast` look up the `TypeInfo` of `T`, encode it with the generic codec (block 4) into
+  a bounded `ByteWriter`, and send it on the transport declared on the message: `unreliable()` → UDP,
+  `reliable()` (default) → UDP with acknowledgements, `stream()` → TCP.
+- The message id comes from the position of `T` in `TypeRegistry::messages()`; client and server load
+  the same game module, so they agree. Its width and encoding are defined by the protocol RFC.
+- `Entity` fields are written as `NetworkId` and read back through `NetworkIdMap`; an entity unknown
+  on arrival becomes `Entity::null()` (for example a message that arrives before the snapshot that
+  spawns the entity). Game callbacks must check `isNull()`.
+- `on<T>` callbacks run **on the loop thread during `poll()`**, at the start of the frame, before
+  `FixedUpdate`, in arrival order. Structural changes go through `ctx.commands()`. An exception in a
+  callback is caught and logged with the message name; the message is ignored; the session continues.
+- A message that fails to decode (missing bytes, limit exceeded, unknown enum value) is dropped and
+  counted; it never reaches game code.
+
+### Players and the handshake
+
+- A client's TCP stream and UDP endpoint are linked to one `PlayerId` (how is defined by the protocol
+  RFC). One connection is one player in Part 1.
+- The handshake carries the player name and `TypeRegistry::formatFingerprint()`. A server refuses a
+  client whose fingerprint differs (`FormatMismatch`), whose name is empty or too long, or when
+  `maxClients` is reached (`ServerFull`); the client receives `LeftServer{reason}` with a log line
+  explaining what to rebuild or change.
+- Events published (block 6): `PlayerJoined{player}`, `PlayerLeft{player, reason}` on the server;
+  `JoinedServer{me}`, `LeftServer{reason}` on the client.
+
 Every datagram is checked against `maxDatagramBytes`, the protocol magic/version and the header
-bounds before any handler runs. A malformed datagram is dropped and counted; it never throws,
-allocates beyond the limit, or reaches game code.
+bounds before any handler runs; every stream message against `maxStreamMessageBytes`. A malformed
+input is dropped and counted; it never throws, allocates beyond the limit, or reaches game code.
 
 ## Replication
 
@@ -99,7 +147,7 @@ allocates beyond the limit, or reaches game code.
 ```cpp
 struct NetworkId  { uint32_t value = 0; };        // shared identity; never reused during a session
 struct NetPrefab  { uint32_t prefabKey = 0; };    // fnv1a of the prefab path, to spawn on clients
-struct NetOwner   { ConnectionId owner = 0; };    // which client controls this entity
+struct NetOwner   { PlayerId owner = 0; };        // which player controls this entity
 struct RemoteInput{ ActionState state; uint64_t lastMask = 0; uint32_t lastTick = 0; }; // server side
 struct NetInterpolation { Vec2 from, to; double fromTime = 0, toTime = 0; };              // client side
 ```
@@ -126,7 +174,7 @@ public:
 | `engine.net.apply_snapshot` | FixedUpdate (first) | client | decodes, maps ids, spawns from `NetPrefab`, writes components, fills `NetInterpolation` |
 | `engine.net.interpolate` | Render (first) | client | positions networked entities between the two last snapshots |
 | `engine.net.send_input` | LateUpdate | client | sends `ActionState::toMask` for the tick |
-| `engine.net.receive_input` | FixedUpdate (first) | server | writes `RemoteInput` of entities owned by each connection |
+| `engine.net.receive_input` | FixedUpdate (first) | server | writes `RemoteInput` of entities owned by each player (`NetOwner`) |
 
 Which components are `Replicated` is declared by the game (block 4 flags). Prediction and
 reconciliation, delta snapshots and compression belong to the Network part (Track 2).

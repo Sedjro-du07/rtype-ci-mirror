@@ -16,7 +16,7 @@ How to read the tables:
 - 🔒 = engine only: called by the engine itself, never by game code.
 
 Totals: **9 interfaces**, **~60 classes and structs**, **20 engine components**, **20 engine systems**,
-**5 Null Objects**, **7 plugin classes**, **6 macros**, **3 CMake functions**.
+**5 Null Objects**, **7 plugin classes**, **8 macros**, **3 CMake functions**.
 
 ---
 
@@ -90,17 +90,18 @@ Totals: **9 interfaces**, **~60 classes and structs**, **20 engine components**,
 
 | Item | Kind | File | Task | To implement |
 |---|---|---|---|---|
-| `TypeName<T>`, `typeKey<T>()`, `ComponentId` | template | `inc/reflection/TypeKey.hpp` | ENG-22 | primary template + key |
-| `ENGINE_COMPONENT`, `ENGINE_EVENT`, `ENGINE_ENUM` | macro | `inc/reflection/TypeKey.hpp` | ENG-22 | specialise `TypeName`; enum names list |
-| `FieldKind` | enum | `inc/reflection/TypeInfo.hpp` | ENG-22 | 18 kinds |
-| `FieldInfo`, `EnumInfo` | struct | `inc/reflection/TypeInfo.hpp` | ENG-22 | fields only |
+| `TypeCategory`, `TypeName<T>`, `HasTypeName`, `typeKey<T>()`, `ComponentId` | enum, template, concept | `inc/reflection/TypeKey.hpp` | ENG-22 | primary template: name, key, category |
+| `ENGINE_COMPONENT`, `ENGINE_EVENT`, `ENGINE_MESSAGE`, `ENGINE_STRUCT`, `ENGINE_ENUM` | macro | `inc/reflection/TypeKey.hpp` | ENG-22 | specialise `TypeName` with the category; qualified name → last part; enum names list (ADR 0036) |
+| `FieldKind`, `Transport` | enum | `inc/reflection/TypeInfo.hpp` | ENG-22 | 20 kinds (with `List`, `Struct`); `Unreliable`, `Reliable`, `Stream` |
+| `FieldInfo`, `EnumInfo`, `WireContext` | struct | `inc/reflection/TypeInfo.hpp` | ENG-22 | fields only (`maxLength`, element kind); `WireContext`: `Entity` ↔ `NetworkId` functions |
 | `TypeFlags` | enum | `inc/reflection/TypeInfo.hpp` | ENG-22 | `Replicated`, `EditorHidden`, `Tag`, `Transient` |
-| `TypeInfo` | struct | `inc/reflection/TypeInfo.hpp` | ENG-22 | function pointers filled by `TypeBuilder` |
-| `TypeBuilder<T>` | template | `inc/reflection/TypeBuilder.hpp` | ENG-22 | `field` (deduces `FieldKind`, compile error otherwise), `flags`, `yaml`, `binary`; generates construct/destroy/copy/makeStorage/codecs |
-| `TypeRegistry` | class | `inc/reflection/TypeRegistry.hpp`, `src/reflection/TypeRegistry.cpp` | ENG-22 | `add<T>`, `addEvent<E>`, `addEnum<En>`, `id<T>`, `find`, `info`, `all`, `closestName`, `clearGameTypes`; `DuplicateName` check |
-| `YamlNode`, `YamlWriter`, `LoadContext`, `SaveContext` | class | `inc/reflection/Yaml.hpp`, `src/reflection/Yaml.cpp` | ENG-23 | wrappers over yaml-cpp (kept out of game headers), one codec per `FieldKind` |
+| `TypeInfo` | struct | `inc/reflection/TypeInfo.hpp` | ENG-22 | function pointers filled by the builders; category, transport |
+| `FieldsBuilder<T>` + `ComponentBuilder`, `MessageBuilder`, `EventBuilder`, `StructBuilder`, `EnumBuilder` | template | `inc/reflection/TypeBuilder.hpp` | ENG-22 | `field` (deducing this, deduces `FieldKind` incl. vectors and structs), `maxLength`; `flags`, `yaml`, `binary` (components); `unreliable`, `reliable`, `stream`, `binary` (messages); generate construct/destroy/copy/makeStorage |
+| `TypeRegistry` | class | `inc/reflection/TypeRegistry.hpp`, `src/reflection/TypeRegistry.cpp` | ENG-22 | `add<T>` (only method; builder by category), `id<T>`, `find`, `findByKey`, `info`, `all`, `messages`, `formatFingerprint`, `closestName`, `clearGameTypes`; `DuplicateName` check |
+| `YamlNode`, `YamlWriter`, `LoadContext`, `SaveContext` | class | `inc/reflection/Yaml.hpp`, `src/reflection/Yaml.cpp` | ENG-23 | wrappers over yaml-cpp (kept out of game headers), one generic YAML codec per `FieldKind` (lists, structs, enums by name) |
 | `ByteWriter` | class | `inc/reflection/ByteStream.hpp`, `src/reflection/ByteStream.cpp` | ENG-24 | ctor, `write` ×7, `writeBits`, `size`, `overflowed` |
 | `ByteReader` | class | same | ENG-24 | ctor, `u8`, `u16`, `u32`, `u64`, `i32`, `f32`, `string`, `bits`, `remaining`, `failed` |
+| Generic binary codec | function | `src/reflection/ByteStream.cpp` | ENG-24 | `encode` / `decode` walking `TypeInfo::fields` for any type; list count checked before allocating; `Entity` through `WireContext` |
 | Engine components | struct | `inc/components/*.hpp` | ENG-25 | `Position`, `PreviousPosition`, `Velocity`, `Sprite`, `Animation`, `Text`, `Collider`, `Lifetime`, `Parallax`, `Name`, `Uuid`, `Tags`, `Parent`, `Children`, `Script` (+ net components, block 10) |
 | `registerEngineTypes` | function | `src/systems/RegisterEngineTypes.cpp` | ENG-25 | registers every engine component and event with fields and flags, before the game |
 
@@ -119,7 +120,7 @@ Totals: **9 interfaces**, **~60 classes and structs**, **20 engine components**,
 | Item | Kind | File | Task | To implement |
 |---|---|---|---|---|
 | `EventBus` | class | `inc/events/EventBus.hpp`, `src/events/EventBus.cpp` | ENG-27 | `subscribe<E>`, `publish<E>`, `emit<E>`, `publishFromAnyThread<E>` (mutex inbox), `dispatch` 🔒, `clearGameSubscriptions` |
-| Engine events | struct | `inc/events/EngineEvents.hpp` | ENG-27 | `QuitRequested`, `WindowResized`, `WindowFocusChanged`, `Collision`, `SceneLoaded`, `SceneUnloading`, `ClientConnected`, `ClientDisconnected`, `ConnectedToServer`, `DisconnectedFromServer`, `Caption`, `ConsoleCommand` |
+| Engine events | struct | `inc/events/EngineEvents.hpp` | ENG-27 | `QuitRequested`, `WindowResized`, `WindowFocusChanged`, `Collision`, `SceneLoaded`, `SceneUnloading`, `PlayerJoined`, `PlayerLeft`, `JoinedServer`, `LeftServer`, `Caption`, `ConsoleCommand` |
 
 ## 7 · Input — ENG-28, ENG-29 · [reference 07](reference/07-input.md)
 
@@ -165,12 +166,12 @@ Totals: **9 interfaces**, **~60 classes and structs**, **20 engine components**,
 
 | Item | Kind | File | Task | To implement |
 |---|---|---|---|---|
-| `ConnectionId`, `Channel`, `DisconnectReason` | alias, enum | `inc/net/NetTypes.hpp` | ENG-36 | values |
+| `PlayerId`, `ConnectionId`, `DisconnectReason` | alias, enum | `inc/net/NetTypes.hpp` | ENG-36 | values (`ServerFull`, `FormatMismatch` added) |
 | `Endpoint` | struct | same | ENG-36 | `toString`, `resolve` |
 | `Datagram`, `NetConfig`, `ConnectionStats` | struct | same | ENG-36 | fields only |
 | **`INetwork`** | interface | `inc/net/INetwork.hpp` | ENG-36 | declares `openUdp`, `closeUdp`, `sendUdp`, `setReceiver`, `listenTcp`, `connectTcp`, `sendTcp`, `setTcpReceiver`, `closeTcp` |
-| `AsioNetwork` | plugin | `plugins/network_asio/AsioNetwork.*` | ENG-37 | every `IPlugin` + `INetwork` method; one `io_context` on its own thread |
-| `NetworkSession` | class | `inc/net/NetworkSession.hpp`, `src/net/NetworkSession.cpp` | ENG-38 | ctor, `attach` 🔒, `host`, `connect`, `disconnect`, `kick`, `poll` 🔒 (bounded inbox, validation, heartbeats, timeouts), `send`, `broadcast`, `onMessage`, `isServer`, `connected`, `localId`, `connections`, `stats`. **Bytes: protocol RFC (Network part)** |
+| `AsioNetwork` | plugin | `plugins/network_asio/AsioNetwork.*` | ENG-37 | every `IPlugin` + `INetwork` method, **UDP and TCP from Part 1**; one `io_context` on its own thread |
+| `NetworkSession` | class | `inc/net/NetworkSession.hpp`, `src/net/NetworkSession.cpp` | ENG-38 | ctor, `attach` 🔒; `startServer`, `stopServer`, `connectTo`, `disconnect`; `players`, `localPlayer`, `name`, `kick`, `ping`, `stats`, `isServer`, `connected`; `send<T>` ×2, `broadcast<T>`, `on<T>` ×2 (RAII, exceptions caught); `poll` 🔒 (bounded inbox, validation, handshake with name and fingerprint, TCP ↔ UDP link per player, heartbeats, timeouts, player events, callbacks); `sendRaw` 🔒. **Bytes: protocol RFC (Network part)** |
 | Net components | struct | `inc/net/NetComponents.hpp` | ENG-39 | `NetworkId`, `NetPrefab`, `NetOwner`, `RemoteInput`, `NetInterpolation` + registration |
 | `NetworkIdMap` | class | `inc/net/NetworkIdMap.hpp`, `src/net/NetworkIdMap.cpp` | ENG-39 | `allocate`, `bind`, `unbind`, `find`, `clear` |
 | Net systems | system | `src/systems/NetSystems.cpp` | ENG-39 | `engine.net.assign_ids`, `snapshot`, `apply_snapshot`, `interpolate`, `send_input`, `receive_input` |

@@ -8,6 +8,9 @@ A component is a plain struct: data only, no logic, no pointers to other compone
 // src/Components.hpp
 #include <engine/reflection/TypeKey.hpp>
 
+enum class Pattern { Straight, Sine, Dive };
+ENGINE_ENUM(Pattern, Straight, Sine, Dive)
+
 struct Health { int hp = 3; int maxHp = 3; };
 ENGINE_COMPONENT(Health)
 
@@ -16,19 +19,34 @@ ENGINE_COMPONENT(BydosAI)
 
 struct Enemy {};                       // empty struct = typed tag
 ENGINE_COMPONENT(Enemy)
-
-enum class Pattern { Straight, Sine, Dive };
-ENGINE_ENUM(Pattern, Straight, Sine, Dive)
 ```
 
-`ENGINE_COMPONENT` gives the type its name. Never rely on `typeid`; the name is what scenes,
-scripts, the editor and the network use.
+`ENGINE_COMPONENT` gives the type its name **and says it is a component**. Never rely on `typeid`;
+the name is what scenes, scripts, the editor and the network use. Put the macro right after the
+type, outside any namespace; a qualified name works (`ENGINE_COMPONENT(rtype::Health)` registers
+`Health`).
+
+## The five kinds of types
+
+The macro decides what the engine does with the type (ADR 0036):
+
+| Macro | The type is | Used with |
+|---|---|---|
+| `ENGINE_COMPONENT(T)` | data attached to an entity | `world()`, views, YAML, Lua, replication |
+| `ENGINE_EVENT(T)` | a notification inside this process | `events().publish` / `subscribe` (page 06) |
+| `ENGINE_MESSAGE(T)` | a message between server and clients | `network().send` / `on<T>` (page 12) |
+| `ENGINE_STRUCT(T)` | a small record used inside another type | as a field, alone or in a `std::vector` |
+| `ENGINE_ENUM(T, values…)` | an enumeration readable by name | as a field (`pattern: Sine` in YAML) |
+
+All of them are registered the same way, with `types.add<T>()`. The engine returns the right
+"form" for the kind, and only offers the options that make sense for it: `flags` exists on a
+component, `reliable` on a message. A wrong option does not compile.
 
 ## Register
 
 ```cpp
 void MyGameModule::registerTypes(engine::TypeRegistry& t) {
-    t.addEnum<Pattern>();
+    t.add<Pattern>();
     t.add<Health>().field("hp", &Health::hp).field("maxHp", &Health::maxHp)
                    .flags(engine::Replicated);
     t.add<BydosAI>().field("shootCooldown", &BydosAI::shootCooldown)
@@ -37,14 +55,29 @@ void MyGameModule::registerTypes(engine::TypeRegistry& t) {
 }
 ```
 
-Only listed fields are read from YAML, saved, shown in the editor and sent over the network.
+Read the chain as filling a form: `add<Health>()` opens the form for `Health`, each `field(name,
+&Health::member)` adds a line (the name used in files and scripts, and where the member is in the
+struct), `flags(...)` ticks options. Only listed fields are read from YAML, saved, shown in the
+editor and sent over the network.
 
 ## Field types
 
 `bool`, `int32_t`, `uint32_t`, `int64_t`, `float`, `double`, `std::string`, `Vec2`, `Rect`,
 `Color`, `Entity` (saved as the target's uuid), `TextureHandle`, `SoundHandle`, `MusicHandle`,
-`FontHandle`, `ScriptHandle` (saved as paths), enums declared with `ENGINE_ENUM`. Anything else
-needs a custom codec: `.yaml(read, write)` and, if replicated, `.binary(encode, decode)`.
+`FontHandle`, `ScriptHandle` (saved as paths), enums declared with `ENGINE_ENUM`, structs declared
+with `ENGINE_STRUCT`, and `std::vector` of any of these. Text and lists are limited (256 characters,
+64 elements by default); change the limit of the field just declared with `.maxLength(n)`.
+Anything else needs a custom codec: `.yaml(read, write)` and, if replicated, `.binary(encode, decode)`.
+
+```cpp
+struct ShotPattern { float angle; float speed; };
+ENGINE_STRUCT(ShotPattern)
+struct Weapon { std::vector<ShotPattern> shots; float cooldown; };
+ENGINE_COMPONENT(Weapon)
+
+t.add<ShotPattern>().field("angle", &ShotPattern::angle).field("speed", &ShotPattern::speed);
+t.add<Weapon>().field("shots", &Weapon::shots).maxLength(8).field("cooldown", &Weapon::cooldown);
+```
 
 ## Flags
 

@@ -153,7 +153,7 @@ private:
 while running_:
     accumulator += clock_.restart()  (clamped to 0.25 s to avoid a spiral after a stall)
     platform.pollEvents(input_, events_)        raw input → InputMap; window events → EventBus
-    network_.poll()                             network thread inbox → connection events, messages
+    network_.poll(ctx)                          network inbox → player events, on<T> message callbacks
     while accumulator >= step:
         input_.beginTick()                      latch edges for this tick
         scheduler_.run(FixedUpdate, ctx)

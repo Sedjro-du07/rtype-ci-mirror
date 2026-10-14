@@ -30,13 +30,13 @@ allow-list of ADR 0017. Online views: [class reference](https://claude.ai/artifa
 | 1 Core | `Engine`, `Context`, `EngineConfig`, `Role`, `Time`, `Clock`, `Error`, `Result`, `BootError`, `Vec2`, `Rect`, `Color`, `Signal`, `Subscription`, launcher `main()` | [01](reference/01-core.md) |
 | 2 Modules | `PluginKind`, `PluginContext`, `DynamicLibrary`, `StaticModuleTable`, `ModuleManager`, `LoadedModule`, Null Objects, `ENGINE_PLUGIN`, `ENGINE_GAME_MODULE`, CMake functions | [02](reference/02-modules.md) |
 | 3 ECS | `Entity`, `EntityAllocator`, `SparseSet<T>`, `Registry`, `View<Ts...>`, `Exclude`, `Commands`, `ComponentHooks` | [03](reference/03-ecs.md) |
-| 4 Reflection | `TypeName`, `ENGINE_COMPONENT`, `ENGINE_EVENT`, `ENGINE_ENUM`, `FieldKind`, `FieldInfo`, `TypeFlags`, `TypeInfo`, `TypeBuilder<T>`, `TypeRegistry`, `ByteWriter`, `ByteReader` | [04](reference/04-reflection.md) |
+| 4 Reflection | `TypeCategory`, `TypeName`, `ENGINE_COMPONENT`, `ENGINE_EVENT`, `ENGINE_MESSAGE`, `ENGINE_STRUCT`, `ENGINE_ENUM`, `FieldKind`, `FieldInfo`, `TypeFlags`, `Transport`, `TypeInfo`, `WireContext`, `FieldsBuilder<T>`, `ComponentBuilder<T>`, `MessageBuilder<T>`, `EventBuilder<T>`, `StructBuilder<T>`, `EnumBuilder<T>`, `TypeRegistry`, `ByteWriter`, `ByteReader` | [04](reference/04-reflection.md) |
 | 5 Scheduler | `Stage`, `SystemFn`, `RoleMask`, `SystemBuilder`, `SystemStats`, `Scheduler` | [05](reference/05-scheduler.md) |
 | 6 Events | `EventBus`, engine events | [06](reference/06-events.md) |
 | 7 Input | `Key`, `MouseButton`, `GamepadButton`, `GamepadAxis`, `RawInputEvent`, `ActionId`, `Binding`, `InputOptions`, `ActionState`, `InputMap` | [07](reference/07-input.md) |
 | 8 Rendering | `Handle<Tag>`, `WindowDesc`, `Feature`, `ColorFilter`, `Camera2D`, `DrawCmd`, `RenderFrame`, `RenderQueue` | [08](reference/08-rendering.md) |
 | 9 Audio | `AudioBus`, `PlayParams`, `VoiceId` | [09](reference/09-audio.md) |
-| 10 Network | `ConnectionId`, `Endpoint`, `Datagram`, `Channel`, `DisconnectReason`, `NetConfig`, `ConnectionStats`, `NetworkSession`, `NetworkIdMap`, net components | [10](reference/10-network.md) |
+| 10 Network | `PlayerId`, `ConnectionId` (internal), `Endpoint`, `Datagram`, `DisconnectReason`, `NetConfig`, `ConnectionStats`, `NetworkSession`, `NetworkIdMap`, net components | [10](reference/10-network.md) |
 | 11 Scenes and assets | `AssetManager`, `Prefab`, `PrefabLibrary`, `SceneLoader`, `Scene`, `SceneManager` | [11](reference/11-scenes-assets.md) |
 | 12 Services | `Logger`, `LogLevel`, `LogConfig`, `CVar<T>`, `CVars`, `Console`, `Metrics`, `ScriptHost` | [12](reference/12-services.md) |
 | Built-ins | 20 engine components, 18 engine systems | [13](reference/13-components-systems.md) |

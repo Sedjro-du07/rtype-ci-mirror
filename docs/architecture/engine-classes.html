@@ -549,15 +549,20 @@ struct Tags     { small_vector&lt;TagId&gt; ids; };   // text tags from YAML / s
 
     <article class="card" data-status="locked">
       <div class="card-top"><span class="kind">class</span><span class="name">TypeRegistry</span><span class="chip st-locked">Locked</span></div>
-      <p>The dictionary of component types: name, numeric ID, size, fields, and functions to create, read from YAML, write and inspect. IDs are assigned here, never by a static counter.</p>
-      <div class="facts"><span><b>Patterns</b> Registry, reflection by registration</span><span><b>Block</b> 4</span></div>
-<pre>class TypeRegistry {
+      <p>The dictionary of every type the game invents. The macro after a type gives its kind (component, event, message, struct, enum); <code>add&lt;T&gt;()</code> is the only registration method and returns the builder of that kind, so wrong options do not compile (ADR 0036). One generic codec writes any registered type to YAML or to the wire.</p>
+      <div class="facts"><span><b>Patterns</b> Registry, reflection by registration, Builder</span><span><b>Block</b> 4</span></div>
+<pre>struct Health { int hp, maxHp; };   ENGINE_COMPONENT(Health)
+struct Chat   { std::string text; }; ENGINE_MESSAGE(Chat)
+
+class TypeRegistry {
 public:
-    template &lt;class T&gt; TypeBuilder&lt;T&gt; add(std::string_view name);
-    ComponentId id(std::string_view name) const;
+    template &lt;class T&gt; auto add();          // ComponentBuilder / MessageBuilder / EventBuilder / StructBuilder / EnumBuilder
+    template &lt;class T&gt; ComponentId id() const;
     const TypeInfo* find(std::string_view name) const;
+    uint64_t formatFingerprint() const;      // compared at the network handshake
 };
-types.add&lt;Health&gt;("Health").field("hp", &amp;Health::hp);</pre>
+types.add&lt;Health&gt;().field("hp", &amp;Health::hp).flags(engine::Replicated);
+types.add&lt;Chat&gt;().field("text", &amp;Chat::text).maxLength(128).stream();</pre>
     </article>
 
     <article class="card" data-status="locked">
@@ -682,7 +687,25 @@ using TextureHandle = uint32_t;  // also SoundHandle, MusicHandle, FontHandle</p
 
     <article class="card" data-status="locked">
       <div class="card-top"><span class="kind">interface</span><span class="name">INetwork</span><span class="chip st-locked">Locked</span></div>
-      <p>Engine side of networking (E-13): transport, connections, timeouts and crash notification, packet validation, network thread, replication. Designed in the network block; the protocol itself has its own part.</p>
+      <p>The byte transport plugin (<code>network_asio</code>): UDP and TCP on its own I/O thread. Engine only: games use <code>NetworkSession</code>. The protocol itself has its own part.</p>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">NetworkSession</span><span class="chip st-locked">Locked</span></div>
+      <p>The server lives in the engine; the game only sees players and typed messages (ADR 0037). It opens the server or connects explicitly, receives messages through callbacks run at the start of the frame, and never touches sockets or bytes. Each message chooses UDP, reliable UDP or TCP.</p>
+      <div class="facts"><span><b>Patterns</b> Facade, Observer</span><span><b>Block</b> 10</span></div>
+<pre>class NetworkSession {
+public:
+    Result&lt;void&gt; startServer(std::optional&lt;uint16_t&gt; port = {});
+    void stopServer();
+    Result&lt;void&gt; connectTo(std::string_view host, uint16_t port, std::string_view name);
+    void disconnect();
+    std::span&lt;const PlayerId&gt; players() const;
+    template &lt;class T&gt; void send(PlayerId to, const T&amp;);
+    template &lt;class T&gt; void broadcast(const T&amp;, std::optional&lt;PlayerId&gt; except = {});
+    template &lt;class T&gt; Subscription on(std::move_only_function&lt;void(Context&amp;, PlayerId, const T&amp;)&gt;);
+};
+// events: PlayerJoined, PlayerLeft, JoinedServer, LeftServer</pre>
     </article>
 
     <article class="card" data-status="locked">

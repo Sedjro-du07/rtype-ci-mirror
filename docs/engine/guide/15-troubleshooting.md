@@ -31,7 +31,12 @@
 | script stopped with "instruction limit" | infinite or very long loop in a hook | split the work over several `on_update` calls |
 | a server system disappears from `systems` timings | it threw and was disabled | read the log line naming it; fix and restart |
 | clients never connect | wrong host or port, firewall, server not started | `net` on the server; check `server.yaml` and the client command line |
-| `ClientDisconnected{Timeout}` while the client runs | no packet for `net_timeout` seconds (debugger pause, frozen client) | expected; raise `net_timeout` only while debugging |
+| `PlayerLeft{Timeout}` while the client runs | no packet for `net_timeout` seconds (debugger pause, frozen client) | expected; raise `net_timeout` only while debugging |
 | works on Linux, crashes at load on Windows | plugin or game built with another compiler or runtime | rebuild everything with the same Visual Studio and `/MD` (page 24) |
+| client gets `LeftServer{FormatMismatch}` | client and server built from different versions of the game types | rebuild both from the same commit |
+| client gets `LeftServer{ServerFull}` | `maxClients` players already connected | raise `net.maxClients` in `server.yaml` or wait |
+| a message callback never runs | type not registered, `on<T>` subscription not kept, or server not started | `types.add<T>()`, keep the `Subscription` in a member, call `startServer` |
+| `Entity` field of a message is null | entity not replicated, or the message arrived before its spawn snapshot | give it a `NetPrefab`; check `isNull()` and ignore |
+| `add<T>()` fails with "needs ENGINE_COMPONENT, ENGINE_EVENT…" | the type macro is missing | add the macro after the type, outside any namespace |
 | static build: `unknown plugin 'platform_sfml'` | plugin not linked into the executable | `engine_add_launcher(... GAME ...)` links plugins only in static mode; rebuild with the option set |
 

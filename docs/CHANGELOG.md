@@ -7,6 +7,34 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — server part, round 1: players and typed messages
+
+### Added
+
+- We opened the Server part with how the game talks to the network, and I recorded it as ADR 0037:
+  the server is part of the engine and the game never touches sockets or bytes. It opens the server
+  or connects explicitly (`startServer`, `stopServer`, `connectTo` with a player name, `disconnect`),
+  sees players (`PlayerId`, `PlayerJoined`, `PlayerLeft`, `JoinedServer`, `LeftServer`) and sends
+  typed messages (`send`, `broadcast`, `on<T>` callbacks run at the start of the frame).
+- Messages are structs declared with `ENGINE_MESSAGE` and serialized by the engine from their fields,
+  with default limits (text 256, lists 64) and `.maxLength(n)`. Each message chooses
+  `unreliable()` (UDP), `reliable()` (UDP with acknowledgements, default) or `stream()` (TCP, for the
+  lobby and text chat). `Entity` fields travel as `NetworkId`. A format fingerprint compared at the
+  handshake refuses a client built from other game types.
+- `ENGINE_STRUCT` for small records used inside other types, and list fields (`std::vector`).
+
+### Changed
+
+- ADR 0036 amends ADR 0027: `types.add<T>()` is the only registration method; the macro after the
+  type gives its kind and `add` returns the matching builder, so wrong options do not compile.
+  `addEvent` and `addEnum` are gone; `TypeBuilder` became `FieldsBuilder` and five builders.
+- ADR 0037 amends ADR 0033: `host()` / `connect()` / `onMessage()` with raw bytes and
+  `ConnectionId` are engine-internal now; `ClientConnected`, `ClientDisconnected`,
+  `ConnectedToServer` and `DisconnectedFromServer` became the four player events; `NetOwner` holds a
+  `PlayerId`; TCP is implemented from Part 1.
+- The reference (04, 06, 10), the guide (03, 06, 12, 15), `game-api.md`, `to-implement.md`, the
+  class summary and the titles of tasks ENG-22 and ENG-38 follow these decisions.
+
 ## [2026-10-12] — implementation list and game API
 
 ### Added

@@ -26,8 +26,13 @@ All types are in namespace `engine`. Headers are under `engine/include/engine/`.
 |---|---|---|
 | `ENGINE_GAME_MODULE(Class)` | `module/Export.hpp` | once, at the end of the module `.cpp` |
 | `ENGINE_COMPONENT(Type)` | `reflection/TypeKey.hpp` | after each component struct |
-| `ENGINE_EVENT(Type)` | `reflection/TypeKey.hpp` | after each event struct |
-| `ENGINE_ENUM(Type, values…)` | `reflection/TypeKey.hpp` | after each enum used in a component |
+| `ENGINE_EVENT(Type)` | `reflection/TypeKey.hpp` | after each event struct (inside the process) |
+| `ENGINE_MESSAGE(Type)` | `reflection/TypeKey.hpp` | after each network message struct |
+| `ENGINE_STRUCT(Type)` | `reflection/TypeKey.hpp` | after each struct used only as a field of another type |
+| `ENGINE_ENUM(Type, values…)` | `reflection/TypeKey.hpp` | after each enum used in a field |
+
+Type macros go right after the type, outside any namespace; the macro says **what kind** of type it
+is, and `types.add<T>()` uses it (ADR 0036).
 
 ### `IGameModule` — the class the game implements · `module/IGameModule.hpp` · guide [19](guide/19-game-module-and-state.md)
 
@@ -55,23 +60,22 @@ Exit codes: 0 ok, 1 config, 2 plugin, 3 game module or schedule, 4 scene, 5 clie
 
 | Method | Use |
 |---|---|
-| `TypeBuilder<T> add<T>()` | register a component |
-| `void addEvent<E>()` | register an event (needed for Lua `publish`) |
-| `void addEnum<En>()` | register an enum used in components |
+| `auto add<T>()` | the only registration method, for every kind; returns the builder of the kind of `T` |
 | `ComponentId id<T>() const`, `const TypeInfo* find(name) const` | rarely: generic code, tools |
 
-### `TypeBuilder<T>` · `reflection/TypeBuilder.hpp`
+### Builders · `reflection/TypeBuilder.hpp`
 
-| Method | Use |
+| Builder (returned by `add<T>()` for…) | Methods |
 |---|---|
-| `field(name, &T::member, tooltip = {})` | one per field read from YAML, shown, saved or sent |
-| `flags(f)` | `Replicated`, `Transient`, `EditorHidden`, `Tag` (enum `TypeFlags`) |
-| `yaml(read, write)` | custom YAML format |
-| `binary(encode, decode)` | custom wire format (with `ByteWriter` / `ByteReader`) |
+| all except enums | `field(name, &T::member, tooltip = {})`: one per field read from YAML, shown, saved or sent; `maxLength(n)`: limit of the text or list field just declared (default 256 / 64) |
+| `ComponentBuilder` (`ENGINE_COMPONENT`) | `flags(f)`: `Replicated`, `Transient`, `EditorHidden`, `Tag`; `yaml(read, write)`; `binary(encode, decode)` |
+| `MessageBuilder` (`ENGINE_MESSAGE`) | `unreliable()` (UDP), `reliable()` (UDP + acks, default), `stream()` (TCP); `binary(encode, decode)` |
+| `EventBuilder`, `StructBuilder` | fields only |
+| `EnumBuilder` | nothing |
 
 Supported field types (`FieldKind`): `bool`, `int32_t`, `uint32_t`, `int64_t`, `float`, `double`,
 `std::string`, `Vec2`, `Rect`, `Color`, `Entity`, `TextureHandle`, `SoundHandle`, `MusicHandle`,
-`FontHandle`, `ScriptHandle`, registered enums.
+`FontHandle`, `ScriptHandle`, `ENGINE_ENUM` enums, `ENGINE_STRUCT` structs, `std::vector` of these.
 
 ### `Scheduler` · `scheduler/Scheduler.hpp` · guide [04](guide/04-systems.md)
 
@@ -164,7 +168,7 @@ values inside is safe; structural changes go through `Commands`.
 | `Name`, `Uuid`, `Tags` | identity | `find`, `withTag`, scene files |
 | `Parent`, `Children` | `value, offset` / `list` | `engine.hierarchy` |
 | `Script` | `file` | `engine.script.*` |
-| `NetworkId`, `NetPrefab`, `NetOwner` | network identity, prefab, owner | `engine.net.*` |
+| `NetworkId`, `NetPrefab`, `NetOwner{player}` | network identity, prefab, owning player | `engine.net.*` |
 | `RemoteInput` | `state` (`ActionState`) | server: a player's actions |
 | `NetInterpolation` | snapshot positions | client, engine |
 
@@ -183,8 +187,8 @@ Do not call `emit`, `publishFromAnyThread`, `dispatch` (engine only).
 
 Engine events (`events/EngineEvents.hpp`): `QuitRequested`, `WindowResized{width, height}`,
 `WindowFocusChanged{focused}`, `Collision{a, b}`, `SceneLoaded{name}`, `SceneUnloading{name}`,
-`ClientConnected{id}`, `ClientDisconnected{id, reason}`, `ConnectedToServer`,
-`DisconnectedFromServer{reason}`, `Caption{text, seconds}`, `ConsoleCommand{line}`.
+`PlayerJoined{player}`, `PlayerLeft{player, reason}`, `JoinedServer{me}`, `LeftServer{reason}`,
+`Caption{text, seconds}`, `ConsoleCommand{line}`.
 
 ---
 
@@ -276,16 +280,20 @@ Load sounds through `AssetManager`, not `createSound`. Do not call `update()`. O
 
 | `NetworkSession` (via `ctx.network()`) | Use |
 |---|---|
-| `host()` / `connect(host, port)` / `disconnect(reason)` | start or end a session |
-| `kick(id, reason)` | server |
-| `send(to, channel, type, payload)`, `broadcast(channel, type, payload, except)` | game messages |
-| `onMessage(type, handler(from, ByteReader&))` | receive game messages |
-| `isServer()`, `connected()`, `localId()`, `connections()`, `stats(id)` | state, lagometer |
+| `startServer(port = config)`, `stopServer()` | server: open (UDP + TCP) and close; nothing opens by itself |
+| `connectTo(host, port, name)`, `disconnect()` | client: join with a player name, leave |
+| `players()`, `name(p)`, `ping(p)`, `stats(p)`, `kick(p, reason)` | server: who is there |
+| `localPlayer()`, `isServer()`, `connected()` | state |
+| `send(player, msg)`, `broadcast(msg, except)` | server → clients, typed messages |
+| `send(msg)` | client → server |
+| `on<T>(fn(ctx, from, msg))` / `on<T>(fn(ctx, msg))` | receive; returns a `Subscription`; runs at the start of the frame on the game thread |
 
-Types: `ConnectionId`, `Channel` (`Unreliable`, `Reliable`), `DisconnectReason`, `ConnectionStats`.
-Payloads are written with `ByteWriter` (`write`, `writeBits`, `overflowed`) and read with `ByteReader`
-(`u8` … `f32`, `string`, `bits`, `failed`). Replication needs nothing more than the `Replicated` flag
-and a `NetPrefab`. Message ids and bytes: protocol RFC (Network part).
+Types: `PlayerId`, `DisconnectReason` (`Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`,
+`ServerFull`, `FormatMismatch`), `ConnectionStats`. The game never writes bytes: messages are structs
+(`ENGINE_MESSAGE`) serialized by the engine; `Entity` fields arrive as local entities or
+`Entity::null()`. Replication needs nothing more than the `Replicated` flag and a `NetPrefab`.
+`ByteWriter` / `ByteReader` remain only for a custom `binary()` codec. Bytes, ids, reliability:
+protocol RFC (Network part).
 
 ---
 
@@ -337,7 +345,7 @@ Calls: `self:get(name)`, `self:set(name, t)`, `self:has(name)`, `self:remove(nam
 ## Never in game code
 
 `Engine`, `EngineConfig::load`, `ModuleManager`, `DynamicLibrary`, `StaticModuleTable`, `IPlugin`,
-`IPlatform`, `IRenderer`, `INetwork`, `IScripting`, `IStorage`, `SparseSet`, `EntityAllocator`,
+`IPlatform`, `IRenderer`, `INetwork`, `IScripting`, `ConnectionId`, `NetworkSession::sendRaw`, `IStorage`, `SparseSet`, `EntityAllocator`,
 `SceneLoader`, `NetworkIdMap`, `TypeInfo` function pointers, and every method marked *engine only* in
 the reference (`Scheduler::build/run`, `Commands::apply`, `EventBus::dispatch`, `InputMap::feed`,
 `RenderQueue::frame`, `SceneManager::applyPending`, …). Writing a backend instead of a game? See

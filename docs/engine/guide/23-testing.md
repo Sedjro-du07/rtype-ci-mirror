@@ -40,7 +40,7 @@ for s in scenes/*.yaml; do ./r-type_server --scene "$s" --ticks 5 || exit 1; don
 ## 4. Network
 
 Run a headless server and two headless clients on the same machine with `--ticks`, and check the
-logs for `ClientConnected`. Network conditions (latency, loss) are tested in the Network part.
+logs for `PlayerJoined`. Network conditions (latency, loss) are tested in the Network part.
 
 ## What to test first
 

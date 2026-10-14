@@ -7,10 +7,10 @@ Placeholder created from the engine architecture (2026-10-09). Replace this file
 | File to create | Task |
 |---|---|
 | `ByteStream.hpp` | ENG-24 — ByteWriter / ByteReader: bounds-checked, bit packing |
-| `TypeBuilder.hpp` | ENG-22 — TypeRegistry, TypeInfo, TypeBuilder, ENGINE_COMPONENT / ENGINE_EVENT / ENGINE_ENUM |
-| `TypeInfo.hpp` | ENG-22 — TypeRegistry, TypeInfo, TypeBuilder, ENGINE_COMPONENT / ENGINE_EVENT / ENGINE_ENUM |
-| `TypeKey.hpp` | ENG-22 — TypeRegistry, TypeInfo, TypeBuilder, ENGINE_COMPONENT / ENGINE_EVENT / ENGINE_ENUM |
-| `TypeRegistry.hpp` | ENG-22 — TypeRegistry, TypeInfo, TypeBuilder, ENGINE_COMPONENT / ENGINE_EVENT / ENGINE_ENUM |
+| `TypeBuilder.hpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) |
+| `TypeInfo.hpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) |
+| `TypeKey.hpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) |
+| `TypeRegistry.hpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) |
 | `Yaml.hpp` | ENG-23 — YAML wrappers and field codecs |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

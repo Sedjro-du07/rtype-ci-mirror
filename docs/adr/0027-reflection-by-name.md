@@ -1,6 +1,6 @@
 # ADR 0027: Types are identified by name hash and described by registration
 
-- Status: Accepted
+- Status: Accepted, amended by [ADR 0036](0036-one-add-and-type-categories.md)
 - Date: 2026-10-09
 - Deciders: the R-Type team
 - Discussion id: Block 4

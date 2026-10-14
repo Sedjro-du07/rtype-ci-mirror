@@ -85,7 +85,7 @@ cvars:                       # any console variable, see 13
 | `--config <file>` | use another config file |
 | `--platform <name>`, `--audio <name>`, `--network <name>`, `--scripting <name>` | override the plugin |
 | `--role <client\|server\|editor>` | override the role |
-| `--port <n>`, `--host <address>` | network |
+| `--port <n>`, `--host <address>` | network: default port of `startServer()`, default address the game may pass to `connectTo()` |
 | `--set <cvar>=<value>` | set a console variable (repeatable) |
 | `--log <level>` | log level |
 | `--scene <path>` | start on this scene instead of `firstScene()` (tests, debugging) |

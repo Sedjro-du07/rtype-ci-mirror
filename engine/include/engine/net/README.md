@@ -10,6 +10,6 @@ Placeholder created from the engine architecture (2026-10-09). Replace this file
 | `NetComponents.hpp` | ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems |
 | `NetTypes.hpp` | ENG-36 — INetwork and network types |
 | `NetworkIdMap.hpp` | ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems |
-| `NetworkSession.hpp` | ENG-38 — NetworkSession: connections, heartbeat, timeouts, validation, stats, handlers |
+| `NetworkSession.hpp` | ENG-38 — NetworkSession: start and connect, players, typed messages, handshake, heartbeat, timeouts |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

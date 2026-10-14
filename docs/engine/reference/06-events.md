@@ -43,7 +43,7 @@ public:
 ## `class EventBus` — `events/EventBus.hpp`
 
 Events are plain structs declared with `ENGINE_EVENT(Type)` and registered with
-`TypeRegistry::addEvent<E>()` (block 4).
+`TypeRegistry::add<E>()` (block 4, ADR 0036).
 
 ```cpp
 class EventBus {
@@ -72,10 +72,13 @@ Dispatch points: after each `FixedUpdate` step (after `Commands::apply`) and aft
 | `Collision` | `Entity a, b` | `engine.collision` | two colliders overlap this tick (once per pair) |
 | `SceneLoaded` | `std::string name` | `SceneManager` | after a scene finished loading |
 | `SceneUnloading` | `std::string name` | `SceneManager` | before a scene is cleared |
-| `ClientConnected` | `ConnectionId id` | `NetworkSession` | server: a client completed the handshake |
-| `ClientDisconnected` | `ConnectionId id; DisconnectReason reason` | `NetworkSession` | server: quit, timeout or error |
-| `ConnectedToServer` / `DisconnectedFromServer` | `DisconnectReason reason` | `NetworkSession` | client side |
+| `PlayerJoined` | `PlayerId player` | `NetworkSession` | server: a player completed the handshake (ADR 0037) |
+| `PlayerLeft` | `PlayerId player; DisconnectReason reason` | `NetworkSession` | server: quit, timeout, kick or error |
+| `JoinedServer` | `PlayerId me` | `NetworkSession` | client: accepted by the server |
+| `LeftServer` | `DisconnectReason reason` | `NetworkSession` | client: left, kicked, timed out, refused or server shut down |
 | `Caption` | `std::string text; float seconds` | `IAudio::play` with a caption | accessibility: visual cue for a sound |
 | `ConsoleCommand` | `std::string line` | `Console` | a command was executed |
 
-`DisconnectReason`: `Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`.
+`DisconnectReason`: `Quit`, `Timeout`, `Kicked`, `ProtocolError`, `ServerShutdown`, `ServerFull`, `FormatMismatch`.
+
+Events never leave the process. To tell other machines, use a network message (`ENGINE_MESSAGE`, block 10).
