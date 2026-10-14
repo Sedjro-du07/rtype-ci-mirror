@@ -1,6 +1,6 @@
 # ADR 0033: Engine networking: transport plugin, session, replication
 
-- Status: Accepted, amended by [ADR 0037](0037-game-facing-networking.md)
+- Status: Accepted, amended by [ADR 0037](0037-game-facing-networking.md) and [ADR 0041](0041-netcode-means-in-engine-policy-in-game.md)
 - Date: 2026-10-09
 - Deciders: the R-Type team
 - Discussion id: Block 10
@@ -21,4 +21,5 @@ ADR 0011 placed generic networking in the engine; E-03 (entity identity on the w
 ## Consequences
 
 - Malformed datagrams are dropped and counted before any game code runs.
-- Prediction, delta compression and lag compensation are Network-part work on top of this.
+- Prediction, delta compression and lag compensation are Network-part work on top of this. ADR 0041:
+  the engine gives the means (fields, settings, extension points), the game team writes and tunes them.

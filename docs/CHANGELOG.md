@@ -7,6 +7,21 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 1: scope and who optimizes
+
+### Added
+
+- `docs/network/`: the Network part, step by step. Step 1 (scope) recorded in `01-scope.md`: what is
+  already decided, the subject's network requirements read from the kick-off slides, the budgets
+  (with the subject's 5 KB/s test link and duplicates), the threats, encryption out of scope.
+- ADR 0041: the engine is used as a product, without its code. It gives the means (protocol fields,
+  settings, extension points); the game team writes its prediction and reconciliation and tunes its
+  bandwidth. Engine interpolation stays as a default a game can disable.
+
+### Changed
+
+- ADR 0033 amended by 0041; reference 10, guides 12 and 27 updated.
+
 ## [2026-10-14] — network part, step 1: server capacity
 
 ### Fixed

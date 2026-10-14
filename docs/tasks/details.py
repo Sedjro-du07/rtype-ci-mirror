@@ -251,7 +251,8 @@ DETAILS = {
     goal="Replication of entities from server to clients.",
     todo=["`NetworkIdMap`", "Net components and their registration", "Systems assign_ids, snapshot, apply_snapshot, interpolate, send_input, receive_input"],
     done=["Two headless clients see the same spawned entities as the server"],
-    watch=["Uses the generic codec (SRV-04) for Replicated components", "Unknown NetworkId on a client → ignored, never a crash"]),
+    watch=["Uses the generic codec (SRV-04) for Replicated components", "Unknown NetworkId on a client → ignored, never a crash",
+           "`engine.net.interpolate` is a default a game can disable to use its own (ADR 0041); prediction is the game team's"]),
 # ---------------------------------------------------------------- 11 Scenes & assets
 'ENG-40': dict(
     goal="Load each resource once behind a handle, with fallbacks.",

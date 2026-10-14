@@ -86,6 +86,7 @@ void registerNetSystems(Scheduler& s); // called by registerEngineSystems
 
 - Uses the generic codec (SRV-04) for Replicated components
 - Unknown NetworkId on a client → ignored, never a crash
+- `engine.net.interpolate` is a default a game can disable to use its own (ADR 0041); prediction is the game team's
 
 ## Workflow
 

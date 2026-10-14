@@ -208,6 +208,14 @@
     "title": "Server tasks"
   },
   {
+    "file": "network/README.md",
+    "title": "Network part — steps"
+  },
+  {
+    "file": "network/01-scope.md",
+    "title": "Network · 01 Scope"
+  },
+  {
     "file": "tasks/README.md",
     "title": "Tasks — details (one page per task)"
   },
@@ -382,6 +390,10 @@
   {
     "file": "adr/0040-server-client-split.md",
     "title": "ADR 0040 — One game code, two builds; server and client folders"
+  },
+  {
+    "file": "adr/0041-netcode-means-in-engine-policy-in-game.md",
+    "title": "ADR 0041 — Network optimizations: engine means, game team optimizes"
   },
   {
     "file": "../benchmark-graphics-rtype.md",

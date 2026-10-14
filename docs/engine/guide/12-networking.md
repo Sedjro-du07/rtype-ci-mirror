@@ -70,7 +70,10 @@ Keep the returned `Subscription`s in members of your module.
    The prefab gives `NetPrefab`; the engine assigns a `NetworkId` and clients spawn the same prefab.
 3. Run gameplay systems with `.roles(engine::ServerRole)`. Clients receive the results.
 
-Client positions are interpolated between snapshots; no game code is needed.
+Client positions are interpolated between snapshots by default; no game code is needed. To use your
+own interpolation, disable `engine.net.interpolate` and write a client system. Prediction of the
+local player and other network optimizations are your team's work, with the means the engine gives
+(ADR 0041); the settings and extension points come with the protocol RFC.
 
 ## Player input
 

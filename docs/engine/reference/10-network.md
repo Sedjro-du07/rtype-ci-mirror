@@ -233,12 +233,14 @@ public:
 | `engine.net.assign_ids` | LateUpdate | server | gives a `NetworkId` to new entities that have `NetPrefab` |
 | `engine.net.snapshot` | LateUpdate | server | at `snapshotRate`, encodes every `Replicated` component of networked entities through `TypeInfo::encode`, sends spawn / update / destroy |
 | `engine.net.apply_snapshot` | FixedUpdate (first) | client | decodes, maps ids, spawns from `NetPrefab`, writes components, fills `NetInterpolation` |
-| `engine.net.interpolate` | Render (first) | client | positions networked entities between the two last snapshots |
+| `engine.net.interpolate` | Render (first) | client | positions networked entities between the two last snapshots; a default the game can disable to use its own (ADR 0041) |
 | `engine.net.send_input` | LateUpdate | client | sends `ActionState::toMask` for the tick |
 | `engine.net.receive_input` | FixedUpdate (first) | server | writes `RemoteInput` of entities owned by each player (`NetOwner`) |
 
-Which components are `Replicated` is declared by the game (block 4 flags). Prediction and
-reconciliation, delta snapshots and compression belong to the Network part (Track 2).
+Which components are `Replicated` is declared by the game (block 4 flags). Network optimizations
+(ADR 0041): the engine gives the means (protocol fields such as input sequence numbers and the last
+input processed, settings, extension points), and the game team writes its prediction and
+reconciliation and tunes rates and precision. Which settings and extension points: Network part.
 
 ## Plugin
 
