@@ -113,10 +113,10 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
 </nav>
 
 <header>
-  <div class="eyebrow">R-Type · Architecture · Engine inventory</div>
+  <div class="eyebrow">R-Type · Architecture · Engine inventory · Engine, Server, Network</div>
   <h1>R-Type Engine Inventory</h1>
-  <p class="muted">Everything the engine contains: interfaces, classes, data types, entry points and design patterns. The whole engine architecture is locked; full signatures are in <code>docs/engine/reference/</code>, the usage guide in <code>docs/engine/guide/</code>, the tasks in the Notion board.</p>
-  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-09</span><span>round 8 · engine architecture locked</span><span><a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener">class reference</a></span><span><a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener">architecture snapshot</a></span></div>
+  <p class="muted">Everything the engine contains, server part and protocol included: interfaces, classes, data types, entry points and design patterns. Engine, server and network are locked; the protocol is specified in <code>docs/network/rfc.md</code> (RTEP v1.0); full signatures are in <code>docs/engine/reference/</code>, the usage guide in <code>docs/engine/guide/</code>, the tasks in the Notion board.</p>
+  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-14</span><span>engine, server and network locked</span><span><a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener">class reference</a></span><span><a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener">architecture snapshot</a></span></div>
   <div class="tally" id="tally"></div>
 </header>
 
@@ -142,6 +142,7 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
       <tr data-status="locked"><td class="n">IRenderer</td><td>Receives the frame's draw list and draws it</td><td>SfmlRenderer, RaylibRenderer, NullRenderer</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">IAudio</td><td>Plays sounds and music</td><td>MiniaudioAudio, NullAudio</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">INetwork</td><td>Engine-side networking (generic server role, E-13)</td><td>AsioNetwork</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">IRoomHost</td><td>Where rooms run: all in one process on a thread pool, or one process per room</td><td>ThreadPoolRoomHost (Part 1), ProcessRoomHost (Part 2)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">IScripting</td><td>Scripting language for the content layer (Track 3)</td><td>scripting_lua first; own language optional (ADR 0019)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
     </tbody>
   </table></div>
@@ -176,6 +177,19 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
       <tr data-status="locked"><td class="n">AssetManager</td><td>Load each image or sound once, hand out handles</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">Logger</td><td>Write messages; passed to modules, never a singleton</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">CVars · Console</td><td>Console variables and developer console</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr class="group"><td colspan="3">Network (engine side)</td></tr>
+      <tr data-status="locked"><td class="n">NetworkSession</td><td>Players, typed messages, admission, reconnection; the only network door for games</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Handshake · PendingLimiter</td><td>Hello checks, game admission, link token, Accepted / Refused; flood limits (private)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">ReliableChannel</td><td>Packet acks, RTT and loss, reliable ordered messages (private)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">StreamFramer · MessageDispatcher · Codec</td><td>TCP frames, message id ↔ type, field encoding by reflection (private)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">NetworkIdMap · ReplicationState</td><td>Entity ↔ NetworkId; what each client acknowledged, so snapshots carry only what is missing</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">GraceTable · ClientReconnector · UdpRelink</td><td>30 s grace period, single-use tokens, automatic reconnection (private)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr class="group"><td colspan="3">Server: lobby, parties, rooms</td></tr>
+      <tr data-status="locked"><td class="n">Lobby · RoomHandle</td><td>Server game API for parties and rooms; what a room sees of itself</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">ClientLobby · RoomNetwork</td><td>Client requests to the lobby; the network limited to one room</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">ServiceContext · LobbyContext</td><td>Shared services; the door of lobby code, which has no world</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">ThreadPoolRoomHost · WorkerPool · RoomRuntime · RoomMailbox</td><td>Rooms ticked in parallel, one thread at a time per room; lobby ↔ room messages</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">PartyTable · RoomDirectory · PlayerRouting · ServerLoop</td><td>Parties and leaders, room records, where each player is, the server's main loop</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -195,6 +209,11 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
       <tr data-status="locked"><td class="n">DrawCmd · Feature</td><td>One draw command; the optional 3D capability</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">Vec2 · Rect · Color · Key · handles</td><td>The engine's own vocabulary; no backend type leaves its plugin</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">Engine components</td><td>Position, Velocity, Sprite, Collider, Name, Uuid, Parent, Children, Tags</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">PlayerId · DisconnectReason</td><td>u32 player id; 12 reasons for leaving (Quit … ConnectionLost), RFC §6.8</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">NetConfig</td><td>port, maxClients 32, timings, budget, interpolation delay, input redundancy, grace period</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Admission · AdmissionRequest</td><td>The game's answer to a joining player: accept, or refuse with a reason</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">PartyId · RoomId · Party · RoomSettings · RoomInfo · LobbyRequest</td><td>The vocabulary of several games on one server</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Net components</td><td>NetworkId, NetPrefab, NetOwner, RemoteInput, NetInterpolation, NetPriority</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -210,6 +229,9 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
       <tr data-status="locked"><td class="n">create_plugin · destroy_plugin</td><td>A plugin's <code>extern "C"</code> entry point</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">ENGINE_GAME_MODULE · ENGINE_PLUGIN</td><td>Generate the entry points for both linking modes (ADR 0020)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">engine_add_game_module</td><td>Builds a game as a module, shared or static (ADR 0020)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">ENGINE_COMPONENT · ENGINE_EVENT · ENGINE_MESSAGE · ENGINE_STRUCT · ENGINE_ENUM</td><td>Name a type; one <code>types.add&lt;T&gt;()</code> picks the builder from the macro (ADR 0036)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">engine_add_game_module(SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES …)</td><td>One game code, two builds: lib&lt;name&gt;_server and lib&lt;name&gt;_client (ADR 0040)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">onLobbyStart · onRoomStart · onShutdown</td><td>Game module hooks for lobby code and each room (ADR 0039)</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -243,6 +265,8 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
       <tr data-status="locked"><td class="n">Type Object</td><td>enemy kinds in YAML</td><td>No class per enemy</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">Bridge · Strategy</td><td>IRenderer to SFML / raylib</td><td>Swap the backend</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">Adapter</td><td>every plugin, DynamicLibrary</td><td>Translate a library to the engine vocabulary</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">Strategy</td><td>IRoomHost: shared or dedicated rooms</td><td>Change where rooms run without changing the game</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
+      <tr data-status="locked"><td class="n">State</td><td>Handshake, session (connected, disconnected, closed)</td><td>One clear answer for every message in every state</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">Flyweight</td><td>asset handles</td><td>One texture shared by 300 Bydos</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
       <tr data-status="locked"><td class="n">State · Spatial Partition · Dirty Flag · Bytecode</td><td>boss phases, collisions, hierarchy, scripts</td><td>Later blocks</td><td class="s"><span class="chip st-locked">Locked</span></td></tr>
     </tbody>
@@ -274,12 +298,12 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
   </div>
   <h3>Next</h3>
   <div class="open">
-    <div><b>Engine tasks</b><span>59 tasks derived from the folder tree, self-assign in Notion.</span></div>
-    <div><b>Server part</b><span>Lobby, rooms, game module split (E-12), then the protocol.</span></div>
+    <div><b>Client part</b><span>Menus, lobby screens, client scene flow, UI widgets.</span></div>
+    <div><b>Game part</b><span>R-Type itself, and Part II of the RFC (its messages).</span></div>
   </div>
 </section>
 
-<footer>All engine items are locked (ADRs 0001–0035). The other filters stay for later parts of the architecture (server, network, game).</footer>
+<footer>Engine, server and network items are locked (ADRs 0001–0043, RTEP v1.0). The other filters stay for the parts still ahead (client, game).</footer>
 
 </div>
 

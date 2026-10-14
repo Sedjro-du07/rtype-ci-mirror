@@ -178,15 +178,15 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
 </nav>
 
 <header>
-  <div class="eyebrow">R-Type · Architecture · Part 1 of 7: Engine</div>
+  <div class="eyebrow">R-Type · Architecture · Parts 1–3 of 7: Engine, Server, Network</div>
   <h1>R-Type Engine Architecture</h1>
-  <p class="muted">The engine architecture is complete and locked. Solid borders are agreed, dashed borders are proposals waiting for the team, dotted borders are pieces we have not designed yet.</p>
-  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-09</span><span>status: locked</span><span>source of truth: Notion › 01 · Engine</span><span>class reference: <a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener">R-Type Engine Classes</a></span></div>
+  <p class="muted">The engine, the server part and the network protocol are designed and locked. The engine hosts several games at once in rooms, and speaks RTEP v1.0, a binary protocol over UDP and TCP. Solid borders are agreed, dashed borders are proposals waiting for the team, dotted borders are pieces we have not designed yet.</p>
+  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-14</span><span>status: locked</span><span>source of truth: Notion › 01 · Engine, 02 · Server, 03 · Network</span><span>class reference: <a href="https://claude.ai/artifact/QJCdiQcPYn15WT9iu8eF7B" target="_blank" rel="noopener">R-Type Engine Classes</a></span></div>
   <div class="tally">
-    <div><b>35</b><span class="chip s-locked">ADRs</span></div>
-    <div><b>12</b><span class="chip s-locked">Blocks locked</span></div>
-    <div><b>59</b><span class="chip s-locked">Engine tasks</span></div>
-    <div><b>0</b><span class="chip s-todo">Open</span></div>
+    <div><b>43</b><span class="chip s-locked">ADRs</span></div>
+    <div><b>3 / 7</b><span class="chip s-locked">Parts locked</span></div>
+    <div><b>79</b><span class="chip s-locked">Tasks (59 engine, 20 server)</span></div>
+    <div><b>v1.0</b><span class="chip s-locked">Protocol RFC</span></div>
   </div>
 </header>
 
@@ -199,7 +199,7 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
   <div class="layers">
     <div class="layer"><span class="n">4</span><span class="t">Content</span><span class="d">YAML scenes and prefabs, scripts, sprites, sounds. Changed without recompiling.</span><span class="w">game designers</span></div>
     <div class="layer"><span class="n">3</span><span class="t">Game module</span><span class="d">R-Type rules: Bydos, the Force, waves, score. Knows the engine, never SFML.</span><span class="w">gameplay devs</span></div>
-    <div class="layer engine"><span class="n">2</span><span class="t">Engine core</span><span class="d">Loop, ECS, TypeRegistry, InputMap, EventBus, scenes, assets, plugin loader, services.</span><span class="w">engine devs</span></div>
+    <div class="layer"><span class="n">2</span><span class="t">Engine core</span><span class="d">Loop, ECS, TypeRegistry, InputMap, EventBus, scenes, assets, plugin loader, services.</span><span class="w">engine devs</span></div>
     <div class="layer"><span class="n">1</span><span class="t">Plugins</span><span class="d">platform (SFML or raylib), audio, network, scripting. Implement interfaces the core defines.</span><span class="w">engine devs</span></div>
     <div class="layer"><span class="n">0</span><span class="t">OS and libraries</span><span class="d">Linux, Windows, SFML, raylib, Asio, miniaudio.</span><span class="w">third parties</span></div>
   </div>
@@ -454,8 +454,8 @@ extern "C" EXPORT void destroy_plugin(IPlugin* p) { delete p; }</pre>
         <tr><td class="id">E-09</td><td>Audio plugin</td><td>One <code>audio_miniaudio</code> plugin shared by both backends, since SFML 3 and raylib both use miniaudio internally.</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">E-10</td><td>Linking mode</td><td>Inspired by Unreal: every module is designed once, and a CMake option <code>ENGINE_DYNAMIC_MODULES</code> builds it either as a runtime <code>.so</code> / <code>.dll</code> (dev, Track 1 demo, editor) or statically into one binary (safety net, release). Shows all three kinds of modularity the subject lists.</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">E-11</td><td>Content layer</td><td>Three layers above the plugins: engine (C++), game module (C++ building blocks), content (YAML + scripts that assemble them). Designers add levels and enemies without touching C++. Model of Quake 3, Unity, Godot.</td><td><span class="chip s-locked">Locked</span></td></tr>
-        <tr><td class="id">E-12</td><td>Game module split</td><td>Either one <code>rtype_game</code> with client and server entry points, or <code>rtype_shared</code> + <code>rtype_server</code> + <code>rtype_client</code> as in Quake 3 and Source, so the server never ships client code. Revisited in the Server part.</td><td><span class="chip s-locked">Locked</span></td></tr>
-        <tr><td class="id">E-13</td><td>Server and engine boundary</td><td><b>Generic server role.</b> The engine provides everything an online Pong would also need (transport, connections, timeouts and crash notification, packet validation, network thread, replication, server role). The game module provides the server-side rules. <code>r-type_server</code> is the application: launcher and configuration. Lobby placement is decided in the Server part.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-12</td><td>Game module split</td><td><b>One game code, two builds.</b> A game is organised in <code>shared/</code>, <code>server/</code>, <code>client/</code>; <code>engine_add_game_module</code> builds <code>lib&lt;name&gt;_server</code> and <code>lib&lt;name&gt;_client</code>, and each role loads its own. The engine has the same split (<code>net/</code>, <code>server/</code>, <code>client/</code>). ADR 0040.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">E-13</td><td>Server and engine boundary</td><td><b>Generic server role.</b> The engine provides everything an online Pong would also need (transport, connections, timeouts and crash notification, packet validation, network thread, replication, server role). The game module provides the server-side rules. <code>r-type_server</code> is the application: launcher and configuration. The lobby lives in the engine, its rules in the game (ADR 0038, 0039).</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">E-14</td><td>C++ standard</td><td><b>C++23 with an allow-list:</b> all of C++20 except modules, plus <code>std::expected</code>, <code>std::move_only_function</code>, <code>std::print</code>, deducing this, <code>std::to_underlying</code>, <code>std::unreachable</code>. Fallback <code>tl::expected</code>. ADR 0017.</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">E-15</td><td>Data format</td><td><b>Data in YAML, behaviour in scripts.</b> Config, scenes, prefabs in YAML; waves, boss phases and special AI in scripts referenced from prefabs. ADR 0018.</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">E-16</td><td>Script language</td><td><b>Lua first</b> (<code>scripting_lua</code>, Lua + sol2). Your own language stays optional, as a second <code>IScripting</code> plugin or a small pattern language. ADR 0019.</td><td><span class="chip s-locked">Locked</span></td></tr>
@@ -467,8 +467,81 @@ extern "C" EXPORT void destroy_plugin(IPlugin* p) { delete p; }</pre>
         <tr><td class="id">ECS-3</td><td>Module components</td><td>Type-erased <code>IStorage</code> indexed by the TypeRegistry's <code>ComponentId</code>. The registry is cleared before a game module is unloaded, because the storages' code lives in that module.</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">ECS-4</td><td>Structural changes</td><td><b>Command buffer.</b> Systems record spawn, destroy, add and remove; changes apply at the end of each stage, where hooks fire. Editing a component's value stays immediate.</td><td><span class="chip s-locked">Locked</span></td></tr>
         <tr><td class="id">ECS-5</td><td>Entity identity card</td><td><b>Optional components</b> instead of the slides' fixed <code>EntityInfo</code>: <code>Name</code>, <code>Uuid</code>, <code>Parent</code>, <code>Children</code>. Typed tags (empty components) for C++, text tags for YAML and scripts.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr class="group"><td colspan="4">Server part (2026-10-14)</td></tr>
+        <tr><td class="id">S-1</td><td>Players and messages</td><td><b>The game sees players and typed messages, never sockets or bytes.</b> Explicit <code>startServer</code> / <code>connectTo</code>; <code>ENGINE_MESSAGE</code> structs encoded by reflection; each message picks <code>unreliable</code>, <code>reliable</code> (default) or <code>stream</code> (TCP). One <code>add&lt;T&gt;()</code>, the category comes from the macro. ADR 0036, 0037.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">S-2</td><td>Several games on one server</td><td><b>Rooms.</b> Each game is a room with its own world, events and tick. Part 1 hosts every room in one process on a thread pool (<code>ThreadPoolRoomHost</code>, "shared"); one process per room is the Part 2 Track 1 demo. 8 rooms by default. ADR 0038.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">S-3</td><td>Lobby, parties, rooms</td><td>Every player is always in a party (a party of 1 at first). The engine provides the mechanics (<code>Lobby</code>, <code>RoomHandle</code>, <code>ClientLobby</code>, three contexts); the game decides the rules (who starts, solo allowed, end of a game). A failed room stops alone and the game decides. ADR 0039.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">S-4</td><td>Capacity</td><td><code>net.maxClients</code> 32 for the whole server, lobby included (8 rooms × 4 players); every limit is a setting.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr class="group"><td colspan="4">Network part (2026-10-14)</td></tr>
+        <tr><td class="id">N-1</td><td>Who optimises</td><td><b>The engine gives the means, the game team optimises.</b> The engine is used without its code: it owns the bytes and exposes settings (budget, priority, relevance, quantisation) and extension points; prediction belongs to the game; engine interpolation is a default that can be turned off. ADR 0041.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">N-2</td><td>Admission</td><td>The engine refuses only what it cannot decode (protocol version, game, types). The game accepts or refuses a player with its own reason, like Unreal's <code>PreLogin</code> or Unity's connection approval. ADR 0042.</td><td><span class="chip s-locked">Locked</span></td></tr>
+        <tr><td class="id">N-3</td><td>Protocol RTEP v1.0</td><td>Big-endian, magic "RT" + version, 16-byte UDP header with a session key and packet acks, TCP frames up to 64 KB, no fragmentation, replication sent until acknowledged, reconnection within 30 s with a single-use token, room transitions on the reliable UDP stream. 36 decisions (D1–D36), 40 scenarios. ADR 0043.</td><td><span class="chip s-locked">Locked</span></td></tr>
       </tbody>
     </table>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Server part</div>
+    <h2>One server, several games</h2>
+    <p class="muted">Players who are not in a game are in the lobby; players who play together form a party; each game is a room. The engine moves parties between the lobby and rooms; the game decides when.</p>
+  </div>
+  <div class="cols">
+<pre>r-type_server (one process, Part 1)
+ ├── Lobby          main thread, lobby code of the game
+ │    ├── Party 1: Ola (leader), Michel
+ │    └── Party 2: Sedjro        a party of 1
+ ├── Room 7         Party 1: own world, events, tick
+ └── Room 8         Party 2
+      rooms run on a thread pool, one thread at a time per room</pre>
+    <div class="panel">
+      <h3>Where code runs</h3>
+      <ul>
+        <li><b>Game systems</b> run in every room, with that room's <code>Context</code>.</li>
+        <li><b>Lobby code</b> runs once on the main thread, with a <code>LobbyContext</code> (no world).</li>
+        <li><b>Client code</b> asks through <code>ClientLobby</code> and changes scene on <code>EnteredRoom</code>.</li>
+        <li>Lobby and rooms talk only through messages, so one process per room stays possible in Part 2.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Network part</div>
+    <h2>RTEP v1.0 at a glance</h2>
+    <p class="muted">The protocol the engine speaks for every game. Everything in a running game travels on UDP; TCP carries only the connection and the lobby. Full specification: <code>docs/network/rfc.md</code>.</p>
+  </div>
+  <div class="layers">
+    <div class="layer"><span class="n">5</span><span class="t">Game messages</span><span class="d">The game's typed messages, ids 0x0100 and up; the only layer a game sees</span><span class="w">SRV-03, SRV-04</span></div>
+    <div class="layer"><span class="n">4</span><span class="t">Engine messages</span><span class="d">Lobby and party (TCP), room transitions (reliable UDP), snapshots and inputs (UDP)</span><span class="w">ENG-39, SRV-13, SRV-14, SRV-17</span></div>
+    <div class="layer"><span class="n">3</span><span class="t">Reliability</span><span class="d">Packet acks on every packet, reliable messages resent and delivered in order; UDP only</span><span class="w">SRV-05</span></div>
+    <div class="layer"><span class="n">2</span><span class="t">Session</span><span class="d">Hello, checks, admission by the game, link token, heartbeat, 30 s reconnection</span><span class="w">SRV-01, SRV-02, SRV-16</span></div>
+    <div class="layer"><span class="n">1</span><span class="t">Frame</span><span class="d">Magic "RT" + version; 16-byte UDP header; TCP length-prefixed frames</span><span class="w">ENG-38, SRV-06</span></div>
+    <div class="layer"><span class="n">0</span><span class="t">Transport</span><span class="d">The OS's UDP and TCP behind the <code>network_asio</code> plugin</span><span class="w">ENG-36, ENG-37</span></div>
+  </div>
+  <div class="cols">
+<pre> 0                   1                   2                   3
++-------------------------------+---------------+---------------+
+|        magic 0x5254 "RT"      |  version 1    |  kind         |
++-------------------------------+---------------+---------------+
+|                          sessionKey                           |
++-------------------------------+-------------------------------+
+|           sequence            |              ack              |
++-------------------------------+-------------------------------+
+|                    ackBits (32 packets)                       |
++---------------------------------------------------------------+
+|   messages: id · [messageSeq] · length · payload   (≤ 1200 B) |</pre>
+    <div class="panel">
+      <h3>Budgets it is designed for</h3>
+      <ul>
+        <li>≤ 64 KB/s down and ≤ 8 KB/s up per player, worst case; 32 players per server.</li>
+        <li>Playable at 150 ms round trip and 5 % loss; never broken at 20 %.</li>
+        <li>The subject's 5 KB/s test link: reached with the game's settings (budget, priority, 16-bit positions).</li>
+        <li>Measured by tasks SRV-20 (netem), fuzzed by SRV-18, visible in Wireshark with SRV-19.</li>
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -507,13 +580,15 @@ extern "C" EXPORT void destroy_plugin(IPlugin* p) { delete p; }</pre>
     <h2>What we design next, in order</h2>
   </div>
   <ol class="next">
-    <li><b>Engine architecture</b><span>Done: 12 blocks, ADRs 0001–0035, reference and guide in docs/engine/.</span></li>
-    <li class="now"><b>Engine tasks</b><span>59 tasks from the folder tree, self-assign on the Notion board.</span></li>
-    <li><b>Server part</b><span>Lobby, rooms, threads, robustness policy, game module split (E-12).</span></li>
-    <li><b>Network part</b><span>Protocol RFC: header, messages, reliability, byte order.</span></li>
+    <li><b>Engine</b><span>Done: 12 blocks, ADRs 0001–0035, reference and guide in docs/engine/, 59 tasks.</span></li>
+    <li><b>Server part</b><span>Done: rooms, lobby and parties, one game code in two builds; ADRs 0036–0040.</span></li>
+    <li><b>Network part</b><span>Done: RTEP v1.0 frozen, ADRs 0041–0043, 20 server tasks.</span></li>
+    <li class="now"><b>Client part</b><span>Menus and lobby screens, scene flow on the client, UI widgets (the team already has the design).</span></li>
+    <li><b>Game part</b><span>R-Type itself: components, systems, levels, bosses, Part II of the RFC.</span></li>
+    <li><b>Tooling and task distribution</b><span>CI, tests, package manager; final sharing of the work.</span></li>
   </ol>
 </section>
 
-<footer>Then: 02 Network (E-03 resolved there), 03 Server, 04 Client, 05 Game, 06 Tooling, 07 Task distribution.</footer>
+<footer>Parts: 01 Engine, 02 Server, 03 Network (done) · 04 Client, 05 Game, 06 Tooling, 07 Task distribution (ahead). Tasks are taken from the Notion boards, lowest wave first.</footer>
 
 </div>

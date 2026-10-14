@@ -122,10 +122,10 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
 </nav>
 
 <header>
-  <div class="eyebrow">R-Type · Architecture · Engine API</div>
+  <div class="eyebrow">R-Type · Architecture · Engine API · Engine, Server, Network</div>
   <h1>R-Type Engine Classes</h1>
-  <p class="muted">Every class, interface, struct and function of the engine, all locked. These cards summarise each type; the complete signatures with every method and what it does are in <code>docs/engine/reference/</code> (one page per block).</p>
-  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-09</span><span>round 8 · engine architecture locked</span><span>companion page: <a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener">R-Type Engine Architecture</a></span></div>
+  <p class="muted">Every class, interface, struct and function of the engine, including the server part (rooms, lobby, parties) and the protocol internals, all locked. These cards summarise each type; the complete signatures with every method and what it does are in <code>docs/engine/reference/</code> (one page per block).</p>
+  <div class="meta"><span>branch: architecture-task-distribution</span><span>updated: 2026-10-14</span><span>engine, server and network locked · RTEP v1.0</span><span>companion page: <a href="https://claude.ai/artifact/8SCfRPzicju1fSpgxRmfWF" target="_blank" rel="noopener">R-Type Engine Architecture</a></span></div>
   <div class="tally" id="tally"></div>
   <div class="legend">
     <div><span class="chip st-locked">Locked</span><br>Shape decided by a locked decision.</div>
@@ -544,7 +544,7 @@ struct Tags     { small_vector&lt;TagId&gt; ids; };   // text tags from YAML / s
 
 <!-- BLOCK 4-7 -->
 <section class="block" id="b4">
-  <div class="block-head"><h2>4–7 · Types, scheduling, events, input</h2><span class="k">engine/core · blocks 4 to 7 not designed yet</span></div>
+  <div class="block-head"><h2>4–7 · Types, scheduling, events, input</h2><span class="k">engine/core · blocks 4 to 7</span></div>
   <div class="cards">
 
     <article class="card" data-status="locked">
@@ -682,7 +682,7 @@ using TextureHandle = uint32_t;  // also SoundHandle, MusicHandle, FontHandle</p
 
 <!-- BLOCK 10-12 -->
 <section class="block" id="b10">
-  <div class="block-head"><h2>10–12 · Network, scenes and assets, services</h2><span class="k">later blocks</span></div>
+  <div class="block-head"><h2>10–12 · Network, scenes and assets, services</h2><span class="k">engine/net, engine/scene, engine/services · blocks 10 to 12</span></div>
   <div class="cards">
 
     <article class="card" data-status="locked">
@@ -692,20 +692,25 @@ using TextureHandle = uint32_t;  // also SoundHandle, MusicHandle, FontHandle</p
 
     <article class="card" data-status="locked">
       <div class="card-top"><span class="kind">class</span><span class="name">NetworkSession</span><span class="chip st-locked">Locked</span></div>
-      <p>The server lives in the engine; the game only sees players and typed messages (ADR 0037). It opens the server or connects explicitly, receives messages through callbacks run at the start of the frame, and never touches sockets or bytes. Each message chooses UDP, reliable UDP or TCP.</p>
+      <p>The server lives in the engine; the game only sees players and typed messages (ADR 0037). The game decides who joins through an admission callback (ADR 0042); a lost player keeps their place for 30 s (ADR 0043). It opens the server or connects explicitly, receives messages through callbacks run at the start of the frame, and never touches sockets or bytes. Each message chooses UDP, reliable UDP or TCP.</p>
       <div class="facts"><span><b>Patterns</b> Facade, Observer</span><span><b>Block</b> 10</span></div>
 <pre>class NetworkSession {
 public:
     Result&lt;void&gt; startServer(std::optional&lt;uint16_t&gt; port = {});
     void stopServer();
     Result&lt;void&gt; connectTo(std::string_view host, uint16_t port, std::string_view name);
+    template &lt;class T&gt; Result&lt;void&gt; connectTo(std::string_view host, uint16_t port,
+                                              std::string_view name, const T&amp; admissionData);
     void disconnect();
     std::span&lt;const PlayerId&gt; players() const;
+    void kick(PlayerId p, std::string_view reason);
+    template &lt;class T&gt; void admission(std::move_only_function&lt;Admission(const AdmissionRequest&amp;, const T&amp;)&gt;);
     template &lt;class T&gt; void send(PlayerId to, const T&amp;);
     template &lt;class T&gt; void broadcast(const T&amp;, std::optional&lt;PlayerId&gt; except = {});
     template &lt;class T&gt; Subscription on(std::move_only_function&lt;void(Context&amp;, PlayerId, const T&amp;)&gt;);
 };
-// events: PlayerJoined, PlayerLeft, JoinedServer, LeftServer</pre>
+// server: PlayerJoined, PlayerLeft{reason, message}, PlayerDisconnected, PlayerReconnected
+// client: JoinedServer, LeftServer{reason, message}, ConnectionInterrupted, Reconnected</pre>
     </article>
 
     <article class="card" data-status="locked">
@@ -752,6 +757,136 @@ public:
     <article class="card" data-status="locked">
       <div class="card-top"><span class="kind">class</span><span class="name">CVars · Console</span><span class="chip st-locked">Locked</span></div>
       <p>Console variables and developer console (Track 1 tooling).</p>
+    </article>
+
+  </div>
+</section>
+
+
+<section class="block" id="b13">
+  <div class="block-head"><h2>13–14 · Server: lobby, parties, rooms</h2><span class="k">engine/server, engine/client, engine/net · ADR 0038–0040, 0043</span></div>
+  <div class="cards">
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Lobby</span><span class="chip st-locked">Locked</span></div>
+      <p>The server-side game API for parties and rooms, reached from lobby code through <code>LobbyContext</code>. The engine applies; the game decides who starts, who joins and when a game ends.</p>
+      <div class="facts"><span><b>Patterns</b> Facade, Mediator</span><span><b>Task</b> SRV-13</span></div>
+<pre>class Lobby {
+public:
+    const Party&amp; partyOf(PlayerId p) const;
+    void sendInvite(PartyId p, PlayerId to);
+    void addToParty(PartyId p, PlayerId player);
+    void setLeader(PartyId p, PlayerId player);
+    RoomId createRoom(const RoomSettings&amp; settings);
+    void   moveParty(PartyId p, RoomId room);
+    void   moveToLobby(PartyId p, std::string_view reason = {});
+    void   closeRoom(RoomId room, std::string_view reason = {});
+    void   refuse(PlayerId to, LobbyRequest request, std::string_view reason);
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">RoomHandle</span><span class="chip st-locked">Locked</span></div>
+      <p>What a room's code sees of its room (<code>ctx.room()</code>): its players, subscriptions tied to its life, and how to report the end of the game.</p>
+      <div class="facts"><span><b>Task</b> SRV-13</span></div>
+<pre>class RoomHandle {
+public:
+    RoomId id() const;
+    std::span&lt;const PlayerId&gt; players() const;
+    void keep(Subscription s);
+    template &lt;class T&gt; void reportFinished(const T&amp; result);
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">ClientLobby</span><span class="chip st-locked">Locked</span></div>
+      <p>The client's requests to the lobby; answers come back as events. The engine sends <code>RoomReady</code> by itself once the client's scene switch is done.</p>
+      <div class="facts"><span><b>Task</b> SRV-14</span></div>
+<pre>class ClientLobby {
+public:
+    void invite(PlayerId player);
+    void answerInvite(PartyId p, bool accept);
+    void leaveParty();
+    void requestRoomList();
+    std::span&lt;const PlayerId&gt; onlinePlayers() const;
+    std::string_view name(PlayerId p) const;
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">RoomNetwork</span><span class="chip st-locked">Locked</span></div>
+      <p>The network as seen from a room: the same typed messages, limited to the room's players, plus who receives which entity.</p>
+      <div class="facts"><span><b>Task</b> SRV-14, SRV-17</span></div>
+<pre>class RoomNetwork {
+public:
+    std::span&lt;const PlayerId&gt; players() const;
+    template &lt;class T&gt; void broadcast(const T&amp; msg, std::optional&lt;PlayerId&gt; except = {});
+    void setRelevance(std::move_only_function&lt;bool(PlayerId, Entity)&gt; fn);
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">ServiceContext · LobbyContext</span><span class="chip st-locked">Locked</span></div>
+      <p>Three doors: <code>ServiceContext</code> (shared services), one <code>Context</code> per room, and <code>LobbyContext</code> for lobby code, which has no world.</p>
+      <div class="facts"><span><b>Task</b> SRV-09</span></div>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">interface</span><span class="name">IRoomHost</span><span class="chip st-locked">Locked</span></div>
+      <p>Where rooms run. <code>ThreadPoolRoomHost</code> ("shared", Part 1) ticks every room on a worker pool, one thread at a time per room; <code>ProcessRoomHost</code> ("dedicated") is the Part 2 demo.</p>
+      <div class="facts"><span><b>Pattern</b> Strategy</span><span><b>Task</b> SRV-11, SRV-12</span></div>
+<pre>class IRoomHost {
+public:
+    virtual Result&lt;void&gt; start(std::unique_ptr&lt;RoomRuntime&gt; room) = 0;
+    virtual void stop(RoomId room) = 0;
+    virtual void post(RoomId room, RoomMessage m) = 0;
+    virtual void collect(std::move_only_function&lt;void(RoomId, RoomMessage&amp;&amp;)&gt; toLobby) = 0;
+};</pre>
+    </article>
+
+  </div>
+</section>
+
+<section class="block" id="b15">
+  <div class="block-head"><h2>Protocol internals (RTEP v1.0)</h2><span class="k">engine/src/net · private to the engine · RFC sections</span></div>
+  <div class="cards">
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">Handshake</span><span class="chip st-locked">Locked</span></div>
+      <p>Hello, checks in a fixed order (version, game, types, name, capacity, then the game's admission), link token, Accepted or Refused. 16 pending connections at most, 4 per address, 5 s deadline. RFC §6.</p>
+      <div class="facts"><span><b>Pattern</b> State</span><span><b>Task</b> SRV-02</span></div>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">ReliableChannel</span><span class="chip st-locked">Locked</span></div>
+      <p>Packet sequence and 32-bit ack field on every UDP packet; reliable messages resent after 1.5 × RTT and delivered once, in order. RFC §7.</p>
+      <div class="facts"><span><b>Task</b> SRV-05</span></div>
+<pre>class ReliableChannel {
+public:
+    uint16_t nextSequence();
+    void queue(uint16_t messageId, std::span&lt;const std::byte&gt; payload);
+    bool onPacket(uint16_t seq, uint16_t ack, uint32_t ackBits, double now);
+    std::vector&lt;Delivered&gt; deliverable();
+    std::vector&lt;uint16_t&gt;  newlyAcked();
+};</pre>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">ReplicationState</span><span class="chip st-locked">Locked</span></div>
+      <p>Per player: which spawns, destroys and component bytes were acknowledged. Snapshots carry only what is missing, by priority, within the budget. RFC §9.</p>
+      <div class="facts"><span><b>Task</b> SRV-17</span></div>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">GraceTable · ClientReconnector</span><span class="chip st-locked">Locked</span></div>
+      <p>A lost session waits 30 s for its single-use token; the client reconnects by itself every 2 s and relinks UDP after 1 s of silence. RFC §6.7.</p>
+      <div class="facts"><span><b>Task</b> SRV-16</span></div>
+    </article>
+
+    <article class="card" data-status="locked">
+      <div class="card-top"><span class="kind">class</span><span class="name">StreamFramer · MessageDispatcher</span><span class="chip st-locked">Locked</span></div>
+      <p>TCP frames (length u32, id u16, payload, ≤ 64 KB) and message id ↔ type, with callbacks that never let an exception escape. RFC §4.3, §4.5.</p>
+      <div class="facts"><span><b>Task</b> SRV-06, SRV-03</span></div>
     </article>
 
   </div>
