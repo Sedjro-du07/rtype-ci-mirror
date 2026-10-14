@@ -15,7 +15,7 @@ How to read the tables:
 - Paths are relative to `engine/`. `inc/` means `include/engine/`.
 - 🔒 = engine only: called by the engine itself, never by game code.
 
-Totals: **9 interfaces**, **~60 classes and structs**, **20 engine components**, **20 engine systems**,
+Totals: **9 interfaces**, **~65 classes and structs** (6 private to the server layer), **20 engine components**, **20 engine systems**,
 **5 Null Objects**, **7 plugin classes**, **8 macros**, **3 CMake functions**.
 
 ---
@@ -101,7 +101,6 @@ Totals: **9 interfaces**, **~60 classes and structs**, **20 engine components**,
 | `YamlNode`, `YamlWriter`, `LoadContext`, `SaveContext` | class | `inc/reflection/Yaml.hpp`, `src/reflection/Yaml.cpp` | ENG-23 | wrappers over yaml-cpp (kept out of game headers), one generic YAML codec per `FieldKind` (lists, structs, enums by name) |
 | `ByteWriter` | class | `inc/reflection/ByteStream.hpp`, `src/reflection/ByteStream.cpp` | ENG-24 | ctor, `write` ×7, `writeBits`, `size`, `overflowed` |
 | `ByteReader` | class | same | ENG-24 | ctor, `u8`, `u16`, `u32`, `u64`, `i32`, `f32`, `string`, `bits`, `remaining`, `failed` |
-| Generic binary codec | function | `src/reflection/ByteStream.cpp` | ENG-24 | `encode` / `decode` walking `TypeInfo::fields` for any type; list count checked before allocating; `Entity` through `WireContext` |
 | Engine components | struct | `inc/components/*.hpp` | ENG-25 | `Position`, `PreviousPosition`, `Velocity`, `Sprite`, `Animation`, `Text`, `Collider`, `Lifetime`, `Parallax`, `Name`, `Uuid`, `Tags`, `Parent`, `Children`, `Script` (+ net components, block 10) |
 | `registerEngineTypes` | function | `src/systems/RegisterEngineTypes.cpp` | ENG-25 | registers every engine component and event with fields and flags, before the game |
 
@@ -171,10 +170,22 @@ Totals: **9 interfaces**, **~60 classes and structs**, **20 engine components**,
 | `Datagram`, `NetConfig`, `ConnectionStats` | struct | same | ENG-36 | fields only |
 | **`INetwork`** | interface | `inc/net/INetwork.hpp` | ENG-36 | declares `openUdp`, `closeUdp`, `sendUdp`, `setReceiver`, `listenTcp`, `connectTcp`, `sendTcp`, `setTcpReceiver`, `closeTcp` |
 | `AsioNetwork` | plugin | `plugins/network_asio/AsioNetwork.*` | ENG-37 | every `IPlugin` + `INetwork` method, **UDP and TCP from Part 1**; one `io_context` on its own thread |
-| `NetworkSession` | class | `inc/net/NetworkSession.hpp`, `src/net/NetworkSession.cpp` | ENG-38 | ctor, `attach` 🔒; `startServer`, `stopServer`, `connectTo`, `disconnect`; `players`, `localPlayer`, `name`, `kick`, `ping`, `stats`, `isServer`, `connected`; `send<T>` ×2, `broadcast<T>`, `on<T>` ×2 (RAII, exceptions caught); `poll` 🔒 (bounded inbox, validation, handshake with name and fingerprint, TCP ↔ UDP link per player, heartbeats, timeouts, player events, callbacks); `sendRaw` 🔒. **Bytes: protocol RFC (Network part)** |
+| `NetworkSession` | class | `inc/net/NetworkSession.hpp`, `src/net/NetworkSession.cpp` | ENG-38, SRV-01, SRV-03 | core (ENG-38): ctor, `attach` 🔒, `poll` 🔒 (bounded inbox, validation, routing, heartbeats, timeouts), `sendRaw` 🔒, `isServer`, `connected`, `stats`. Game API: `startServer`, `stopServer`, `connectTo`, `disconnect`, `players`, `localPlayer`, `name`, `kick`, `ping` (SRV-01); `send<T>` ×2, `broadcast<T>`, `on<T>` ×2 (SRV-03). **Bytes: protocol RFC (Network part)** |
 | Net components | struct | `inc/net/NetComponents.hpp` | ENG-39 | `NetworkId`, `NetPrefab`, `NetOwner`, `RemoteInput`, `NetInterpolation` + registration |
 | `NetworkIdMap` | class | `inc/net/NetworkIdMap.hpp`, `src/net/NetworkIdMap.cpp` | ENG-39 | `allocate`, `bind`, `unbind`, `find`, `clear` |
 | Net systems | system | `src/systems/NetSystems.cpp` | ENG-39 | `engine.net.assign_ids`, `snapshot`, `apply_snapshot`, `interpolate`, `send_input`, `receive_input` |
+
+## Server layer (private classes) — SRV-01 to SRV-07 · [reference 10](reference/10-network.md#internal-structure-engine-only--enginesrcnet) · [server tasks](../server/tasks.md)
+
+| Item | Kind | File | Task | To implement |
+|---|---|---|---|---|
+| `PlayerTable` | class | `src/net/PlayerTable.hpp`, `.cpp` | SRV-01 | `add`, `remove`, `playerOf`, `connectionOf`, `name`, `players` |
+| `Handshake` | class | `src/net/Handshake.hpp`, `.cpp` | SRV-02 | state machine: name, fingerprint, `ServerFull` / `FormatMismatch`, TCP ↔ UDP link |
+| `MessageDispatcher` | class | `src/net/MessageDispatcher.hpp`, `.cpp` | SRV-03 | `idOf`, `typeOf`, `add`, `dispatch` (exceptions caught) |
+| `Codec` | class | `src/reflection/Codec.hpp`, `.cpp` | SRV-04 | generic `encode` / `decode`: lists, structs, enums, `Entity` via `WireContext`, limits |
+| `ReliableChannel` | class | `src/net/ReliableChannel.hpp`, `.cpp` | SRV-05 | `send`, `onAck`, `accept`, `due` |
+| `StreamFramer` | class | `src/net/StreamFramer.hpp`, `.cpp` | SRV-06 | `feed`, `next`, size limit |
+| Server tests | tests | `tests/net/players/`, `tests/net/messages/`, `tests/reflection/codec/` | SRV-07 | players, handshake, messages on three transports, codec fuzzing |
 
 ## 11 · Scenes, prefabs, assets — ENG-40 to ENG-43 · [reference 11](reference/11-scenes-assets.md)
 

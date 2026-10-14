@@ -140,6 +140,59 @@ Every datagram is checked against `maxDatagramBytes`, the protocol magic/version
 bounds before any handler runs; every stream message against `maxStreamMessageBytes`. A malformed
 input is dropped and counted; it never throws, allocates beyond the limit, or reaches game code.
 
+## Internal structure (engine only) — `engine/src/net/`
+
+`NetworkSession` is a facade over small private classes. Their headers live next to their sources
+in `engine/src/net/`, not under `include/`, so games cannot include them. Tasks: server board.
+
+| Class | File | Task | Responsibility |
+|---|---|---|---|
+| `PlayerTable` | `src/net/PlayerTable.hpp` | SRV-01 | `PlayerId` ↔ `ConnectionId`, names, allocation and release of ids |
+| `Handshake` | `src/net/Handshake.hpp` | SRV-02 | connection state machine on both sides: name, format fingerprint, refusals, TCP ↔ UDP link |
+| `MessageDispatcher` | `src/net/MessageDispatcher.hpp` | SRV-03 | message id ↔ `TypeInfo`, `on<T>` callback lists, safe invocation (exceptions caught) |
+| `ReliableChannel` | `src/net/ReliableChannel.hpp` | SRV-05 | per connection: sequence numbers, acknowledgements, resends, duplicate drop for `reliable()` |
+| `StreamFramer` | `src/net/StreamFramer.hpp` | SRV-06 | cuts a TCP byte stream into messages; refuses announced sizes over `maxStreamMessageBytes` |
+| `Codec` | `src/reflection/Codec.hpp` | SRV-04 | generic `encode` / `decode` of any registered type (lists, structs, enums, `Entity` through `WireContext`) |
+
+```cpp
+class PlayerTable {
+public:
+    PlayerId add(ConnectionId c, std::string name);       // next free id, never 0
+    void     remove(PlayerId p);
+    PlayerId playerOf(ConnectionId c) const;              // 0 if unknown
+    ConnectionId connectionOf(PlayerId p) const;
+    std::string_view name(PlayerId p) const;
+    std::span<const PlayerId> players() const;
+};
+
+class MessageDispatcher {
+public:
+    explicit MessageDispatcher(const TypeRegistry& types, Logger& log);
+    uint16_t idOf(uint64_t typeKey) const;                // position in TypeRegistry::messages()
+    const TypeInfo* typeOf(uint16_t id) const;            // nullptr → message dropped and counted
+    Subscription add(uint64_t typeKey, std::move_only_function<void(Context&, PlayerId, const void*)> fn);
+    void dispatch(Context& ctx, PlayerId from, uint16_t id, ByteReader& payload, const WireContext& wire);
+};
+
+class ReliableChannel {
+public:
+    void     send(uint16_t messageId, std::span<const std::byte> payload, double now);
+    void     onAck(/* ack fields defined by the protocol RFC */);
+    bool     accept(uint32_t sequence);                   // false for duplicates
+    std::vector<Pending> due(double now);                 // to resend
+};
+
+class StreamFramer {
+public:
+    explicit StreamFramer(uint32_t maxMessageBytes);
+    Result<void> feed(std::span<const std::byte> bytes);  // error → close the stream
+    std::optional<std::vector<std::byte>> next();         // one complete message, or nothing yet
+};
+```
+
+`Handshake` and `Codec` signatures follow the protocol RFC (bytes) and block 4 (`TypeInfo`); their
+behaviour is fixed above and in ADR 0037.
+
 ## Replication
 
 ### Components — `net/NetComponents.hpp`

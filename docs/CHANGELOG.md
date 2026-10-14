@@ -7,6 +7,31 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — task details, server board, generated tree
+
+### Added
+
+- I added one detail page per task in `docs/tasks/` (66 pages: goal, files, dependencies, what it
+  unlocks, what to read, a checklist of what to implement, how to know it is done, traps). The task
+  tables link every ID to its page, and the Notion task pages carry the same content.
+- I created the server task board (`docs/server/tasks.md` and Notion **Server — folder tree & tasks**)
+  with SRV-01 to SRV-07, derived from ADR 0037: players, handshake, typed messages, generic codec,
+  reliable UDP, TCP framing, tests.
+- New private classes and their skeletons in `engine/src/net/` (`PlayerTable`, `Handshake`,
+  `MessageDispatcher`, `ReliableChannel`, `StreamFramer`) and `engine/src/reflection/Codec`, documented
+  in reference 10 ("Internal structure"). Private headers live next to their sources, outside `include/`.
+- `docs/tasks/tasks.py` and `docs/tasks/details.py` are now the single source of the tasks;
+  `python3 docs/tasks/generate.py` regenerates the tables, detail pages, folder tree, folder READMEs and
+  missing skeletons. Every skeleton header now points to its detail page.
+- The documentation viewer opens links between pages inside the viewer (they used to 404) and keeps
+  the current page in the address (`index.html#tasks/SRV-03.md`).
+
+### Changed
+
+- ENG-38 is now the session core only (connections, inbox, validation, heartbeat, timeouts); the
+  game-facing layers moved to SRV-01 and SRV-03. ENG-37 implements TCP from Part 1. ENG-39 depends on
+  the generic codec (SRV-04).
+
 ## [2026-10-14] — server part, round 1: players and typed messages
 
 ### Added

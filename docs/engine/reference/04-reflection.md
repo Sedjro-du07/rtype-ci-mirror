@@ -203,7 +203,8 @@ field list of any type: no code per component or message. Per field kind:
 | asset handles | handle | path | path |
 
 A decode failure (missing bytes, limit exceeded, unknown enum value) rejects the whole value: no
-partial object reaches game code.
+partial object reaches game code. The binary codec is the private class `Codec` (`engine/src/reflection/Codec.hpp`,
+task SRV-04); the YAML codec lives in `Yaml.cpp` (ENG-23).
 
 ## Byte streams — `reflection/ByteStream.hpp`
 

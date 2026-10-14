@@ -1,11 +1,11 @@
 # `engine/plugins/network_asio/`
 
-Placeholder created from the engine architecture (2026-10-09). Replace this file's list as files are written.
+Placeholder created from the architecture. Replace this file's list as files are written.
 
-| File to create | Task |
-|---|---|
-| `AsioNetwork.cpp` | ENG-37 — network_asio plugin: UDP and optional TCP on an I/O thread |
-| `AsioNetwork.hpp` | ENG-37 — network_asio plugin: UDP and optional TCP on an I/O thread |
-| `CMakeLists.txt` | ENG-37 — network_asio plugin: UDP and optional TCP on an I/O thread |
+| File to create | Task | Details |
+|---|---|---|
+| `AsioNetwork.cpp` | ENG-37 — network_asio plugin: UDP and TCP on an I/O thread | `docs/tasks/ENG-37.md` |
+| `AsioNetwork.hpp` | ENG-37 — network_asio plugin: UDP and TCP on an I/O thread | `docs/tasks/ENG-37.md` |
+| `CMakeLists.txt` | ENG-37 — network_asio plugin: UDP and TCP on an I/O thread | `docs/tasks/ENG-37.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

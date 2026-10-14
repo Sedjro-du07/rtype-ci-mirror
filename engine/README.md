@@ -1,10 +1,9 @@
-# Engine
+# `engine/`
 
-Game-agnostic engine library. R-Type (`games/rtype/`) is its first client.
+Placeholder created from the architecture. Replace this file's list as files are written.
 
-- How to use it: `docs/engine/guide/README.md`
-- Architecture reference (every class and method): `docs/engine/reference/README.md`
-- Folder tree and file ownership: `docs/engine/folder-tree.md`
-- Tasks: `docs/engine/tasks.md` and the Notion board
+| File to create | Task | Details |
+|---|---|---|
+| `CMakeLists.txt` | ENG-01 — Engine CMake project, options and C++23 setup | `docs/tasks/ENG-01.md` |
 
-Status: architecture locked (2026-10-09), implementation not started.
+Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

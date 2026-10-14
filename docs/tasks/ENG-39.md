@@ -1,0 +1,55 @@
+# ENG-39 · Replication: NetworkIdMap, net components, snapshot and input systems
+
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **10 Network** · status and owner live on the board.
+
+## Goal
+
+Replication of entities from server to clients.
+
+## Files
+
+Relative to `engine/`. Each file already exists as a skeleton naming this task.
+
+- `include/engine/net/NetworkIdMap.hpp`
+- `include/engine/net/NetComponents.hpp`
+- `src/net/NetworkIdMap.cpp`
+- `src/systems/NetSystems.cpp`
+
+## Depends on
+
+- [ENG-38](ENG-38.md) — NetworkSession core: connections, bounded inbox, validation, heartbeat, timeouts
+- [ENG-18](ENG-18.md) — Registry: typed and type-erased access, identity, hierarchy
+- [ENG-22](ENG-22.md) — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)
+- [ENG-29](ENG-29.md) — InputMap and ActionState: input.yaml, rebinding, accessibility options, masks
+- [SRV-04](SRV-04.md) — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits
+
+## Unlocks
+
+- no task waits for this one
+
+## Read first
+
+- [ADR 0033](../adr/0033-engine-networking.md)
+- protocol RFC (Network part, not written yet)
+
+## To implement
+
+- [ ] `NetworkIdMap`
+- [ ] Net components and their registration
+- [ ] Systems assign_ids, snapshot, apply_snapshot, interpolate, send_input, receive_input
+
+## Done when
+
+- Two headless clients see the same spawned entities as the server
+
+## Watch out
+
+- Uses the generic codec (SRV-04) for Replicated components
+- Unknown NetworkId on a client → ignored, never a crash
+
+## Workflow
+
+1. Claim the task on the board (Owner, Status = Claimed, Claimed on).
+2. Start when every dependency is at least *In review*, or agree on the interface with its owner.
+3. Implement, with tests; open a pull request and set *In review*.
+4. Merged → *Done* and Completed on.

@@ -1,7 +1,7 @@
 # `engine/tests/headless/`
 
-Placeholder created from the engine architecture (2026-10-09). Replace this file's list as files are written.
+Placeholder created from the architecture. Replace this file's list as files are written.
 
-Task: ENG-57 — Headless smoke test in CI: client with Null plugins runs 1000 ticks
+Task: ENG-57 — Headless smoke test in CI: client with Null plugins runs 1000 ticks (details: `docs/tasks/ENG-57.md`)
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

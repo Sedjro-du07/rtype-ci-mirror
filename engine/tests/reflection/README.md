@@ -1,7 +1,7 @@
 # `engine/tests/reflection/`
 
-Placeholder created from the engine architecture (2026-10-09). Replace this file's list as files are written.
+Placeholder created from the architecture. Replace this file's list as files are written.
 
-Task: ENG-54 — Unit tests: ECS, reflection, commands, hooks
+Task: ENG-54 — Unit tests: ECS, reflection, commands, hooks (details: `docs/tasks/ENG-54.md`)
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

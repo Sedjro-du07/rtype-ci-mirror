@@ -2,13 +2,13 @@
 
 Scenes, prefabs, loader.
 
-Placeholder created from the engine architecture (2026-10-09). Replace this file's list as files are written.
+Placeholder created from the architecture. Replace this file's list as files are written.
 
-| File to create | Task |
-|---|---|
-| `Prefab.hpp` | ENG-41 — PrefabLibrary and instantiate |
-| `Scene.hpp` | ENG-43 — Scene and SceneManager: switch, persistent entities |
-| `SceneLoader.hpp` | ENG-42 — SceneLoader: two passes, errors with file:line, save |
-| `SceneManager.hpp` | ENG-43 — Scene and SceneManager: switch, persistent entities |
+| File to create | Task | Details |
+|---|---|---|
+| `Prefab.hpp` | ENG-41 — PrefabLibrary and instantiate | `docs/tasks/ENG-41.md` |
+| `Scene.hpp` | ENG-43 — Scene and SceneManager: switch, persistent entities | `docs/tasks/ENG-43.md` |
+| `SceneLoader.hpp` | ENG-42 — SceneLoader: two passes, errors with file:line, save | `docs/tasks/ENG-42.md` |
+| `SceneManager.hpp` | ENG-43 — Scene and SceneManager: switch, persistent entities | `docs/tasks/ENG-43.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

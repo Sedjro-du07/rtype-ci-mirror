@@ -1,0 +1,63 @@
+# ENG-04 · Core types: hash, Vec2/Rect/Color, Error, Result, BootError
+
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **01 Core** · status and owner live on the board.
+
+## Goal
+
+Write the leaf vocabulary every block uses: hashing, math types, errors and results.
+
+## Files
+
+Relative to `engine/`. Each file already exists as a skeleton naming this task.
+
+- `include/engine/core/Hash.hpp`
+- `include/engine/core/math/Vec2.hpp`
+- `include/engine/core/math/Rect.hpp`
+- `include/engine/core/math/Color.hpp`
+- `include/engine/core/Error.hpp`
+- `src/core/Error.cpp`
+
+## Depends on
+
+- nothing: can start now
+
+## Unlocks
+
+- [ENG-07](ENG-07.md) — EngineConfig: YAML file and command-line overrides
+- [ENG-11](ENG-11.md) — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE
+- [ENG-12](ENG-12.md) — DynamicLibrary for Linux and Windows
+- [ENG-22](ENG-22.md) — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)
+- [ENG-24](ENG-24.md) — ByteWriter / ByteReader: bounds-checked, bit packing
+- [ENG-26](ENG-26.md) — Scheduler: stages, names, after/before, roles, stats, failure policy
+- [ENG-28](ENG-28.md) — Keys, RawInputEvent, ActionId
+- [ENG-30](ENG-30.md) — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform
+- [ENG-44](ENG-44.md) — Logger and sinks (console, file, developer console)
+
+## Read first
+
+- [ADR 0017](../adr/0017-cpp23-with-allow-list.md)
+- [ADR 0024](../adr/0024-error-handling-policy.md)
+- [reference 01](../engine/reference/01-core.md)
+
+## To implement
+
+- [ ] `fnv1a64` as `constexpr` (usable in templates and macros)
+- [ ] `Vec2` (operators, `dot`, `length`, `normalized`, `lerp`), `Rect` (`contains`, `intersects`), `Color` (named constants)
+- [ ] `Errc` (15 codes), `Error` with `toString()` → `file:line: message`
+- [ ] `Result<T>` alias, `BootError` with exit code
+
+## Done when
+
+- Unit tests: hash known values at compile time (`static_assert`), rect intersection edges, `Error::toString` with and without file
+
+## Watch out
+
+- No engine include in `core/`: it is the bottom layer
+- `Error::message` is a full sentence; suggestions ("did you mean") are added by callers
+
+## Workflow
+
+1. Claim the task on the board (Owner, Status = Claimed, Claimed on).
+2. Start when every dependency is at least *In review*, or agree on the interface with its owner.
+3. Implement, with tests; open a pull request and set *In review*.
+4. Merged → *Done* and Completed on.

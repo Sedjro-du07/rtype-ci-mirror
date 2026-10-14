@@ -1,13 +1,13 @@
 # `engine/plugins/scripting_lua/`
 
-Placeholder created from the engine architecture (2026-10-09). Replace this file's list as files are written.
+Placeholder created from the architecture. Replace this file's list as files are written.
 
-| File to create | Task |
-|---|---|
-| `CMakeLists.txt` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload |
-| `LuaApi.cpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload |
-| `LuaScripting.cpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload |
-| `LuaScripting.hpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload |
-| `Sandbox.cpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload |
+| File to create | Task | Details |
+|---|---|---|
+| `CMakeLists.txt` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload | `docs/tasks/ENG-49.md` |
+| `LuaApi.cpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload | `docs/tasks/ENG-49.md` |
+| `LuaScripting.cpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload | `docs/tasks/ENG-49.md` |
+| `LuaScripting.hpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload | `docs/tasks/ENG-49.md` |
+| `Sandbox.cpp` | ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload | `docs/tasks/ENG-49.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

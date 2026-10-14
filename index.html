@@ -153,9 +153,43 @@
 
       buildSidebar(docs);
 
-      if (docs.length > 0) {
-        loadDoc(docs[0].file);
+      const start = decodeURIComponent(location.hash.slice(1));
+      if (start) loadDoc(start);
+      else if (docs.length > 0) loadDoc(docs[0].file);
+      window.addEventListener("hashchange", () => {
+        const file = decodeURIComponent(location.hash.slice(1));
+        if (file && file !== currentFile) loadDoc(file);
+      });
+    }
+
+    let currentFile = null;
+
+    // "engine/guide/README.md" + "../reference/01-core.md" → "engine/reference/01-core.md"
+    function resolvePath(fromFile, href) {
+      const parts = fromFile.split("/").slice(0, -1);
+      for (const seg of href.split("/")) {
+        if (seg === "..") parts.pop();
+        else if (seg !== "." && seg !== "") parts.push(seg);
       }
+      return parts.join("/");
+    }
+
+    // Links between .md pages open inside the viewer instead of 404ing at the site root
+    function wireLinks(fromFile) {
+      content.querySelectorAll("a[href]").forEach(a => {
+        const href = a.getAttribute("href");
+        if (/^[a-z]+:|^#|^\//i.test(href)) return;            // external, anchor or absolute
+        const [path, anchor] = href.split("#");
+        if (!path.endsWith(".md")) return;
+        const target = resolvePath(fromFile, path);
+        a.setAttribute("href", "#" + target);
+        a.onclick = (e) => {
+          e.preventDefault();
+          loadDoc(target).then(() => {
+            if (anchor) document.getElementById(anchor)?.scrollIntoView();
+          });
+        };
+      });
     }
 
     function buildSidebar(docs) {
@@ -171,8 +205,15 @@
 
     async function loadDoc(file) {
       const res = await fetch(`docs/${file}`);
+      if (!res.ok) {
+        content.innerHTML = `<p>Page not found: <code>docs/${file}</code></p>`;
+        return;
+      }
       const text = await res.text();
       content.innerHTML = marked.parse(text);
+      currentFile = file;
+      if (location.hash.slice(1) !== file) history.replaceState(null, "", "#" + file);
+      wireLinks(file);
       highlightActive(file);
       addCopyButtons();
       scrollToTop();

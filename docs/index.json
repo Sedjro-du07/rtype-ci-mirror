@@ -196,6 +196,14 @@
     "title": "Engine tasks"
   },
   {
+    "file": "server/tasks.md",
+    "title": "Server tasks"
+  },
+  {
+    "file": "tasks/README.md",
+    "title": "Tasks — details (one page per task)"
+  },
+  {
     "file": "engine/real-engines-study.md",
     "title": "Study — how real engines attach a game"
   },

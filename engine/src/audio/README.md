@@ -1,9 +1,9 @@
 # `engine/src/audio/`
 
-Placeholder created from the engine architecture (2026-10-09). Replace this file's list as files are written.
+Placeholder created from the architecture. Replace this file's list as files are written.
 
-| File to create | Task |
-|---|---|
-| `AudioCaptions.cpp` | ENG-34 — IAudio, PlayParams, buses, captions |
+| File to create | Task | Details |
+|---|---|---|
+| `AudioCaptions.cpp` | ENG-34 — IAudio, PlayParams, buses, captions | `docs/tasks/ENG-34.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.
