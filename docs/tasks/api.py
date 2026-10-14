@@ -785,6 +785,10 @@ public:
 };'''),
 ]),
 'SRV-11': dict(extra=[
+    ('src/room/RoomRuntime.hpp', 'cpp', '''struct EngineServices {           // the shared, thread-safe services a room may use (ADR 0039)
+    const TypeRegistry& types;  Logger& log;  const CVars& cvars;  AssetManager& assets;  Metrics& metrics;
+    const EngineConfig& config;
+};'''),
     ('src/room/RoomMailbox.hpp', 'cpp', '''struct RoomMessage { enum class Kind : uint8_t { PlayerEntered, PlayerLeft, NetMessage, Finished, Failed, Close };
                      Kind kind; PlayerId player = 0; uint16_t messageId = 0; std::vector<std::byte> payload; };
 

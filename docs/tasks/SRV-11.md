@@ -19,6 +19,24 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
 
+### `src/room/RoomRuntime.hpp`
+
+```cpp
+struct EngineServices {           // the shared, thread-safe services a room may use (ADR 0039)
+    const TypeRegistry& types;  Logger& log;  const CVars& cvars;  AssetManager& assets;  Metrics& metrics;
+    const EngineConfig& config;
+};
+
+class RoomRuntime {
+public:
+    RoomRuntime(RoomId id, const RoomSettings& s, const EngineServices& services, const Scheduler& prototypes);
+    Result<void> start();                             // loads settings.level, instantiates systems
+    void tick();                                      // FixedUpdate / LateUpdate of this room; one thread at a time
+    RoomMailbox& inbox();  RoomMailbox& outbox();
+    bool failed() const;  RoomId id() const;
+};
+```
+
 ### `src/room/RoomMailbox.hpp`
 
 ```cpp
@@ -29,19 +47,6 @@ class RoomMailbox {                                   // multi-producer, single-
 public:
     void push(RoomMessage m);
     std::vector<RoomMessage> drain();
-};
-```
-
-### `src/room/RoomRuntime.hpp`
-
-```cpp
-class RoomRuntime {
-public:
-    RoomRuntime(RoomId id, const RoomSettings& s, const EngineServices& services, const Scheduler& prototypes);
-    Result<void> start();                             // loads settings.level, instantiates systems
-    void tick();                                      // FixedUpdate / LateUpdate of this room; one thread at a time
-    RoomMailbox& inbox();  RoomMailbox& outbox();
-    bool failed() const;  RoomId id() const;
 };
 ```
 
