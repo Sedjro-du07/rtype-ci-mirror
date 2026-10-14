@@ -40,12 +40,8 @@ public:
 // Room entry: on EnteredRoom the game switches scene; the engine sends RoomReady by itself once that
 // switch has completed (or at the end of the frame if none), and replication starts (RFC §8.3).
 
-// Additions of protocol v1 (ADR 0043); the rest comes from reference 14.
+// Private part of ClientLobby (the public part is above)
 class ClientLobby {
-public:
-    std::span<const PlayerId> onlinePlayers() const;  // OnlinePlayers / PlayerOnline / PlayerOffline
-    std::string_view name(PlayerId p) const;
-    bool connected(PlayerId p) const;
 private:
     void onEnteredRoom(uint16_t roomSession);         // waits for the scene switch, then sends RoomReady
 };

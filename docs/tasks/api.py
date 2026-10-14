@@ -889,12 +889,8 @@ public:
     bool     ready(PlayerId p) const;
     std::span<const PlayerId> playersIn(RoomId r) const;
 };'''),
-    ('include/engine/client/ClientLobby.hpp', 'cpp', '''// Additions of protocol v1 (ADR 0043); the rest comes from reference 14.
+    ('include/engine/client/ClientLobby.hpp', 'cpp', '''// Private part of ClientLobby (the public part is above)
 class ClientLobby {
-public:
-    std::span<const PlayerId> onlinePlayers() const;  // OnlinePlayers / PlayerOnline / PlayerOffline
-    std::string_view name(PlayerId p) const;
-    bool connected(PlayerId p) const;
 private:
     void onEnteredRoom(uint16_t roomSession);         // waits for the scene switch, then sends RoomReady
 };'''),
