@@ -1,6 +1,6 @@
 # ENG-33 · Colour-blindness filters and UI scale in platform_sfml
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **08 Rendering** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **08 Rendering** · **Wave 7** · status and owner live on the board.
 
 ## Goal
 

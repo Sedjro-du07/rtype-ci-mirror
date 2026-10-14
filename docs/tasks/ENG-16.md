@@ -1,6 +1,6 @@
 # ENG-16 · Entity and EntityAllocator (generations, free list)
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **03 ECS** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **03 ECS** · **Wave 1** · status and owner live on the board.
 
 ## Goal
 

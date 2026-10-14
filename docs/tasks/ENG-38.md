@@ -1,6 +1,6 @@
 # ENG-38 · NetworkSession core: connections, bounded inbox, validation, heartbeat, timeouts
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **10 Network** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **10 Network** · **Wave 5** · status and owner live on the board.
 
 ## Goal
 

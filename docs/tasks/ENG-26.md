@@ -1,6 +1,6 @@
 # ENG-26 · Scheduler: stages, names, after/before, roles, stats, failure policy
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **05 Scheduler** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **05 Scheduler** · **Wave 3** · status and owner live on the board.
 
 ## Goal
 

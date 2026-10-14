@@ -1,6 +1,6 @@
 # ENG-14 · ModuleManager: load by kind and name, version check, reverse unload
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **02 Modules** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **02 Modules** · **Wave 4** · status and owner live on the board.
 
 ## Goal
 

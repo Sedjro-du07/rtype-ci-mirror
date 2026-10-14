@@ -165,13 +165,42 @@ def api_section(t):
     return lines
 
 
+# ------------------------------------------------------------------ waves
+def compute_waves():
+    """Wave of a task = 1 + the highest wave among its dependencies (wave 1 = no dependency).
+    Tasks of the same wave can be done in parallel; take tasks from the lowest open wave."""
+    waves = {}
+
+    def wave(tid, path=()):
+        if tid in path:
+            sys.exit('dependency cycle: ' + ' -> '.join(path + (tid,)))
+        if tid not in waves:
+            waves[tid] = 1 + max((wave(d, path + (tid,)) for d in BY_ID[tid]['deps']), default=0)
+        return waves[tid]
+    for t in TASKS:
+        wave(t['id'])
+    return waves
+
+
+WAVES = compute_waves()
+
+
+def in_wave_order(tasks):
+    return sorted(tasks, key=lambda t: (WAVES[t['id']], t['id']))
+
+
+WAVE_NOTE = ('**Wave** = the order in which tasks can be done: a task\'s wave is one more than the highest wave of '
+             'its dependencies, so every task of a wave can be done in parallel once the earlier waves are done. '
+             'Take your next task from the lowest open wave.')
+
+
 # ------------------------------------------------------------------ detail pages
 def detail_page(t):
     d = DETAILS.get(t['id'], {})
     board = BOARDS[t['board']]
     lines = [f"# {t['id']} · {t['title']}", '',
              f"Board: **{board['name']}** ([Notion]({board['notion']})) · Phase **{t['phase']}** · "
-             f"status and owner live on the board.", '']
+             f"**Wave {WAVES[t['id']]}** · status and owner live on the board.", '']
     if d.get('goal'):
         lines += ['## Goal', '', d['goal'], '']
     lines += ['## Files', '', 'Relative to `engine/`. Each file already exists as a skeleton naming this task.', '']
@@ -208,14 +237,14 @@ def tasks_index():
     lines = ['# Tasks — details', '',
              'One page per task: goal, files, dependencies, what to implement, how to know it is done. '
              'Claiming happens on the Notion boards; this folder is where you read what a task means. '
-             'Generated from `tasks.py` and `details.py` by `generate.py`: edit those, not the pages.', '']
+             'Generated from `tasks.py` and `details.py` by `generate.py`: edit those, not the pages.', '', WAVE_NOTE, '']
     for key, b in BOARDS.items():
         lines += [f"## {b['title']}", '', f"Board: [Notion]({b['notion']}) · table: [`{b['doc']}`](../{b['doc'][5:]})", '',
-                  '| ID | Phase | Task | Depends on |', '|---|---|---|---|']
-        for t in TASKS:
+                  '| Wave | ID | Phase | Task | Depends on |', '|---|---|---|---|---|']
+        for t in in_wave_order(TASKS):
             if t['board'] == key:
                 deps = ', '.join(link_task(x, '') for x in t['deps']) or '—'
-                lines.append(f"| [{t['id']}]({t['id']}.md) | {t['phase']} | {t['title']} | {deps} |")
+                lines.append(f"| {WAVES[t['id']]} | [{t['id']}]({t['id']}.md) | {t['phase']} | {t['title']} | {deps} |")
         lines.append('')
     return '\n'.join(lines)
 
@@ -236,13 +265,14 @@ def board_table(key):
              'Nobody assigns tasks to anyone else.',
              'Start a task only when the tasks it depends on are at least *In review*, or agree on the interface with their owner first.',
              f'**What each task contains in detail:** click its ID (pages in [`docs/tasks/`]({base}README.md)), or open the task on the board.', '',
-             '| ID | Phase | Task | Files | Depends on | Ref |', '|---|---|---|---|---|---|']
-    for t in TASKS:
+             WAVE_NOTE + ' Waves count dependencies across both boards (engine and server).', '',
+             '| Wave | ID | Phase | Task | Files | Depends on | Ref |', '|---|---|---|---|---|---|---|']
+    for t in in_wave_order(TASKS):
         if t['board'] != key:
             continue
         files = '<br>'.join(f'`engine/{f}`' for f in t['files'])
         deps = ', '.join(t['deps']) or '—'
-        lines.append(f"| [{t['id']}]({base}{t['id']}.md) | {t['phase']} | {t['title']} | {files} | {deps} | {t['ref']} |")
+        lines.append(f"| {WAVES[t['id']]} | [{t['id']}]({base}{t['id']}.md) | {t['phase']} | {t['title']} | {files} | {deps} | {t['ref']} |")
     return '\n'.join(lines) + '\n'
 
 

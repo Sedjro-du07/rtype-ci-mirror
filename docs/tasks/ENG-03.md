@@ -1,6 +1,6 @@
 # ENG-03 · C++23 feature probe compiled on GCC, Clang and MSVC in CI
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **00 Build** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **00 Build** · **Wave 2** · status and owner live on the board.
 
 ## Goal
 

@@ -1,6 +1,6 @@
 # SRV-07 · Tests: players, handshake, messages, codec, malformed input
 
-Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **04 Tests** · status and owner live on the board.
+Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **04 Tests** · **Wave 8** · status and owner live on the board.
 
 ## Goal
 

@@ -1,6 +1,6 @@
 # SRV-02 · Handshake: player name, format fingerprint, ServerFull / FormatMismatch, TCP ↔ UDP link
 
-Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **01 Players** · status and owner live on the board.
+Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **01 Players** · **Wave 7** · status and owner live on the board.
 
 ## Goal
 

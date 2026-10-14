@@ -243,15 +243,14 @@ Totals: **9 interfaces**, **~65 classes and structs** (6 private to the server l
 
 ---
 
-## Suggested order
+## Order
 
-Start with what nothing depends on, then go up the header layers
-([reference README](reference/README.md#dependency-direction-between-blocks)):
+Tasks are done by **wave**: a task's wave is one more than the highest wave of its dependencies, so
+every task of a wave can be done in parallel once the earlier waves are done. The waves are computed
+from the dependencies by `docs/tasks/generate.py` and shown in [`tasks.md`](tasks.md),
+[`../server/tasks.md`](../server/tasks.md), [`../tasks/README.md`](../tasks/README.md) and the **Wave**
+column of the Notion boards.
 
-1. ENG-01, ENG-04, ENG-05, ENG-06, ENG-16 (build, core, entity)
-2. ENG-11, ENG-12, ENG-24, ENG-28, ENG-44 (module interfaces, byte streams, keys, logger)
-3. ENG-17 → ENG-22 → ENG-18 → ENG-19, ENG-20, ENG-21 (storage, reflection, registry)
-4. ENG-26, ENG-27, ENG-29, ENG-30 (scheduler, events, input, render API)
-5. ENG-14, ENG-15, ENG-31, ENG-40 → ENG-43 (module loading, SFML, assets, scenes)
-6. ENG-07 → ENG-08 → ENG-09 → ENG-10 (config, engine, context, launcher): first window
-7. Everything else, then the tests close each phase.
+Start with wave 1 (ENG-01, ENG-04, ENG-05, ENG-06, ENG-16). The whole engine runs for the first time
+at waves 10–11 (ENG-08 `Engine`, ENG-09 `Context`, ENG-10 launcher, ENG-57 headless test); until then
+each piece is checked by its unit tests.

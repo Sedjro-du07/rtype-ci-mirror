@@ -1,6 +1,6 @@
 # ENG-50 · Systems: previous_position, movement, hierarchy, parallax, lifetime
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **13 Engine systems** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **13 Engine systems** · **Wave 6** · status and owner live on the board.
 
 ## Goal
 

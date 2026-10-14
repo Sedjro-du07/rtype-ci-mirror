@@ -1,6 +1,6 @@
 # SRV-05 · ReliableChannel: acknowledged and resent UDP messages
 
-Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **03 Transports** · status and owner live on the board.
+Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **03 Transports** · **Wave 6** · status and owner live on the board.
 
 ## Goal
 

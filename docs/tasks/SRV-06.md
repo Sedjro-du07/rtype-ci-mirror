@@ -1,6 +1,6 @@
 # SRV-06 · StreamFramer: TCP message framing with size limit
 
-Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **03 Transports** · status and owner live on the board.
+Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **03 Transports** · **Wave 5** · status and owner live on the board.
 
 ## Goal
 

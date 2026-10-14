@@ -1,6 +1,6 @@
 # ENG-18 · Registry: typed and type-erased access, identity, hierarchy
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **03 ECS** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **03 ECS** · **Wave 4** · status and owner live on the board.
 
 ## Goal
 

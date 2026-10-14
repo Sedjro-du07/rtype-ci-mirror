@@ -1,6 +1,6 @@
 # SRV-03 · Typed messages: MessageDispatcher, send / broadcast / on<T>
 
-Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **02 Messages** · status and owner live on the board.
+Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **02 Messages** · **Wave 7** · status and owner live on the board.
 
 ## Goal
 
