@@ -224,6 +224,10 @@
     "title": "Network · 03 Layers"
   },
   {
+    "file": "network/04-decisions.md",
+    "title": "Network · 04 Design choices"
+  },
+  {
     "file": "tasks/README.md",
     "title": "Tasks — details (one page per task)"
   },

@@ -7,6 +7,13 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-14] — network part, step 4, round 1: byte order
+
+### Added
+
+- `docs/network/04-decisions.md`, D1: big-endian everywhere on the wire, floats as their IEEE 754
+  bit pattern. Reference 04, guide 27 and ENG-24 updated.
+
 ## [2026-10-14] — network part, step 3: layers
 
 ### Added

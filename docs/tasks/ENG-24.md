@@ -64,7 +64,7 @@ public:
 
 ## Watch out
 
-- Byte order is fixed by the protocol RFC: keep it in one place
+- Big-endian on the wire, floats via `std::bit_cast<uint32_t>` (network D1): keep it in one place
 
 ## Workflow
 

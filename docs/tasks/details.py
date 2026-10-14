@@ -166,7 +166,7 @@ DETAILS = {
     goal="Bounds-checked byte writing and reading: a malformed packet can never read or allocate out of range.",
     todo=["`ByteWriter` with a max size and `overflowed`", "`ByteReader` returning `std::optional`, `failed`", "Bit packing (`writeBits`, `bits`)"],
     done=["Tests: every read past the end fails cleanly; string longer than the limit fails"],
-    watch=["Byte order is fixed by the protocol RFC: keep it in one place"]),
+    watch=["Big-endian on the wire, floats via `std::bit_cast<uint32_t>` (network D1): keep it in one place"]),
 'ENG-25': dict(
     goal="The engine's built-in components and their registration.",
     todo=["Headers of reference 13 with `ENGINE_COMPONENT`", "`registerEngineTypes`: fields and flags (Position/Velocity/Sprite Replicated, PreviousPosition Transient…) and engine events"],

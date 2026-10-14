@@ -228,6 +228,7 @@ public:
 };
 ```
 
-Byte order and the encoding of each wire field are fixed by the protocol RFC (Network part).
+Byte order is big-endian, floats as their IEEE 754 bit pattern (network step 4, D1); the encoding of
+each wire field is fixed by the protocol RFC (Network part).
 These classes guarantee bounds and limits so that a malformed packet can never read or allocate
 out of range.

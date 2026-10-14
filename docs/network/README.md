@@ -7,7 +7,7 @@ Designing the protocol RFC, step by step. Each step is validated before the next
 | 1 · Scope: already decided, subject requirements, budgets, threats | [01-scope.md](01-scope.md) | validated |
 | 2 · Inventory of exchanges, as sequence diagrams, before any byte | [02-exchanges.md](02-exchanges.md) | validated (7 groups, 37 questions for step 4) |
 | 3 · Layers: frame, session, reliability, engine messages, game messages | [03-layers.md](03-layers.md) | validated |
-| 4 · Design choices, one by one | — | next |
+| 4 · Design choices, one by one | [04-decisions.md](04-decisions.md) | round 1 in progress |
 | 5 · RFC written as decisions land (engine protocol, then R-Type messages) | — | |
 | 6 · Validation on scenarios (loss, reorder, duplicates, malformed, full, version, reconnection) | — | |
 | 7 · Prototypes: real sizes, parser fuzzing, Wireshark dissector | — | |
