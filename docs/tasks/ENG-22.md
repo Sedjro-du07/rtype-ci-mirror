@@ -92,6 +92,12 @@ struct TypeInfo {
     Result<void> (*decode)(void* obj, ByteReader&, const WireContext&);
     Transport                 transport = Transport::Reliable; // messages only (block 10)
 };
+
+struct EnumInfo { std::vector<std::pair<std::string, int64_t>> values; };   // name ↔ value, filled by ENGINE_ENUM
+struct WireContext {                                   // Entity ↔ NetworkId for the binary codecs (block 10)
+    std::function<uint32_t(Entity)> networkIdOf;       // 0 if not replicated
+    std::function<Entity(uint32_t)> entityOf;          // Entity::null() if unknown
+};
 ```
 
 ### `include/engine/reflection/TypeBuilder.hpp`
@@ -127,13 +133,10 @@ template <class T> class EventBuilder  : public FieldsBuilder<T> {};   // fields
 template <class T> class StructBuilder : public FieldsBuilder<T> {};   // fields only
 template <class T> class EnumBuilder   {};                              // nothing: the macro said it all
 
-void RType::registerTypes(engine::TypeRegistry& types) {
-    types.add<Health>().field("hp", &Health::hp).field("maxHp", &Health::maxHp).flags(engine::Replicated);
-    types.add<BossDefeated>().field("score", &BossDefeated::score);
-    types.add<RoomInfo>().field("name", &RoomInfo::name).maxLength(32).field("players", &RoomInfo::players);
-    types.add<RoomList>().field("rooms", &RoomList::rooms).maxLength(32).stream();
-    types.add<EnemyKind>();
-}
+using FromYamlFn = Result<void> (*)(void* obj, const YamlNode& node, LoadContext& ctx);
+using ToYamlFn   = void         (*)(const void* obj, YamlWriter& out, SaveContext& ctx);
+using EncodeFn   = void         (*)(const void* obj, ByteWriter& out, const WireContext& wire);
+using DecodeFn   = Result<void> (*)(void* obj, ByteReader& in, const WireContext& wire);
 ```
 
 ### `include/engine/reflection/TypeRegistry.hpp`

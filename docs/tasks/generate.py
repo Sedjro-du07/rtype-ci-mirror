@@ -106,6 +106,8 @@ def reference_blocks():
             if key == 'src/net/':                      # private classes are listed per task in api.py
                 continue
             for lang, code in re.findall(r'```(cpp|cmake)?\n(.*?)```', parts[i + 1], flags=re.S):
+                if re.match(r'\s*void \w+::register', code):     # usage examples are not declarations
+                    continue
                 out.append((key, lang or 'cpp', code.rstrip()))
     return out
 

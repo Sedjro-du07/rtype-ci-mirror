@@ -184,6 +184,17 @@ private:
 };'''),
 ]),
 # ---------------------------------------------------------------- 04 Reflection
+'ENG-22': dict(extra=[
+    ('include/engine/reflection/TypeBuilder.hpp', 'cpp', '''using FromYamlFn = Result<void> (*)(void* obj, const YamlNode& node, LoadContext& ctx);
+using ToYamlFn   = void         (*)(const void* obj, YamlWriter& out, SaveContext& ctx);
+using EncodeFn   = void         (*)(const void* obj, ByteWriter& out, const WireContext& wire);
+using DecodeFn   = Result<void> (*)(void* obj, ByteReader& in, const WireContext& wire);'''),
+    ('include/engine/reflection/TypeInfo.hpp', 'cpp', '''struct EnumInfo { std::vector<std::pair<std::string, int64_t>> values; };   // name ↔ value, filled by ENGINE_ENUM
+struct WireContext {                                   // Entity ↔ NetworkId for the binary codecs (block 10)
+    std::function<uint32_t(Entity)> networkIdOf;       // 0 if not replicated
+    std::function<Entity(uint32_t)> entityOf;          // Entity::null() if unknown
+};'''),
+]),
 'ENG-23': dict(extra=[
     ('include/engine/reflection/Yaml.hpp', 'cpp', '''class YamlNode {                              // read-only view; hides yaml-cpp from game headers
 public:
