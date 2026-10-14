@@ -20,11 +20,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ### `src/reflection/Codec.hpp`
 
 ```cpp
-struct WireContext {                                     // declared in reflection/TypeInfo.hpp
-    std::function<uint32_t(Entity)> networkIdOf;         // 0 if not replicated (warning)
-    std::function<Entity(uint32_t)> entityOf;            // Entity::null() if unknown
-};
-
+// Uses WireContext (Entity <-> NetworkId), declared in reflection/TypeInfo.hpp by ENG-22.
 namespace codec {
 void         encode(const TypeInfo& type, const void* obj, ByteWriter& out, const WireContext& wire);
 Result<void> decode(const TypeInfo& type, void* obj, ByteReader& in, const WireContext& wire);   // obj default-constructed
