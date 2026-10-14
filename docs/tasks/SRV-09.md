@@ -58,23 +58,7 @@ public:
     Role               role() const;
 };
 
-class Context : public ServiceContext {     // a room on the server, the game on the client
-public:
-    Registry&          world();             // this room's world
-    Commands&          commands();
-    SceneManager&      scenes();            // switchTo changes the level of this room
-    EventBus&          events();            // this room's events only
-    const Time&        time() const;        // this room's tick
-    RoomNetwork&       network();           // server: only the players of this room; client: the session
-    RoomHandle&        room();              // server only (asserts on the client)
-    ClientLobby&       lobby();             // client only (asserts on the server)
-    const ActionState& input() const;       // client
-    InputMap&          inputMap();          // client
-    RenderQueue&       render();            // client
-    IAudio&            audio();             // client (NullAudio on the server)
-    Console&           console();           // client (the server console belongs to the lobby)
-    void               requestQuit();       // client only: a room cannot stop the server
-};
+// class Context : public ServiceContext  — declared in reference 01 (Context.hpp)
 
 class LobbyContext : public ServiceContext { // server lobby code, main thread
 public:
