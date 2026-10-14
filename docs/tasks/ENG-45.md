@@ -13,6 +13,36 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/services/CVars.hpp`
 - `src/services/CVars.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/services/CVars.hpp`
+
+```cpp
+enum CVarFlags : uint32_t { CVarNone = 0, Archive = 1, Cheat = 2, ReadOnly = 4, ServerOnly = 8 };
+
+template <class T> class CVar {               // T: bool, int, float, std::string
+public:
+    const T& value() const;
+    void set(T v);                            // validates range, fires onChange
+    [[nodiscard]] Subscription onChange(std::move_only_function<void(const T&)> fn);
+};
+
+class CVars {
+public:
+    template <class T> CVar<T>& define(std::string_view name, T defaultValue,
+                                       std::string_view description, uint32_t flags = CVarNone,
+                                       std::optional<std::pair<T, T>> range = {});
+    Result<void> set(std::string_view name, std::string_view value);  // console and config
+    std::optional<std::string> get(std::string_view name) const;
+    template <class T> CVar<T>* find(std::string_view name);
+    void forEach(std::move_only_function<void(const CVarInfo&)> fn) const;
+    Result<void> loadArchive(const std::filesystem::path& file);      // user settings (volumes, bindings options)
+    Result<void> saveArchive(const std::filesystem::path& file) const;// Archive-flagged only
+};
+```
+
 ## Depends on
 
 - [ENG-06](ENG-06.md) — Signal and RAII Subscription

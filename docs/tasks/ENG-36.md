@@ -13,6 +13,57 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/net/NetTypes.hpp`
 - `include/engine/net/INetwork.hpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/net/NetTypes.hpp`
+
+```cpp
+using PlayerId     = uint32_t;                         // what the game sees; 0 = none; one per connected player
+using ConnectionId = uint32_t;                         // engine-internal: one UDP endpoint and its TCP stream
+struct Endpoint { std::array<uint8_t, 16> address{}; uint16_t port = 0; bool v6 = false;
+                  std::string toString() const; static Result<Endpoint> resolve(std::string_view host, uint16_t port); };
+struct Datagram { Endpoint from; std::vector<std::byte> bytes; };
+// Transport (Unreliable, Reliable, Stream) is declared in reflection/TypeInfo.hpp and chosen per message.
+enum class DisconnectReason : uint8_t { Quit, Timeout, Kicked, ProtocolError, ServerShutdown,
+                                        ServerFull, FormatMismatch };   // the last two: refused at handshake
+
+struct NetConfig {
+    uint16_t port = 4242;
+    uint32_t maxClients = 4;
+    double   heartbeatSeconds = 0.5;
+    double   timeoutSeconds = 5.0;        // no packet for this long → ClientDisconnected{Timeout}
+    uint32_t maxDatagramBytes = 1200;     // larger datagrams are dropped, never allocated
+    uint32_t maxQueuedDatagrams = 1024;   // inbox bound per frame; excess is dropped and counted
+    double   snapshotRate = 20.0;         // replication snapshots per second
+    uint32_t maxNameLength = 16;          // player names longer than this are refused at handshake
+    uint32_t maxStreamMessageBytes = 65536; // TCP: a larger announced message closes the stream
+};
+
+struct ConnectionStats { double rttMs; double lossPercent; uint64_t bytesIn, bytesOut;
+                         uint64_t packetsIn, packetsOut, dropped; };
+```
+
+### `include/engine/net/INetwork.hpp`
+
+```cpp
+class INetwork : public IPlugin {
+public:
+    virtual Result<void> openUdp(uint16_t port) = 0;          // server: bind port; client: port 0
+    virtual void         closeUdp() = 0;
+    virtual void         sendUdp(const Endpoint& to, std::span<const std::byte> bytes) = 0; // thread-safe, copies
+    virtual void         setReceiver(std::move_only_function<void(Datagram&&)> onDatagram) = 0; // called on the I/O thread
+
+    // TCP, for Stream messages (lobby, room lists, text chat; ADR 0037). Same shape, stream-based.
+    virtual Result<void> listenTcp(uint16_t port) = 0;
+    virtual Result<uint32_t> connectTcp(const Endpoint& to) = 0;
+    virtual void         sendTcp(uint32_t stream, std::span<const std::byte> bytes) = 0;
+    virtual void         setTcpReceiver(std::move_only_function<void(uint32_t stream, std::span<const std::byte>)>) = 0;
+    virtual void         closeTcp(uint32_t stream) = 0;
+};
+```
+
 ## Depends on
 
 - [ENG-11](ENG-11.md) — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE

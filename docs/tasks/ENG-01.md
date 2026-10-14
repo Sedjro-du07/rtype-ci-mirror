@@ -13,6 +13,39 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `CMakeLists.txt`
 - `cmake/EngineOptions.cmake`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `CMakeLists.txt`
+
+```cmake
+cmake_minimum_required(VERSION 3.25)
+project(rtype_engine LANGUAGES CXX)
+include(cmake/EngineOptions.cmake)
+include(cmake/EngineModules.cmake)
+
+add_library(engine STATIC|SHARED <sources of src/**>)
+target_include_directories(engine PUBLIC include)
+target_compile_features(engine PUBLIC cxx_std_23)
+target_link_libraries(engine PUBLIC <third-party targets>)   # yaml-cpp stays PRIVATE
+add_subdirectory(plugins/<each plugin>)
+if(ENGINE_BUILD_TESTS)       add_subdirectory(tests)       endif()
+if(ENGINE_BUILD_BENCHMARKS)  add_subdirectory(benchmarks)  endif()
+```
+
+### `cmake/EngineOptions.cmake`
+
+```cmake
+option(ENGINE_DYNAMIC_MODULES   "Plugins and games as runtime-loaded libraries" ON)
+option(ENGINE_WARNINGS_AS_ERRORS "Treat warnings as errors"                      OFF)
+option(ENGINE_SANITIZERS         "Build with address and undefined sanitizers"   OFF)
+option(ENGINE_BUILD_TESTS        "Build engine/tests"                            ON)
+option(ENGINE_BUILD_BENCHMARKS   "Build engine/benchmarks"                       OFF)
+
+function(engine_set_warnings target)        # -Wall -Wextra -Wpedantic / /W4 (+ errors if enabled)
+```
+
 ## Depends on
 
 - nothing: can start now

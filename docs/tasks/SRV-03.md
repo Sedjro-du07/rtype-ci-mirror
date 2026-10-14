@@ -13,6 +13,43 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/net/MessageDispatcher.hpp`
 - `src/net/MessageDispatcher.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/net/MessageDispatcher.hpp`
+
+```cpp
+class MessageDispatcher {
+public:
+    MessageDispatcher(const TypeRegistry& types, Logger& log);
+    uint16_t        idOf(uint64_t typeKey) const;                 // position in TypeRegistry::messages()
+    const TypeInfo* typeOf(uint16_t id) const;                    // nullptr → dropped and counted
+    Subscription    add(uint64_t typeKey, std::move_only_function<void(Context&, PlayerId, const void*)> fn);
+    void            dispatch(Context& ctx, PlayerId from, uint16_t id, ByteReader& payload, const WireContext& wire);
+                                                                  // decode with Codec, call every callback, catch exceptions
+private:
+    std::vector<std::vector<Callback>> callbacks_;                // indexed by message id
+};
+```
+
+### `include/engine/net/NetworkSession.hpp`
+
+```cpp
+// The message part of NetworkSession (core: ENG-38, players: SRV-01).
+class NetworkSession {
+public:
+    template <class T> void send(PlayerId to, const T& msg);
+    template <class T> void send(const T& msg);
+    template <class T> void broadcast(const T& msg, std::optional<PlayerId> except = {});
+    template <class T> [[nodiscard]] Subscription on(std::move_only_function<void(Context&, PlayerId, const T&)> fn);
+    template <class T> [[nodiscard]] Subscription on(std::move_only_function<void(Context&, const T&)> fn);
+private:
+    MessageDispatcher dispatcher_;
+    void sendEncoded(PlayerId to, const TypeInfo& type, std::span<const std::byte> payload);  // picks UDP / reliable UDP / TCP
+};
+```
+
 ## Depends on
 
 - [SRV-01](SRV-01.md) — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping

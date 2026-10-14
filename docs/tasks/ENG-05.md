@@ -13,6 +13,29 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/core/Time.hpp`
 - `src/core/Time.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/core/Time.hpp`
+
+```cpp
+struct Time {
+    double   fixedDelta = 1.0 / 60.0; // seconds per FixedUpdate step; the dt every simulation system uses
+    uint64_t tick = 0;                // number of fixed steps since start
+    double   alpha = 0.0;             // [0,1): position between the last two ticks, for interpolation
+    double   total = 0.0;             // seconds of simulated time since start
+    double   frameDelta = 0.0;        // real seconds of the last frame (rendering, UI only)
+};
+
+class Clock {
+public:
+    Clock();                          // starts measuring
+    double restart();                 // seconds since construction or last restart, then resets
+    double elapsed() const;           // seconds since last restart, without resetting
+};
+```
+
 ## Depends on
 
 - nothing: can start now

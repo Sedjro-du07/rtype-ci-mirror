@@ -12,6 +12,32 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/ecs/Registry.hpp` (shared with [ENG-18](ENG-18.md))
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/ecs/Registry.hpp`
+
+```cpp
+// The hook part of Registry (the rest belongs to ENG-18).
+struct ComponentHooks {
+    Signal<void(Registry&, Entity)> onCreate;   // after the component is added
+    Signal<void(Registry&, Entity)> onReplace;  // after replace()
+    Signal<void(Registry&, Entity)> onDestroy;  // before the component is removed
+};
+
+class Registry {
+public:
+    template <class T> ComponentHooks& hooks();
+    ComponentHooks& hooks(ComponentId id);
+private:
+    std::vector<ComponentHooks> hooks_;         // indexed by ComponentId
+    void fireCreate(ComponentId, Entity);       // called by emplace / emplaceRaw / Commands::apply
+    void fireReplace(ComponentId, Entity);      // called by replace
+    void fireDestroy(ComponentId, Entity);      // called by remove / removeRaw / destroy, before removal
+};
+```
+
 ## Depends on
 
 - [ENG-18](ENG-18.md) — Registry: typed and type-erased access, identity, hierarchy

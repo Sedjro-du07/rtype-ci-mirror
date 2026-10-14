@@ -12,6 +12,12 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `tools/editor/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+> Part 2: the editor classes are designed when Track 1 opens. Expected pieces: an Editor role, a hierarchy panel, an inspector driven by TypeRegistry, scene save through SceneLoader::save.
+
 ## Depends on
 
 - [ENG-43](ENG-43.md) — Scene and SceneManager: switch, persistent entities

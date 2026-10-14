@@ -13,6 +13,53 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/net/NetworkSession.hpp` (shared with [SRV-01](SRV-01.md))
 - `src/net/NetworkSession.cpp` (shared with [SRV-01](SRV-01.md))
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+> The class below is shared: ENG-38 writes the core (constructor, attach, poll, sendRaw, isServer, connected, stats); SRV-01 the player methods; SRV-03 the message methods.
+
+### `include/engine/net/NetworkSession.hpp`
+
+```cpp
+class NetworkSession {
+public:
+    NetworkSession(EventBus& events, Logger& log, const NetConfig& config, const TypeRegistry& types);
+    void attach(INetwork& transport, NetworkIdMap& ids);   // engine only, after the plugin is loaded
+
+    // ---- Game API: opening and closing (ADR 0037, explicit) ----
+    Result<void> startServer(std::optional<uint16_t> port = {}); // server: open UDP + TCP on port
+                                                           // (default: NetConfig::port, i.e. --port / config)
+    void stopServer();                                     // tells every player (ServerShutdown), closes
+    Result<void> connectTo(std::string_view host, uint16_t port, std::string_view playerName); // client
+    void disconnect();                                     // client: leave (Quit)
+
+    // ---- Game API: players ----
+    std::span<const PlayerId> players() const;             // server: connected players
+    PlayerId         localPlayer() const;                  // client: my id (0 before JoinedServer)
+    std::string_view name(PlayerId p) const;               // name given to connectTo
+    void             kick(PlayerId p, std::string_view reason); // server
+    double           ping(PlayerId p) const;               // round-trip time in ms
+    ConnectionStats  stats(PlayerId p) const;              // lagometer, console "net"
+    bool isServer() const; bool connected() const;
+
+    // ---- Game API: typed messages (T registered with ENGINE_MESSAGE) ----
+    template <class T> void send(PlayerId to, const T& msg);           // server → one player
+    template <class T> void send(const T& msg);                        // client → server
+    template <class T> void broadcast(const T& msg, std::optional<PlayerId> except = {}); // server → all
+    template <class T> [[nodiscard]] Subscription on(
+        std::move_only_function<void(Context&, PlayerId from, const T&)> fn);   // server (and client)
+    template <class T> [[nodiscard]] Subscription on(
+        std::move_only_function<void(Context&, const T&)> fn);                  // client: from = server
+
+    // ---- Engine only ----
+    void poll(Context& ctx);   // drain inbox → validate size / header → route to connections →
+                               // handshake (name, format fingerprint), heartbeats, timeouts →
+                               // decode messages → call on<T> callbacks → publish player events
+    void sendRaw(ConnectionId to, Transport t, uint16_t messageId, std::span<const std::byte> payload);
+};
+```
+
 ## Depends on
 
 - [ENG-36](ENG-36.md) — INetwork and network types

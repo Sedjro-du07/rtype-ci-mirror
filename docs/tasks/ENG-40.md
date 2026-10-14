@@ -13,6 +13,34 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/assets/AssetManager.hpp`
 - `src/assets/AssetManager.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/assets/AssetManager.hpp`
+
+```cpp
+class AssetManager {
+public:
+    AssetManager(Logger& log, std::filesystem::path root);
+    void attach(IRenderer& renderer, IAudio& audio, IScripting& scripting); // engine only, after plugins load
+
+    TextureHandle texture(std::string_view path);  // loads once, returns the cached handle afterwards;
+                                                   // on failure logs the error and returns the "missing" texture
+    FontHandle    font(std::string_view path);     // failure → engine default font
+    SoundHandle   sound(std::string_view path);    // failure → invalid handle (play does nothing)
+    MusicHandle   music(std::string_view path);
+    ScriptHandle  script(std::string_view path);
+
+    std::string_view pathOf(TextureHandle) const;  // reverse lookup for saving scenes; same for other kinds
+    void retain(TextureHandle); void release(TextureHandle);   // reference counting (same for other kinds)
+    void collectUnused();                          // frees zero-count assets; called after a scene switch
+    void reloadChanged();                          // dev: re-reads files whose timestamp changed (CVar asset_hot_reload)
+    std::filesystem::path resolve(std::string_view path) const; // game root + path; rejects "../" escapes
+    AssetStats stats() const;                      // counts and bytes per kind
+};
+```
+
 ## Depends on
 
 - [ENG-30](ENG-30.md) — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform

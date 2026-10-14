@@ -14,6 +14,35 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/ecs/EntityAllocator.hpp`
 - `src/ecs/EntityAllocator.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/ecs/Entity.hpp`
+
+```cpp
+struct Entity {
+    uint32_t index = UINT32_MAX;       // slot in the storages
+    uint32_t generation = 0;           // incremented each time the slot is reused
+    static constexpr Entity null() noexcept;                // the invalid handle
+    constexpr bool isNull() const noexcept;
+    friend constexpr bool operator==(Entity, Entity) = default;
+};
+template <> struct std::hash<engine::Entity>;              // for unordered containers
+```
+
+### `include/engine/ecs/EntityAllocator.hpp`
+
+```cpp
+class EntityAllocator {
+public:
+    Entity create();                    // reuses a free slot (new generation) or appends one
+    void   release(Entity e);           // marks the slot free, bumps its generation
+    bool   alive(Entity e) const;       // index in range and generation matches
+    size_t aliveCount() const;
+};
+```
+
 ## Depends on
 
 - nothing: can start now

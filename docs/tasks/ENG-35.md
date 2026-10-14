@@ -14,6 +14,41 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `plugins/audio_miniaudio/MiniaudioAudio.hpp`
 - `plugins/audio_miniaudio/MiniaudioAudio.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `plugins/audio_miniaudio/MiniaudioAudio.hpp`
+
+```cpp
+class MiniaudioAudio final : public IAudio {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "miniaudio"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext& ctx) override;      // ma_engine_init, one ma_sound_group per bus
+    void shutdown() noexcept override;
+    Result<SoundHandle> createSound(std::span<const std::byte> encoded, std::string_view debugName) override;
+    void   destroySound(SoundHandle) override;
+    Result<MusicHandle> openMusic(const std::filesystem::path& file) override;
+    void   closeMusic(MusicHandle) override;
+    VoiceId play(SoundHandle s, const PlayParams& p) override;
+    void    stop(VoiceId v) override;
+    void    setVoiceVolume(VoiceId v, float volume) override;
+    void    playMusic(MusicHandle m, float fadeInSeconds) override;
+    void    stopMusic(float fadeOutSeconds) override;
+    void    setBusVolume(AudioBus bus, float volume) override;
+    float   busVolume(AudioBus bus) const override;
+    void    setListener(Vec2 position, float hearingRadius) override;
+    void    update() override;                                 // recycles finished voices
+private:
+    ma_engine                                   engine_;
+    std::array<ma_sound_group, 4>               buses_;
+    std::vector<ma_decoder>                     sounds_;        // decoded once, index = handle id - 1
+    std::unordered_map<VoiceId, ma_sound>       voices_;
+};
+ENGINE_PLUGIN(MiniaudioAudio)
+```
+
 ## Depends on
 
 - [ENG-34](ENG-34.md) — IAudio, PlayParams, buses, captions

@@ -13,6 +13,33 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/module/ModuleManager.hpp`
 - `src/module/ModuleManager.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/module/ModuleManager.hpp`
+
+```cpp
+struct LoadedModule {                 // one row per loaded plugin or game, for logs and the console
+    std::string           stem;       // "platform_sfml", "rtype"
+    std::filesystem::path file;       // empty in static mode
+    bool                  isGame;
+};
+
+class ModuleManager {
+public:
+    ModuleManager(Logger& log, std::filesystem::path executableDir); // searches <dir>/plugins and <dir>/games
+    ~ModuleManager();                                                 // unloadAll()
+
+    // Loads "<kind>_<name>" (e.g. platform_sfml), checks apiVersion and kind, calls init().
+    template <class I> Result<I*> loadPlugin(PluginKind kind, std::string_view name, const PluginContext& ctx);
+    Result<IGameModule*> loadGame(std::string_view name);     // checks game_api_version, calls create_game
+    void unloadGame();                                        // destroy_game, then close the library
+    void unloadAll() noexcept;                                // reverse load order: shutdown, destroy, close
+    std::span<const LoadedModule> loaded() const;             // for the "modules" console command
+};
+```
+
 ## Depends on
 
 - [ENG-12](ENG-12.md) — DynamicLibrary for Linux and Windows

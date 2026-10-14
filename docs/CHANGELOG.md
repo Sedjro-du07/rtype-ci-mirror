@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/tasks/tasks.py` and `docs/tasks/details.py` are now the single source of the tasks;
   `python3 docs/tasks/generate.py` regenerates the tables, detail pages, folder tree, folder READMEs and
   missing skeletons. Every skeleton header now points to its detail page.
+- Every task page now has a **Classes and methods** section: the declarations the task must write
+  (classes, methods, functions, systems, tests), without their implementation. They come from the
+  reference automatically, plus `docs/tasks/api.py` for what the reference describes only in prose
+  (plugins, systems, components, events, private server classes, tests).
 - The documentation viewer opens links between pages inside the viewer (they used to 404) and keeps
   the current page in the address (`index.html#tasks/SRV-03.md`).
 

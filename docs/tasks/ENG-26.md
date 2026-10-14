@@ -15,6 +15,66 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/scheduler/Scheduler.hpp`
 - `src/scheduler/Scheduler.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/scheduler/Stage.hpp`
+
+```cpp
+enum class Stage : uint8_t {
+    FixedUpdate,  // N times per frame at 1/tickRate: input, movement, AI, collisions, damage
+    LateUpdate,   // once per frame after simulation: network send, hierarchy, cleanup
+    Render        // once per frame, client and editor only: fill the RenderQueue
+};
+```
+
+### `include/engine/scheduler/System.hpp`
+
+```cpp
+using SystemFn = std::move_only_function<void(Context&)>;
+enum RoleMask : uint8_t { ClientRole = 1, ServerRole = 2, EditorRole = 4, AllRoles = 7 };
+```
+
+### `include/engine/scheduler/Scheduler.hpp`
+
+```cpp
+class SystemBuilder {
+public:
+    SystemBuilder& after(std::string_view other);   // run after this system (same stage)
+    SystemBuilder& before(std::string_view other);  // run before this system (same stage)
+    SystemBuilder& roles(uint8_t mask);             // only registered for these roles
+    SystemBuilder& disabled();                      // starts disabled (enable from console or code)
+    SystemBuilder& critical();                      // if it faults on the server, end the session cleanly
+};
+
+struct SystemStats {
+    std::string_view name;
+    Stage            stage;
+    double           lastMs, averageMs;  // timing for the profiler overlay
+    bool             enabled;
+    bool             faulted;            // threw and was disabled
+    std::string      lastError;
+};
+
+class Scheduler {
+public:
+    explicit Scheduler(Role role, Logger& log);
+
+    // Names are unique, "<module>.<system>": "engine.movement", "rtype.bydos_ai".
+    SystemBuilder add(Stage stage, std::string name, SystemFn fn);
+
+    Result<void> build();                 // engine only: topological sort per stage;
+                                          // unknown name in after/before or a cycle → ScheduleCycle
+    void run(Stage stage, Context& ctx);  // engine only: calls each enabled system in order, times it,
+                                          // catches exceptions (policy below)
+    void setEnabled(std::string_view name, bool enabled);   // console "system enable/disable <name>"
+    bool enabled(std::string_view name) const;
+    std::span<const SystemStats> stats() const;             // metrics overlay, console "systems"
+    void clearGameSystems();                                 // before unloading a game module
+};
+```
+
 ## Depends on
 
 - [ENG-04](ENG-04.md) — Core types: hash, Vec2/Rect/Color, Error, Result, BootError

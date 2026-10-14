@@ -17,6 +17,83 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `plugins/platform_sfml/SfmlRenderer.cpp`
 - `plugins/platform_sfml/SfmlKeys.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `plugins/platform_sfml/SfmlPlatform.hpp`
+
+```cpp
+class SfmlPlatform final : public IPlatform {
+public:
+    // IPlugin
+    PluginKind kind() const override;                 // Platform
+    std::string_view name() const override;           // "sfml"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext& ctx) override;
+    void shutdown() noexcept override;
+    // IPlatform
+    Result<void> openWindow(const WindowDesc& desc) override;
+    void closeWindow() override;
+    bool windowOpen() const override;
+    void pollEvents(InputMap& input, EventBus& events) override;
+    IRenderer& renderer() override;
+    void setWindow(const WindowDesc& desc) override;
+    void beginDebugUi() override;                     // ENG-32
+    void endDebugUi() override;                       // ENG-32
+    void setClipboard(std::string_view text) override;
+    std::string clipboard() const override;
+private:
+    sf::RenderWindow window_;
+    SfmlRenderer     renderer_;
+    WindowDesc       desc_;
+};
+ENGINE_PLUGIN(SfmlPlatform)
+```
+
+### `plugins/platform_sfml/SfmlRenderer.hpp`
+
+```cpp
+class SfmlRenderer final : public IRenderer {
+public:
+    explicit SfmlRenderer(sf::RenderWindow& window);
+    Result<TextureHandle> createTexture(std::span<const std::byte> encodedImage, std::string_view debugName) override;
+    void   destroyTexture(TextureHandle) override;
+    Vec2   textureSize(TextureHandle) const override;
+    Result<FontHandle> createFont(std::span<const std::byte> fontFile, std::string_view debugName) override;
+    void   destroyFont(FontHandle) override;
+    void   submit(const RenderFrame& frame) override;   // sort by layer, batch by texture, draw, present
+    bool   supports(Feature f) const override;
+    void   setColorFilter(ColorFilter f) override;      // ENG-33
+    RenderStats stats() const override;
+private:
+    void applyView(const Camera2D& camera);             // virtual resolution + letterbox
+    void flushBatch();                                  // one sf::VertexArray draw
+    sf::RenderWindow&                          window_;
+    std::vector<std::unique_ptr<sf::Texture>>  textures_;   // index = handle id - 1
+    std::vector<std::unique_ptr<sf::Font>>     fonts_;
+    sf::VertexArray                            batch_;
+    RenderStats                                stats_;
+};
+```
+
+### `plugins/platform_sfml/SfmlKeys.cpp`
+
+```cpp
+Key           toKey(sf::Keyboard::Scancode code);
+MouseButton   toMouseButton(sf::Mouse::Button button);
+GamepadButton toGamepadButton(unsigned int sfmlButton);
+GamepadAxis   toGamepadAxis(sf::Joystick::Axis axis);
+std::optional<RawInputEvent> toRawInputEvent(const sf::Event& event, const WindowDesc& desc);
+```
+
+### `plugins/platform_sfml/CMakeLists.txt`
+
+```cmake
+engine_add_plugin(platform_sfml SOURCES SfmlPlatform.cpp SfmlRenderer.cpp SfmlKeys.cpp SfmlImGui.cpp
+                  DEPENDS SFML::Graphics ImGui-SFML::ImGui-SFML implot)
+```
+
 ## Depends on
 
 - [ENG-30](ENG-30.md) — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform

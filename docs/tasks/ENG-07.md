@@ -13,6 +13,37 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/EngineConfig.hpp`
 - `src/core/EngineConfig.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/EngineConfig.hpp`
+
+```cpp
+enum class Role : uint8_t { Client, Server, Editor };
+
+struct EngineConfig {
+    Role                  role = Role::Client;
+    std::string           game;             // game module name: "rtype" → games/librtype.so
+    std::string           platform = "sfml";// platform plugin (client, editor)
+    std::string           audio = "miniaudio";
+    std::string           network = "asio";
+    std::string           scripting = "lua";// empty string = no scripting plugin (NullScripting)
+    double                tickRate = 60.0;  // fixed simulation steps per second (ADR 0003)
+    std::filesystem::path root;             // folder of the game: assets/, scenes/, prefabs/
+    WindowDesc            window;           // client only, see block 8
+    NetConfig             net;              // see block 10
+    LogConfig             log;              // see block 12
+    YAML::Node            cvars;            // initial console variables, see block 12
+    std::filesystem::path sceneOverride;    // --scene: start here instead of IGameModule::firstScene()
+    uint64_t              maxTicks = 0;     // --ticks: quit cleanly after N steps (0 = never); tests and CI
+
+    // Reads the YAML file, then applies command-line overrides (--config, --role, --platform, --audio,
+    // --network, --scripting, --port, --host, --log, --scene, --ticks, --set name=value). Unknown keys are an error with file:line.
+    static Result<EngineConfig> load(const std::filesystem::path& file, int argc, char** argv);
+};
+```
+
 ## Depends on
 
 - [ENG-04](ENG-04.md) — Core types: hash, Vec2/Rect/Color, Error, Result, BootError

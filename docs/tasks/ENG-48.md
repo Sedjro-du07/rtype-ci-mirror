@@ -13,6 +13,41 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/script/IScripting.hpp`
 - `src/script/ScriptSystems.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/script/IScripting.hpp`
+
+```cpp
+struct ScriptHost {                      // what the engine exposes to scripts (bound by the plugin)
+    TypeRegistry&  types;                // components by name, through reflection
+    AssetManager&  assets;
+    EventBus&      events;
+    Logger&        log;
+};
+
+class IScripting : public IPlugin {
+public:
+    virtual Result<void>          bind(ScriptHost& host) = 0;         // engine only, once after types are registered
+    virtual Result<ScriptHandle>  load(const std::filesystem::path& file) = 0; // compile, sandboxed
+    virtual void                  unload(ScriptHandle) = 0;
+    virtual Result<void>          reload(ScriptHandle) = 0;           // keeps the handle, swaps the code
+    virtual Result<void>          call(ScriptHandle s, std::string_view function,
+                                       Entity self, Context& ctx) = 0; // on_spawn, on_update, on_collision…
+    virtual bool                  has(ScriptHandle s, std::string_view function) const = 0;
+};
+```
+
+### `src/script/ScriptSystems.cpp`
+
+```cpp
+void scriptLifecycle(Context& ctx);   // "engine.script.lifecycle": on_spawn once; on_destroy through the Script onDestroy hook
+void scriptUpdate(Context& ctx);      // "engine.script.update":    on_update(self, dt) for every entity with Script
+void scriptCollision(Context& ctx);   // "engine.script.collision": on_collision(self, other) from Collision events
+void registerScriptSystems(Scheduler& s, IScripting& scripting);
+```
+
 ## Depends on
 
 - [ENG-18](ENG-18.md) — Registry: typed and type-erased access, identity, hierarchy

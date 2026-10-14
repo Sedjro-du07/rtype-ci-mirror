@@ -13,6 +13,64 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/ecs/Registry.hpp` (shared with [ENG-21](ENG-21.md))
 - `src/ecs/Registry.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/ecs/Registry.hpp`
+
+```cpp
+class Registry {
+public:
+    explicit Registry(const TypeRegistry& types);
+
+    // Entities
+    Entity create();                                  // immediate; safe during iteration (touches no storage)
+    void   destroy(Entity e);                         // immediate, recursive over Children. Engine/Commands only
+    bool   alive(Entity e) const;
+    size_t aliveCount() const;
+    void   clear();                                   // destroys everything (scene unload)
+
+    // Components, typed
+    template <class T, class... Args> T& emplace(Entity e, Args&&... args); // immediate: use only outside iteration
+    template <class T> T&       get(Entity e);        // asserts present
+    template <class T> const T& get(Entity e) const;
+    template <class T> T*       tryGet(Entity e);     // nullptr if absent
+    template <class T> bool     has(Entity e) const;
+    template <class T> T&       replace(Entity e, T value); // assigns and fires onReplace
+    template <class T> void     remove(Entity e);     // immediate: use only outside iteration
+
+    // Queries
+    template <class... Ts> View<Ts...> view();                         // entities having all Ts
+    template <class... Ts, class... Xs> View<Ts...> view(Exclude<Xs...>); // …and none of Xs
+
+    // Type-erased access (scene loader, editor, scripts, replication)
+    IStorage*       storage(ComponentId id);          // nullptr if no entity ever had it
+    void*           getRaw(Entity e, ComponentId id);
+    void*           emplaceRaw(Entity e, ComponentId id, const void* src);
+    void            removeRaw(Entity e, ComponentId id);
+    std::vector<ComponentId> componentsOf(Entity e) const;   // for the inspector and save()
+
+    // Identity and hierarchy (ADR 0016)
+    Entity find(std::string_view name) const;         // first entity whose Name matches, or null
+    Entity find(const Uuid& uuid) const;              // indexed, O(1)
+    std::vector<Entity> withTag(std::string_view tag) const;  // text tags
+    void   setParent(Entity child, Entity parent, Vec2 localOffset = {}); // updates Parent and Children
+    Entity parent(Entity e) const;
+    std::span<const Entity> children(Entity e) const;
+
+    // Observer hooks (fired by emplace / replace / remove / destroy, including through Commands)
+    template <class T> ComponentHooks& hooks();
+    ComponentHooks& hooks(ComponentId id);
+};
+
+struct ComponentHooks {
+    Signal<void(Registry&, Entity)> onCreate;   // after the component is added
+    Signal<void(Registry&, Entity)> onReplace;  // after replace()
+    Signal<void(Registry&, Entity)> onDestroy;  // before the component is removed
+};
+```
+
 ## Depends on
 
 - [ENG-17](ENG-17.md) — IStorage and paged SparseSet<T>

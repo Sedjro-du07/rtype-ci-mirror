@@ -12,6 +12,20 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `benchmarks/ecs_storage/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `benchmarks/ecs_storage/`
+
+```cpp
+template <class T> class PagedSparseSet;   // the engine's SparseSet<T>
+template <class T> class SparseArray;      // plain std::vector<std::optional<T>> by entity index
+class MinimalArchetypeStore;               // one table per component combination
+void benchIterate1(benchmark::State&);  void benchIterate2(benchmark::State&);  void benchIterate3(benchmark::State&);
+void benchAddRemove(benchmark::State&);
+```
+
 ## Depends on
 
 - [ENG-17](ENG-17.md) — IStorage and paged SparseSet<T>

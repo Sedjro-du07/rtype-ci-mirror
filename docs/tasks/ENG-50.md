@@ -13,6 +13,26 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/systems/MovementSystems.cpp`
 - `src/systems/RegisterEngineSystems.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/systems/MovementSystems.cpp`
+
+```cpp
+void previousPosition(Context& ctx);   // "engine.previous_position" FixedUpdate, all
+void movement(Context& ctx);           // "engine.movement"          FixedUpdate, all
+void hierarchy(Context& ctx);          // "engine.hierarchy"         FixedUpdate, all
+void parallax(Context& ctx);           // "engine.parallax"          FixedUpdate, client
+void lifetime(Context& ctx);           // "engine.lifetime"          FixedUpdate, all
+```
+
+### `src/systems/RegisterEngineSystems.cpp`
+
+```cpp
+void registerEngineSystems(Scheduler& s, Role role);   // every engine system with its name, stage, roles and order (reference 13)
+```
+
 ## Depends on
 
 - [ENG-25](ENG-25.md) — Engine components and their registration

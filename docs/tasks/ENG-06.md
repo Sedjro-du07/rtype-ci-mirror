@@ -12,6 +12,31 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/core/Signal.hpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/core/Signal.hpp`
+
+```cpp
+class Subscription {                 // move-only; unsubscribes when destroyed
+public:
+    Subscription() = default;
+    Subscription(Subscription&&) noexcept; Subscription& operator=(Subscription&&) noexcept;
+    ~Subscription();                 // calls reset()
+    void reset() noexcept;           // unsubscribe now
+    bool active() const noexcept;
+};
+
+template <class... Args>
+class Signal<void(Args...)> {
+public:
+    [[nodiscard]] Subscription connect(std::move_only_function<void(Args...)> fn);
+    void emit(Args... args);         // calls every listener now, in connection order
+    size_t size() const;
+};
+```
+
 ## Depends on
 
 - nothing: can start now

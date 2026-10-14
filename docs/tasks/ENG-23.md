@@ -13,6 +13,48 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/reflection/Yaml.hpp`
 - `src/reflection/Yaml.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/reflection/Yaml.hpp`
+
+```cpp
+class YamlNode {                              // read-only view; hides yaml-cpp from game headers
+public:
+    bool isMap() const; bool isSequence() const; bool isScalar() const; bool isNull() const;
+    YamlNode operator[](std::string_view key) const;     // null node if absent
+    YamlNode operator[](size_t index) const;
+    size_t   size() const;
+    std::vector<std::string> keys() const;
+    template <class T> Result<T> as() const;              // bool, ints, float, double, std::string
+    int      line() const;                                // 1-based, for errors
+    const std::string& file() const;
+};
+
+class YamlWriter {
+public:
+    void beginMap(); void endMap(); void beginSequence(); void endSequence();
+    void key(std::string_view k);
+    template <class T> void value(const T& v);
+    std::string str() const;
+};
+
+struct LoadContext {                              // Entity fields in files are uuids
+    AssetManager& assets;
+    std::function<Entity(const Uuid&)> entityOf;  // resolved in pass 2
+    std::string file;
+};
+struct SaveContext {
+    const AssetManager& assets;
+    std::function<Uuid(Entity)> uuidOf;
+};
+
+Result<YamlNode> loadYamlFile(const std::filesystem::path& file);
+Result<void>     fromYaml(const TypeInfo& type, void* obj, const YamlNode& node, LoadContext& ctx); // generic, per FieldKind
+void             toYaml(const TypeInfo& type, const void* obj, YamlWriter& out, SaveContext& ctx);
+```
+
 ## Depends on
 
 - [ENG-22](ENG-22.md) — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)

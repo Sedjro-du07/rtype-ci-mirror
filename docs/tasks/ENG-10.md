@@ -12,6 +12,19 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `launcher/main.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `launcher/main.cpp`
+
+```cpp
+int main(int argc, char** argv);
+// Loads EngineConfig from ENGINE_DEFAULT_CONFIG (set by engine_add_launcher) and argv,
+// installs SIGINT / SIGTERM (and the Windows console handler) to call Engine::requestQuit,
+// then returns Engine::run(). Prints Error::toString() and returns 1 if the config is invalid.
+```
+
 ## Depends on
 
 - [ENG-08](ENG-08.md) — Engine: lifecycle, member order, fixed-step loop, error policy

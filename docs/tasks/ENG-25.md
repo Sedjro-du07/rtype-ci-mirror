@@ -23,6 +23,47 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/components/Script.hpp`
 - `src/systems/RegisterEngineTypes.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/components/*.hpp`
+
+```cpp
+struct Position         { float x = 0, y = 0; };                          ENGINE_COMPONENT(Position)
+struct PreviousPosition { float x = 0, y = 0; };                          ENGINE_COMPONENT(PreviousPosition)
+struct Velocity         { float dx = 0, dy = 0; };                        ENGINE_COMPONENT(Velocity)
+struct Sprite           { TextureHandle texture; Rect frame; int16_t layer = 0; Color tint;
+                          Vec2 scale{1, 1}; Vec2 origin; float rotation = 0; bool visible = true; };
+                                                                          ENGINE_COMPONENT(Sprite)
+struct Animation        { std::vector<Rect> frames; float fps = 10; bool loop = true;
+                          float time = 0; uint32_t current = 0; };        ENGINE_COMPONENT(Animation)
+struct Text             { std::string value; FontHandle font; uint16_t size = 16; Color color;
+                          int16_t layer = 100; bool screenSpace = true; };  ENGINE_COMPONENT(Text)
+struct Collider         { Vec2 size; Vec2 offset; uint32_t layer = 1; uint32_t mask = ~0u; bool trigger = false; };
+                                                                          ENGINE_COMPONENT(Collider)
+struct Lifetime         { float seconds = 0; };                           ENGINE_COMPONENT(Lifetime)
+struct Parallax         { float factor = 1; float wrapWidth = 0; };       ENGINE_COMPONENT(Parallax)
+// Identity.hpp
+struct Name             { std::string value; };                           ENGINE_COMPONENT(Name)
+struct Uuid             { uint64_t hi = 0, lo = 0; static Uuid generate(); bool operator==(const Uuid&) const = default; };
+                                                                          ENGINE_COMPONENT(Uuid)
+struct Tags             { std::vector<uint64_t> ids; bool has(std::string_view tag) const; };
+                                                                          ENGINE_COMPONENT(Tags)
+// Hierarchy.hpp
+struct Parent           { Entity value; Vec2 offset; };                   ENGINE_COMPONENT(Parent)
+struct Children         { std::vector<Entity> list; };                    ENGINE_COMPONENT(Children)
+// Script.hpp
+struct Script           { ScriptHandle handle; std::string file; };       ENGINE_COMPONENT(Script)
+```
+
+### `src/systems/RegisterEngineTypes.cpp`
+
+```cpp
+void registerEngineTypes(TypeRegistry& types);   // every component above with fields and flags,
+                                                  // net components (block 10), engine events (block 6)
+```
+
 ## Depends on
 
 - [ENG-22](ENG-22.md) — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)

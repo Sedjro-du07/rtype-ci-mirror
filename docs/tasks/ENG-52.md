@@ -13,6 +13,24 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/systems/RenderSystems.cpp`
 - `src/systems/AnimationSystem.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/systems/RenderSystems.cpp`
+
+```cpp
+void renderSprites(Context& ctx);   // "engine.render.sprites" Render, client/editor: Position lerped with alpha
+void renderText(Context& ctx);      // "engine.render.text"    Render, after sprites
+void renderDebug(Context& ctx);     // "engine.render.debug"   Render, when r_debug_colliders
+```
+
+### `src/systems/AnimationSystem.cpp`
+
+```cpp
+void animation(Context& ctx);       // "engine.animation" FixedUpdate, client/editor: advances Animation, writes Sprite.frame
+```
+
 ## Depends on
 
 - [ENG-25](ENG-25.md) — Engine components and their registration

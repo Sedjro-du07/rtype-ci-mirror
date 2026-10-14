@@ -12,6 +12,29 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `cmake/FeatureProbe.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `cmake/FeatureProbe.cpp`
+
+```cpp
+// One function per allowed feature (ADR 0017); compiled with try_compile, never linked.
+std::expected<int, int>            probeExpected();
+std::move_only_function<void()>    probeMoveOnlyFunction();
+void                               probePrint();                 // std::print
+struct ProbeDeducingThis { template <class Self> auto& get(this Self& self); };
+int                                probeToUnderlying();          // std::to_underlying
+[[noreturn]] void                  probeUnreachable();           // std::unreachable
+```
+
+### `cmake/EngineOptions.cmake`
+
+```cmake
+try_compile(ENGINE_HAS_STD_EXPECTED ... SOURCES cmake/FeatureProbe.cpp ...)
+# if FALSE: target_compile_definitions(engine PUBLIC ENGINE_USE_TL_EXPECTED)
+```
+
 ## Depends on
 
 - [ENG-01](ENG-01.md) — Engine CMake project, options and C++23 setup

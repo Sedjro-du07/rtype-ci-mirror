@@ -13,6 +13,62 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/audio/IAudio.hpp`
 - `src/audio/AudioCaptions.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/audio/IAudio.hpp`
+
+```cpp
+enum class AudioBus : uint8_t { Master, Music, Effects, Interface };
+
+struct PlayParams {
+    float               volume = 1.f;          // multiplied by the bus volume and Master
+    float               pitch = 1.f;
+    float               pan = 0.f;             // -1 left … +1 right; ignored if position is set
+    AudioBus            bus = AudioBus::Effects;
+    std::optional<Vec2> position;              // world position: pan and attenuation from the listener
+    bool                loop = false;
+    std::string         caption;               // non-empty: publishes a Caption event (block 6)
+};
+
+using VoiceId = uint32_t;                      // 0 = not playing
+
+class IAudio : public IPlugin {
+public:
+    virtual Result<SoundHandle> createSound(std::span<const std::byte> encoded, std::string_view debugName) = 0;
+    virtual void   destroySound(SoundHandle) = 0;
+    virtual Result<MusicHandle> openMusic(const std::filesystem::path& file) = 0; // streamed from disk
+    virtual void   closeMusic(MusicHandle) = 0;
+
+    virtual VoiceId play(SoundHandle s, const PlayParams& p = {}) = 0;   // fire and forget, or keep the id
+    virtual void    stop(VoiceId v) = 0;
+    virtual void    setVoiceVolume(VoiceId v, float volume) = 0;
+    virtual void    playMusic(MusicHandle m, float fadeInSeconds = 0.f) = 0; // replaces the current track
+    virtual void    stopMusic(float fadeOutSeconds = 0.f) = 0;
+
+    virtual void    setBusVolume(AudioBus bus, float volume) = 0;        // 0..1, saved through CVars
+    virtual float   busVolume(AudioBus bus) const = 0;
+    virtual void    setListener(Vec2 position, float hearingRadius) = 0; // usually the camera center
+    virtual void    update() = 0;                                        // engine only, once per frame
+};
+```
+
+### `src/audio/AudioCaptions.cpp`
+
+```cpp
+// Decorator placed between Context::audio() and the plugin: every backend gets captions.
+class CaptionedAudio final : public IAudio {
+public:
+    CaptionedAudio(IAudio& backend, EventBus& events);
+    VoiceId play(SoundHandle s, const PlayParams& p) override;   // publishes Caption{p.caption} if not empty, then forwards
+    // every other IAudio / IPlugin method forwards to backend_
+private:
+    IAudio&   backend_;
+    EventBus& events_;
+};
+```
+
 ## Depends on
 
 - [ENG-11](ENG-11.md) — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE

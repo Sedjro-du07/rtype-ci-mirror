@@ -13,6 +13,31 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/scene/Prefab.hpp`
 - `src/scene/PrefabLibrary.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/scene/Prefab.hpp`
+
+```cpp
+struct Prefab {
+    std::string                     path;
+    uint32_t                        key;       // fnv1a(path), used by NetPrefab
+    std::vector<ComponentData>      components;// parsed values, already type-checked
+    std::vector<PrefabChild>        children;  // nested prefabs or inline entities, with local offsets
+};
+
+class PrefabLibrary {
+public:
+    PrefabLibrary(const TypeRegistry& types, AssetManager& assets);
+    Result<const Prefab*> get(std::string_view path);   // parses on first use, cached
+    const Prefab* findByKey(uint32_t key) const;        // replication spawn
+    Entity instantiate(Registry& r, const Prefab& p, Vec2 position,
+                       std::span<const ComponentData> overrides = {}); // creates the entity and its children
+    void clear();
+};
+```
+
 ## Depends on
 
 - [ENG-23](ENG-23.md) — YAML wrappers and field codecs

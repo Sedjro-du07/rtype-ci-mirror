@@ -12,6 +12,19 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `plugins/platform_raylib/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `plugins/platform_raylib/RaylibPlatform.hpp`
+
+```cpp
+class RaylibPlatform final : public IPlatform { /* same methods as SfmlPlatform; pollEvents converts
+                                                   raylib polling (IsKeyPressed…) into RawInputEvent */ };
+class RaylibRenderer final : public IRenderer   { /* same methods as SfmlRenderer; supports(Render3D) == true */ };
+ENGINE_PLUGIN(RaylibPlatform)
+```
+
 ## Depends on
 
 - [ENG-31](ENG-31.md) — platform_sfml plugin: window, events to InputMap, batching renderer

@@ -13,6 +13,49 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/Engine.hpp`
 - `src/core/Engine.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/Engine.hpp`
+
+```cpp
+class Engine {
+public:
+    explicit Engine(EngineConfig config);   // stores the config only; no work happens here
+    ~Engine();                              // members destroyed in reverse declaration order
+
+    int  run();                             // boot → load → loop → shutdown; returns the exit code
+    void requestQuit() noexcept;            // thread-safe; the current frame finishes, then shutdown runs
+
+private:
+    void boot();       // logger, CVars, plugins of the role (version check), game module, registerTypes
+    void load();       // engine systems + registerSystems(role), Scheduler::build, first scene, onStart
+    void loop();       // fixed-step loop (see below) while running_
+    void shutdown();   // onShutdown, scenes cleared, scripts unloaded; RAII destroys the rest
+
+    // Declaration order = construction order; destruction is the reverse (ADR 0021).
+    EngineConfig     config_;
+    Logger           logger_;        // outlives everything that logs
+    CVars            cvars_;
+    ModuleManager    modules_;       // owns the .so/.dll: destroyed after everything using their code
+    TypeRegistry     types_;
+    EventBus         events_;
+    Metrics          metrics_;
+    Console          console_;
+    AssetManager     assets_;
+    InputMap         input_;
+    NetworkSession   network_;
+    Scheduler        scheduler_;     // holds game systems: destroyed before modules_
+    SceneManager     scenes_;        // holds game components: destroyed before modules_
+    Commands         commands_;
+    RenderQueue      renderQueue_;
+    Time             time_;
+    Clock            clock_;
+    std::atomic_bool running_{false};
+};
+```
+
 ## Depends on
 
 - [ENG-07](ENG-07.md) — EngineConfig: YAML file and command-line overrides

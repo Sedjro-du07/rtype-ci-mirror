@@ -16,6 +16,20 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `tests/scene/`
 - `tests/net/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `tests/`
+
+```text
+tests/scheduler/ OrderingTest, CycleTest, FailurePolicyTest (server disables, critical ends, client code 5)
+tests/events/    DispatchOrderTest, PublishDuringDispatchTest, ThreadInboxTest
+tests/input/     EdgeLatchTest, HoldToToggleTest, AutoRepeatTest, DeadzoneTest, MaskTest
+tests/scene/     TwoPassLoadTest, UnknownComponentTest, SwitchPersistentTest, SaveRoundTripTest
+tests/net/       MalformedDatagramTest, OversizedDatagramTest, TimeoutTest (session core only)
+```
+
 ## Depends on
 
 - [ENG-26](ENG-26.md) — Scheduler: stages, names, after/before, roles, stats, failure policy

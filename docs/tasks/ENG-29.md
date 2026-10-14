@@ -15,6 +15,59 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/input/InputMap.cpp`
 - `src/input/ActionState.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/input/InputMap.hpp`
+
+```cpp
+struct AxisBinding { GamepadAxis axis; float direction; float threshold; }; // e.g. LeftY, -1, 0.5 → MoveUp
+using Binding = std::variant<Key, MouseButton, GamepadButton, AxisBinding>;
+
+struct InputOptions {
+    std::vector<ActionId> holdToToggle;   // press once to start holding, press again to release
+    std::vector<ActionId> autoRepeat;     // held action repeats "pressed" at autoRepeatHz (auto-fire)
+    float                 autoRepeatHz = 8.f;
+    float                 deadzone = 0.2f;// gamepad axes below this read as 0
+    bool                  oneHanded = false; // loads the alternate binding set "one_handed" from input.yaml
+};
+
+class InputMap {
+public:
+    Result<void> load(const std::filesystem::path& file);   // input.yaml: actions → bindings, options
+    Result<void> save(const std::filesystem::path& file) const; // after rebinding in the options menu
+    void bind(ActionId a, Binding b);                       // adds a binding (several per action)
+    void unbind(ActionId a, const Binding& b);
+    void clear(ActionId a);
+    std::span<const Binding> bindings(ActionId a) const;
+    std::optional<ActionId> boundTo(const Binding& b) const;// conflict detection when rebinding
+    void setOptions(InputOptions o);
+    const InputOptions& options() const;
+
+    void feed(const RawInputEvent& e);   // engine only: called by the platform plugin's pollEvents
+    void beginTick();                    // engine only: publishes latched edges to the ActionState
+    const ActionState& state() const;    // local player; what Context::input() returns
+    void captureNextBinding(std::move_only_function<void(Binding)> onCaptured); // "press a key" in menus
+};
+```
+
+### `include/engine/input/ActionState.hpp`
+
+```cpp
+class ActionState {
+public:
+    bool  pressed(ActionId a) const;   // went down since the previous tick (edges are latched between ticks)
+    bool  held(ActionId a) const;      // is down this tick
+    bool  released(ActionId a) const;  // went up since the previous tick
+    float axis(ActionId a) const;      // [-1,1] for axis bindings, 0/1 for buttons
+
+    // Compact form for the network (block 10): bit i = held(order[i]).
+    uint64_t toMask(std::span<const ActionId> order) const;
+    static ActionState fromMask(uint64_t mask, uint64_t previousMask, std::span<const ActionId> order);
+};
+```
+
 ## Depends on
 
 - [ENG-28](ENG-28.md) — Keys, RawInputEvent, ActionId

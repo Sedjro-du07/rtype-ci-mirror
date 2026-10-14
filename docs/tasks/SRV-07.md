@@ -14,6 +14,19 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `tests/net/messages/`
 - `tests/reflection/codec/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `tests/`
+
+```text
+tests/net/players/        JoinLeaveTest, KickTest, TimeoutTest, NamesTest
+tests/net/players/        HandshakeTest (FormatMismatch, ServerFull, bad name, UDP link)
+tests/net/messages/       UnreliableTest, ReliableUnderLossTest (20 % loss), StreamTest, CallbackExceptionTest
+tests/reflection/codec/   RoundTripTest (every FieldKind), LimitsTest, EntityMappingTest, FuzzTest (10 000 inputs)
+```
+
 ## Depends on
 
 - [SRV-01](SRV-01.md) — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping

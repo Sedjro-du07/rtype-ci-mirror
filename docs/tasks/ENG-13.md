@@ -13,6 +13,24 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/module/StaticModuleTable.hpp`
 - `src/module/StaticModuleTable.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/module/StaticModuleTable.hpp`
+
+```cpp
+class StaticModuleTable {
+public:
+    using CreatePlugin = IPlugin* (*)() noexcept;   using DestroyPlugin = void (*)(IPlugin*) noexcept;
+    using CreateGame   = IGameModule* (*)() noexcept; using DestroyGame = void (*)(IGameModule*) noexcept;
+    static void addPlugin(std::string_view stem, CreatePlugin, DestroyPlugin);  // "platform_sfml"
+    static void addGame(std::string_view name, CreateGame, DestroyGame);        // "rtype"
+    static const PluginEntry* findPlugin(std::string_view stem);
+    static const GameEntry*   findGame(std::string_view name);
+};
+```
+
 ## Depends on
 
 - [ENG-11](ENG-11.md) — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE

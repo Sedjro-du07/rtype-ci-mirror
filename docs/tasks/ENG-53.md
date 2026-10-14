@@ -15,6 +15,20 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `tests/module/`
 - `tests/fixtures/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `tests/`
+
+```text
+tests/CMakeLists.txt          engine_add_test(<name> SOURCES ...) helper, test framework (chosen in Tooling)
+tests/fixtures/TestPlugin.cpp  class TestPlatform : public IPlatform { ... };  ENGINE_PLUGIN(TestPlatform)
+tests/fixtures/TestGame.cpp    class TestGame : public IGameModule { ... };    ENGINE_GAME_MODULE(TestGame)
+tests/core/   HashTest, MathTest, ErrorTest, TimeTest, SignalTest, EngineConfigTest
+tests/module/ DynamicLibraryTest, StaticModuleTableTest, ModuleManagerTest (version mismatch, wrong kind, null, unload order)
+```
+
 ## Depends on
 
 - [ENG-14](ENG-14.md) — ModuleManager: load by kind and name, version check, reverse unload

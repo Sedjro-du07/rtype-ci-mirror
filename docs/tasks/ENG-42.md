@@ -13,6 +13,25 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/scene/SceneLoader.hpp`
 - `src/scene/SceneLoader.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/scene/SceneLoader.hpp`
+
+```cpp
+class SceneLoader {
+public:
+    SceneLoader(const TypeRegistry& types, AssetManager& assets, PrefabLibrary& prefabs);
+    Result<std::unique_ptr<Scene>> load(const std::filesystem::path& file);
+    // Pass 1: parse; for each entity create it, resolve its prefab, apply overrides, record uuid → entity.
+    // Pass 2: link Parent / Children and Entity fields by uuid (declaration order does not matter).
+    // Then request the assets. Any error returns file:line and leaves no partial scene behind.
+    Result<void> save(const Scene& scene, const std::filesystem::path& file) const;
+    // Writes uuids, prefab references and only the components that differ from the prefab; skips Transient types.
+};
+```
+
 ## Depends on
 
 - [ENG-41](ENG-41.md) — PrefabLibrary and instantiate

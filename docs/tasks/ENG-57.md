@@ -12,6 +12,17 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `tests/headless/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `tests/headless/`
+
+```text
+tests/headless/CMakeLists.txt   add_test(NAME headless_smoke COMMAND r-type_test_client --platform null --audio null --ticks 1000)
+tests/headless/config.yaml      role: client, game: testgame, scripting: ""
+```
+
 ## Depends on
 
 - [ENG-08](ENG-08.md) — Engine: lifecycle, member order, fixed-step loop, error policy

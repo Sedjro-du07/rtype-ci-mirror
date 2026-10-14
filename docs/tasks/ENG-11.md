@@ -14,6 +14,66 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/module/IPlugin.hpp`
 - `include/engine/module/IGameModule.hpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/module/Export.hpp`
+
+```cpp
+inline constexpr uint32_t ENGINE_PLUGIN_API_VERSION = 1;  // bumped when any plugin interface changes
+inline constexpr uint32_t ENGINE_GAME_API_VERSION   = 1;  // bumped when IGameModule or Context changes
+
+#define ENGINE_EXPORT /* __declspec(dllexport) on Windows, visibility("default") elsewhere */
+
+// Placed once at the end of the game's module .cpp. Dynamic mode: defines
+//   extern "C" ENGINE_EXPORT IGameModule* create_game() noexcept;   (try/catch → nullptr)
+//   extern "C" ENGINE_EXPORT void destroy_game(IGameModule*) noexcept;
+//   extern "C" ENGINE_EXPORT uint32_t game_api_version() noexcept;
+// Static mode: defines a registrar object that adds the class to StaticModuleTable at startup.
+#define ENGINE_GAME_MODULE(ClassName)  /* … */
+
+// Same for plugins: create_plugin / destroy_plugin / plugin_api_version, or static registration.
+#define ENGINE_PLUGIN(ClassName)       /* … */
+```
+
+### `include/engine/module/IPlugin.hpp`
+
+```cpp
+enum class PluginKind : uint8_t { Platform, Audio, Network, Scripting };
+
+struct PluginContext {          // what the engine gives a plugin at init (dependency injection)
+    Logger&             log;    // tagged with the plugin name
+    CVars&              cvars;  // a plugin may define its own console variables
+    const EngineConfig& config;
+    EventBus&           events;
+};
+
+class IPlugin {
+public:
+    virtual ~IPlugin() = default;
+    virtual PluginKind       kind() const = 0;          // which interface the object also implements
+    virtual std::string_view name() const = 0;          // "sfml", "miniaudio", "asio", "lua"
+    virtual uint32_t         apiVersion() const = 0;    // must equal ENGINE_PLUGIN_API_VERSION
+    virtual Result<void>     init(const PluginContext&) = 0;  // open devices, create threads
+    virtual void             shutdown() noexcept = 0;   // release everything; called before destroy_plugin
+};
+```
+
+### `include/engine/module/IGameModule.hpp`
+
+```cpp
+class IGameModule {
+public:
+    virtual ~IGameModule() = default;
+    virtual void registerTypes(TypeRegistry& types) = 0;               // components, events, enums the game invents
+    virtual void registerSystems(Role role, Scheduler& scheduler) = 0; // the game's systems for this role
+    virtual std::string_view firstScene() const = 0;                   // path relative to the game root
+    virtual void onStart(Context& ctx) {}                              // once, after the first scene, before the loop
+    virtual void onShutdown(Context& ctx) {}                           // once, world still alive
+};
+```
+
 ## Depends on
 
 - [ENG-04](ENG-04.md) — Core types: hash, Vec2/Rect/Color, Error, Result, BootError

@@ -17,6 +17,47 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/core/Error.hpp`
 - `src/core/Error.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/core/Error.hpp`
+
+```cpp
+enum class Errc : uint16_t {
+    ConfigInvalid, FileNotFound, ParseError, PluginNotFound, SymbolNotFound, ApiMismatch,
+    GameModuleInvalid, UnknownComponent, UnknownPrefab, DuplicateName, ScheduleCycle,
+    AssetLoadFailed, ScriptError, NetworkError, InvalidArgument
+};
+
+struct Error {
+    Errc        code;
+    std::string message;       // human readable, complete sentence
+    std::string file;          // optional: source file of the error (YAML, script)
+    int         line = 0;      // optional: 1-based line in that file
+    std::string toString() const; // "scenes/level1.yaml:14: unknown component 'Helth' (did you mean 'Health'?)"
+};
+
+template <class T> using Result = std::expected<T, Error>;
+
+class BootError : public std::runtime_error {      // thrown only by boot() and load()
+public:
+    BootError(int exitCode, Error error);
+    int exitCode() const noexcept;                 // 1 config, 2 plugin, 3 game module or schedule, 4 scene
+                                                   // (5 = client stopped after a system error, returned by run())
+    const Error& error() const noexcept;
+};
+```
+
+### `include/engine/core/math/`
+
+```cpp
+struct Vec2  { float x = 0, y = 0; /* +, -, * scalar, dot, length, normalized, lerp */ };
+struct Rect  { float x = 0, y = 0, w = 0, h = 0; bool contains(Vec2) const; bool intersects(const Rect&) const; };
+struct Color { uint8_t r = 255, g = 255, b = 255, a = 255; static constexpr Color white(); /* black, red… */ };
+constexpr uint64_t fnv1a64(std::string_view) noexcept;   // core/Hash.hpp: compile-time hash for type, event and action keys
+```
+
 ## Depends on
 
 - nothing: can start now

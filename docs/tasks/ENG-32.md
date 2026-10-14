@@ -12,6 +12,21 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `plugins/platform_sfml/SfmlImGui.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `plugins/platform_sfml/SfmlImGui.cpp`
+
+```cpp
+// Implements the debug-UI part of SfmlPlatform.
+Result<void> initImGui(sf::RenderWindow& window);      // ImGui::SFML::Init + ImPlot::CreateContext
+void         shutdownImGui();
+void         SfmlPlatform::beginDebugUi();             // ImGui::SFML::Update
+void         SfmlPlatform::endDebugUi();               // ImGui::SFML::Render, after submit()
+bool         imguiWantsInput();                        // pollEvents skips InputMap::feed when true
+```
+
 ## Depends on
 
 - [ENG-31](ENG-31.md) — platform_sfml plugin: window, events to InputMap, batching renderer

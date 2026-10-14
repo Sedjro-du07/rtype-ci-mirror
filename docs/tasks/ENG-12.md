@@ -13,6 +13,25 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/module/DynamicLibrary.hpp`
 - `src/module/DynamicLibrary.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/module/DynamicLibrary.hpp`
+
+```cpp
+class DynamicLibrary {
+public:
+    static Result<DynamicLibrary> open(const std::filesystem::path& file); // FileNotFound / SymbolNotFound with the OS message
+    static std::string decorate(std::string_view stem);  // "platform_sfml" → "libplatform_sfml.so" / "platform_sfml.dll"
+    DynamicLibrary(DynamicLibrary&&) noexcept; DynamicLibrary& operator=(DynamicLibrary&&) noexcept;
+    ~DynamicLibrary();                                   // dlclose / FreeLibrary
+    void* rawSymbol(std::string_view name) const;        // nullptr if absent
+    template <class Fn> Result<Fn> symbol(std::string_view name) const; // typed lookup, SymbolNotFound if absent
+    const std::filesystem::path& path() const;
+};
+```
+
 ## Depends on
 
 - [ENG-04](ENG-04.md) — Core types: hash, Vec2/Rect/Color, Error, Result, BootError

@@ -13,6 +13,25 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/net/StreamFramer.hpp`
 - `src/net/StreamFramer.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/net/StreamFramer.hpp`
+
+```cpp
+class StreamFramer {                      // one per TCP stream
+public:
+    explicit StreamFramer(uint32_t maxMessageBytes);
+    Result<void> feed(std::span<const std::byte> bytes);      // error → close the stream
+    std::optional<std::vector<std::byte>> next();             // one complete message, or nothing yet
+    static void frame(std::span<const std::byte> message, std::vector<std::byte>& out);  // length prefix + bytes
+private:
+    std::vector<std::byte> buffer_;
+    uint32_t               max_;
+};
+```
+
 ## Depends on
 
 - [ENG-37](ENG-37.md) — network_asio plugin: UDP and TCP on an I/O thread

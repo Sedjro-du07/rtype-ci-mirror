@@ -13,6 +13,41 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/net/Handshake.hpp`
 - `src/net/Handshake.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/net/Handshake.hpp`
+
+```cpp
+enum class HandshakeState : uint8_t { Idle, Hello, Challenge, LinkUdp, Accepted, Refused };
+
+class ServerHandshake {                       // one per pending connection
+public:
+    ServerHandshake(const NetConfig& cfg, uint64_t serverFingerprint, size_t playersNow);
+    // Each method reads or writes one handshake message; the bytes come from the protocol RFC.
+    Result<void> onHello(ByteReader& in);     // name, fingerprint → Refused(ServerFull | FormatMismatch | bad name) or Challenge
+    void         writeChallenge(ByteWriter& out);   // the token the client must echo on UDP
+    Result<void> onUdpLink(ByteReader& in, const Endpoint& from);   // token matches → Accepted
+    HandshakeState state() const;
+    DisconnectReason refusal() const;
+    const std::string& playerName() const;
+    const Endpoint& udpEndpoint() const;
+};
+
+class ClientHandshake {
+public:
+    ClientHandshake(std::string playerName, uint64_t clientFingerprint);
+    void         writeHello(ByteWriter& out);
+    Result<void> onChallenge(ByteReader& in);   // keeps the token
+    void         writeUdpLink(ByteWriter& out); // sent on UDP until Accepted
+    Result<void> onResult(ByteReader& in);      // Accepted with my PlayerId, or Refused with a reason
+    HandshakeState state() const;
+    PlayerId me() const;
+    DisconnectReason refusal() const;
+};
+```
+
 ## Depends on
 
 - [SRV-01](SRV-01.md) — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping

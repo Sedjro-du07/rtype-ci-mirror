@@ -14,6 +14,35 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/services/Metrics.cpp`
 - `src/systems/DebugOverlaySystem.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/services/Metrics.hpp`
+
+```cpp
+class Metrics {
+public:
+    void beginFrame(); void endFrame();                     // engine only
+    void record(std::string_view series, double value);    // any module: "net.rtt", "rtype.enemies"
+    double fps() const; double frameMs() const;
+    std::span<const double> history(std::string_view series) const; // ring buffer (300 samples) for ImPlot
+    MetricsSnapshot snapshot() const;                       // frame time, per-system times, entity count,
+                                                            // draw calls, network rtt / loss / bandwidth
+};
+```
+
+### `src/systems/DebugOverlaySystem.cpp`
+
+```cpp
+void debugOverlay(Context& ctx);   // "engine.debug_overlay": Render, client and editor, last
+// private helpers
+void drawConsole(Console& console);
+void drawFrameGraph(const Metrics& metrics);
+void drawSystemTimings(std::span<const SystemStats> stats);
+void drawLagometer(const NetworkSession& net);
+```
+
 ## Depends on
 
 - [ENG-32](ENG-32.md) — Dear ImGui and ImPlot in platform_sfml (debug UI hooks)

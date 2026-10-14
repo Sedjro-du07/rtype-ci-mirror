@@ -20,6 +20,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, os.path.dirname(__file__))
 from tasks import TASKS          # noqa: E402
 from details import DETAILS      # noqa: E402
+from api import API              # noqa: E402
 
 GITHUB = 'https://github.com/EpitechPGE3-2026/G-ING-500-COT-5-1-rtype-2/blob/architecture-task-distribution'
 BOARDS = {
@@ -88,6 +89,78 @@ def ref_links(ref, base_docs):
     return out
 
 
+# ------------------------------------------------------------------ classes and methods
+def reference_blocks():
+    """[(file key, code)] from every reference section whose heading names a file."""
+    out = []
+    ref = os.path.join(ROOT, 'docs/engine/reference')
+    for name in sorted(os.listdir(ref)):
+        if not name[:2].isdigit():
+            continue
+        parts = re.split(r'^(#{2,3} .*)$', open(os.path.join(ref, name)).read(), flags=re.M)
+        for i in range(1, len(parts), 2):
+            m = re.search(r'— `([^`]+)`', parts[i])
+            if not m:
+                continue
+            key = m.group(1).removeprefix('engine/')
+            if key == 'src/net/':                      # private classes are listed per task in api.py
+                continue
+            for lang, code in re.findall(r'```(cpp|cmake)?\n(.*?)```', parts[i + 1], flags=re.S):
+                out.append((key, lang or 'cpp', code.rstrip()))
+    return out
+
+
+REF_BLOCKS = None
+
+
+def full_path(key):
+    if key.startswith(('cmake/', 'launcher/', 'src/', 'plugins/', 'tests/', 'benchmarks/', 'tools/')) or key.endswith('.cmake'):
+        return key
+    return 'include/engine/' + key
+
+
+def api_blocks(t):
+    """[(file, lang, code)] grouped by file, declarations only."""
+    global REF_BLOCKS
+    if REF_BLOCKS is None:
+        REF_BLOCKS = reference_blocks()
+    spec = API.get(t['id'], {})
+    blocks = []
+    if spec.get('auto', True):
+        wanted = []
+        for f in t['files']:
+            k = f.removeprefix('include/engine/')
+            wanted.append(k)
+            if f.endswith('.cpp'):                     # a source implements its public header
+                wanted.append(f[:-4].removeprefix('src/') + '.hpp')
+        for key, lang, code in REF_BLOCKS:
+            if any(w == key or (key.endswith('/') and w.startswith(key)) for w in wanted):
+                blocks.append((full_path(key), lang, code))
+    blocks += spec.get('extra', [])
+    grouped = {}
+    for f, lang, code in blocks:
+        g = grouped.setdefault(f, [lang, []])
+        if code not in g[1]:
+            g[1].append(code)
+    return [(f, lang, '\n\n'.join(codes)) for f, (lang, codes) in grouped.items()]
+
+
+def api_section(t):
+    blocks = api_blocks(t)
+    note = API.get(t['id'], {}).get('note')
+    if not blocks and not note:
+        return []
+    lines = ['## Classes and methods', '',
+             '**Declarations only**: what this task must write, without the bodies. Write the implementation in the '
+             'matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the '
+             'pages in *Read first*.', '']
+    if note:
+        lines += [f'> {note}', '']
+    for f, lang, code in blocks:
+        lines += [f'### `{f}`', '', f'```{lang}', code, '```', '']
+    return lines
+
+
 # ------------------------------------------------------------------ detail pages
 def detail_page(t):
     d = DETAILS.get(t['id'], {})
@@ -106,6 +179,7 @@ def detail_page(t):
             note = f" (shared with {', '.join(link_task(o, '') for o in others)})"
         lines.append(f'- `{f}`{note}')
     lines.append('')
+    lines += api_section(t)
     lines += ['## Depends on', '']
     lines += [f"- {link_task(x, '')} — {BY_ID[x]['title']}" for x in t['deps']] or ['- nothing: can start now']
     lines += ['', '## Unlocks', '']

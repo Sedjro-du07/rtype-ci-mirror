@@ -14,6 +14,44 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/events/EngineEvents.hpp`
 - `src/events/EventBus.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/events/EventBus.hpp`
+
+```cpp
+class EventBus {
+public:
+    template <class E> [[nodiscard]] Subscription subscribe(std::move_only_function<void(const E&)> fn);
+
+    template <class E> void publish(E event);   // queued; delivered at the next dispatch()
+    template <class E> void emit(const E& event); // immediate; only for engine internals and tests
+    template <class E> void publishFromAnyThread(E event); // thread-safe inbox (network thread),
+                                                         // merged into the queue at dispatch()
+    void dispatch();                             // engine only; delivers queued events in publish order;
+                                                 // events published during dispatch wait for the next one
+    void clearGameSubscriptions();               // before unloading a game module
+};
+```
+
+### `include/engine/events/EngineEvents.hpp`
+
+```cpp
+struct QuitRequested      {};                                           ENGINE_EVENT(QuitRequested)
+struct WindowResized      { uint32_t width, height; };                    ENGINE_EVENT(WindowResized)
+struct WindowFocusChanged { bool focused; };                              ENGINE_EVENT(WindowFocusChanged)
+struct Collision          { Entity a, b; };                               ENGINE_EVENT(Collision)
+struct SceneLoaded        { std::string name; };                          ENGINE_EVENT(SceneLoaded)
+struct SceneUnloading     { std::string name; };                          ENGINE_EVENT(SceneUnloading)
+struct PlayerJoined       { PlayerId player; };                           ENGINE_EVENT(PlayerJoined)
+struct PlayerLeft         { PlayerId player; DisconnectReason reason; };  ENGINE_EVENT(PlayerLeft)
+struct JoinedServer       { PlayerId me; };                               ENGINE_EVENT(JoinedServer)
+struct LeftServer         { DisconnectReason reason; };                   ENGINE_EVENT(LeftServer)
+struct Caption            { std::string text; float seconds; };           ENGINE_EVENT(Caption)
+struct ConsoleCommand     { std::string line; };                          ENGINE_EVENT(ConsoleCommand)
+```
+
 ## Depends on
 
 - [ENG-06](ENG-06.md) — Signal and RAII Subscription

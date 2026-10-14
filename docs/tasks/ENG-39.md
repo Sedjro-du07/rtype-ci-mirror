@@ -15,6 +15,45 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/net/NetworkIdMap.cpp`
 - `src/systems/NetSystems.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/net/NetComponents.hpp`
+
+```cpp
+struct NetworkId  { uint32_t value = 0; };        // shared identity; never reused during a session
+struct NetPrefab  { uint32_t prefabKey = 0; };    // fnv1a of the prefab path, to spawn on clients
+struct NetOwner   { PlayerId owner = 0; };        // which player controls this entity
+struct RemoteInput{ ActionState state; uint64_t lastMask = 0; uint32_t lastTick = 0; }; // server side
+struct NetInterpolation { Vec2 from, to; double fromTime = 0, toTime = 0; };              // client side
+```
+
+### `include/engine/net/NetworkIdMap.hpp`
+
+```cpp
+class NetworkIdMap {
+public:
+    uint32_t allocate();                              // server: next id, monotonic
+    void     bind(uint32_t id, Entity e);
+    void     unbind(uint32_t id);
+    Entity   find(uint32_t id) const;                 // client: unknown id → Entity::null(), never a crash
+    void     clear();
+};
+```
+
+### `src/systems/NetSystems.cpp`
+
+```cpp
+void netAssignIds(Context& ctx);       // "engine.net.assign_ids"     LateUpdate, server
+void netSnapshot(Context& ctx);        // "engine.net.snapshot"       LateUpdate, server
+void netApplySnapshot(Context& ctx);   // "engine.net.apply_snapshot" FixedUpdate (first), client
+void netInterpolate(Context& ctx);     // "engine.net.interpolate"    Render (first), client
+void netSendInput(Context& ctx);       // "engine.net.send_input"     LateUpdate, client
+void netReceiveInput(Context& ctx);    // "engine.net.receive_input"  FixedUpdate (first), server
+void registerNetSystems(Scheduler& s); // called by registerEngineSystems
+```
+
 ## Depends on
 
 - [ENG-38](ENG-38.md) — NetworkSession core: connections, bounded inbox, validation, heartbeat, timeouts

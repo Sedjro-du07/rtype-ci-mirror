@@ -14,6 +14,39 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/scene/SceneManager.hpp`
 - `src/scene/SceneManager.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/scene/Scene.hpp`
+
+```cpp
+class Scene {
+public:
+    const std::string& name() const;
+    const std::filesystem::path& path() const;
+    Registry& registry();
+};
+```
+
+### `include/engine/scene/SceneManager.hpp`
+
+```cpp
+class SceneManager {
+public:
+    SceneManager(const TypeRegistry&, AssetManager&, EventBus&, Logger&);
+    Result<void> load(const std::filesystem::path& file);   // engine only (first scene): immediate
+    void switchTo(const std::filesystem::path& file);      // deferred to the end of the frame
+    void markPersistent(Entity e);                         // copied into the next scene on switch (the player)
+    Result<void> save(const std::filesystem::path& file) const;
+    Registry& world();                                     // active scene's registry
+    std::string_view activeName() const;
+    PrefabLibrary& prefabs();
+    void applyPending(Context& ctx);                       // engine only: SceneUnloading → clear → load → SceneLoaded
+    void clear();                                          // engine only: shutdown, before the game module unloads
+};
+```
+
 ## Depends on
 
 - [ENG-42](ENG-42.md) — SceneLoader: two passes, errors with file:line, save

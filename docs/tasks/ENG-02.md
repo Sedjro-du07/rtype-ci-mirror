@@ -12,6 +12,27 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `cmake/EngineModules.cmake`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `cmake/EngineModules.cmake`
+
+```cmake
+option(ENGINE_DYNAMIC_MODULES "Build plugins and games as runtime-loaded libraries" ON)
+
+engine_add_plugin(<kind>_<name> SOURCES ... [DEPENDS <targets>])
+# SHARED or STATIC per ENGINE_DYNAMIC_MODULES; links engine; output to <bin>/plugins;
+# hidden visibility; defines ENGINE_BUILDING_PLUGIN.
+
+engine_add_game_module(<name> SOURCES ... [DEPENDS <targets>])
+# Same for a game; output to <bin>/games.
+
+engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
+# Builds engine/launcher/main.cpp with ENGINE_DEFAULT_CONFIG="<file.yaml>"; copies the config next
+# to the executable; in static mode links every plugin and the named game into the executable.
+```
+
 ## Depends on
 
 - [ENG-01](ENG-01.md) — Engine CMake project, options and C++23 setup

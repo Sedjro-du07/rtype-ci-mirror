@@ -13,6 +13,27 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `src/reflection/Codec.hpp`
 - `src/reflection/Codec.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/reflection/Codec.hpp`
+
+```cpp
+struct WireContext {                                     // declared in reflection/TypeInfo.hpp
+    std::function<uint32_t(Entity)> networkIdOf;         // 0 if not replicated (warning)
+    std::function<Entity(uint32_t)> entityOf;            // Entity::null() if unknown
+};
+
+namespace codec {
+void         encode(const TypeInfo& type, const void* obj, ByteWriter& out, const WireContext& wire);
+Result<void> decode(const TypeInfo& type, void* obj, ByteReader& in, const WireContext& wire);   // obj default-constructed
+void         encodeField(const FieldInfo& f, const std::byte* field, ByteWriter& out, const WireContext& wire);
+Result<void> decodeField(const FieldInfo& f, std::byte* field, ByteReader& in, const WireContext& wire);
+uint64_t     fingerprint(std::span<const TypeInfo* const> types);    // used by TypeRegistry::formatFingerprint
+}
+```
+
 ## Depends on
 
 - [ENG-22](ENG-22.md) — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)

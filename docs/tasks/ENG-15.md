@@ -13,6 +13,49 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/module/NullPlugins.hpp`
 - `src/module/NullPlugins.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/module/NullPlugins.hpp`
+
+```cpp
+class NullRenderer final : public IRenderer {
+public:
+    Result<TextureHandle> createTexture(std::span<const std::byte>, std::string_view) override;  // valid handle, no decode
+    void   destroyTexture(TextureHandle) override;
+    Vec2   textureSize(TextureHandle) const override;                                             // {0, 0}
+    Result<FontHandle> createFont(std::span<const std::byte>, std::string_view) override;
+    void   destroyFont(FontHandle) override;
+    void   submit(const RenderFrame&) override;                                                   // ignores
+    bool   supports(Feature) const override;                                                      // false
+    void   setColorFilter(ColorFilter) override;
+    RenderStats stats() const override;
+};
+
+class NullPlatform final : public IPlatform {
+public:
+    PluginKind kind() const override; std::string_view name() const override;   // "null"
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext&) override; void shutdown() noexcept override;
+    Result<void> openWindow(const WindowDesc&) override;  void closeWindow() override;
+    bool windowOpen() const override;                     // true until requestQuit
+    void pollEvents(InputMap&, EventBus&) override;       // produces nothing
+    IRenderer& renderer() override;                       // a NullRenderer member
+    void setWindow(const WindowDesc&) override;
+    void beginDebugUi() override; void endDebugUi() override;
+    void setClipboard(std::string_view) override; std::string clipboard() const override;
+private:
+    NullRenderer renderer_;
+};
+
+class NullAudio final : public IAudio { /* every IPlugin + IAudio method; play() returns 0 */ };
+class NullNetwork final : public INetwork { /* every IPlugin + INetwork method; send drops, receive nothing */ };
+class NullScripting final : public IScripting { /* every IPlugin + IScripting method; load() returns ScriptError "scripting disabled" */ };
+
+std::unique_ptr<IPlugin> makeNullPlugin(PluginKind kind);   // used by ModuleManager for the name "null"
+```
+
 ## Depends on
 
 - [ENG-11](ENG-11.md) — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE

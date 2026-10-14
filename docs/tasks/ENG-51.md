@@ -12,6 +12,26 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `src/systems/CollisionSystem.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/systems/CollisionSystem.cpp`
+
+```cpp
+void collision(Context& ctx);   // "engine.collision" FixedUpdate, all, after engine.hierarchy
+
+class UniformGrid {             // private to this file
+public:
+    explicit UniformGrid(float cellSize);
+    void clear();
+    void insert(Entity e, const Rect& box);
+    template <class Fn> void forEachPair(Fn&& fn) const;   // each candidate pair once
+};
+bool layersMatch(const Collider& a, const Collider& b);    // (a.layer & b.mask) && (b.layer & a.mask)
+Rect worldBox(const Position& p, const Collider& c);
+```
+
 ## Depends on
 
 - [ENG-25](ENG-25.md) — Engine components and their registration

@@ -13,6 +13,28 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/services/Console.hpp`
 - `src/services/Console.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/services/Console.hpp`
+
+```cpp
+using CommandFn = std::move_only_function<void(std::span<const std::string_view> args, Console&)>;
+
+class Console {
+public:
+    Console(CVars& cvars, EventBus& events, Logger& log);
+    void registerCommand(std::string_view name, std::string_view help, CommandFn fn);
+    void execute(std::string_view line);      // "set r_vsync 0", "system disable rtype.bydos_ai"
+    void print(std::string_view text);
+    std::span<const std::string> history() const;
+    std::span<const std::string> output() const;
+    std::vector<std::string> complete(std::string_view prefix) const; // tab completion
+    bool open() const; void toggle();          // F1 by default (bound in input.yaml)
+};
+```
+
 ## Depends on
 
 - [ENG-45](ENG-45.md) — CVars: typed variables, flags, ranges, archive

@@ -13,6 +13,18 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `tests/ecs/`
 - `tests/reflection/`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `tests/`
+
+```text
+tests/ecs/        EntityAllocatorTest, SparseSetTest, RegistryTest, ViewTest, CommandsTest, HooksTest
+tests/reflection/ TypeRegistryTest (each category, DuplicateName, fingerprint), BuilderCompileFailTest,
+                  YamlRoundTripTest (every FieldKind), ByteStreamTest
+```
+
 ## Depends on
 
 - [ENG-18](ENG-18.md) — Registry: typed and type-erased access, identity, hierarchy

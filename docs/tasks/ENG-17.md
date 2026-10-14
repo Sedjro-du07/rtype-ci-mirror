@@ -13,6 +13,49 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/ecs/IStorage.hpp`
 - `include/engine/ecs/SparseSet.hpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/ecs/IStorage.hpp`
+
+```cpp
+class IStorage {
+public:
+    virtual ~IStorage() = default;
+    virtual ComponentId id() const = 0;                  // id assigned by the TypeRegistry
+    virtual bool   has(Entity) const = 0;
+    virtual void   remove(Entity) = 0;                   // no-op if absent
+    virtual size_t size() const = 0;
+    virtual void   clear() = 0;
+    virtual std::span<const Entity> entities() const = 0; // dense order
+    virtual void*       getRaw(Entity) = 0;              // type-erased access (scene loader, editor, scripts)
+    virtual const void* getRaw(Entity) const = 0;
+    virtual void*  emplaceRaw(Entity, const void* src) = 0; // copy-constructs from src (TypeInfo::copy)
+};
+```
+
+### `include/engine/ecs/SparseSet.hpp`
+
+```cpp
+template <class T>
+class SparseSet final : public IStorage {
+public:
+    explicit SparseSet(ComponentId id);
+    template <class... Args> T& emplace(Entity e, Args&&... args); // asserts absent; returns the new component
+    T&       get(Entity e);                 // asserts present
+    const T& get(Entity e) const;
+    T*       tryGet(Entity e);              // nullptr if absent
+    T&       replace(Entity e, T value);    // asserts present; assigns
+    bool     has(Entity e) const override;
+    void     remove(Entity e) override;     // swap with last, pop: O(1); invalidates references
+    size_t   size() const override;
+    std::span<const Entity> entities() const override;
+    std::span<T>            components();   // dense array, same order as entities()
+    // + IStorage raw overrides
+};
+```
+
 ## Depends on
 
 - [ENG-16](ENG-16.md) — Entity and EntityAllocator (generations, free list)

@@ -13,6 +13,32 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/reflection/ByteStream.hpp`
 - `src/reflection/ByteStream.cpp`
 
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/reflection/ByteStream.hpp`
+
+```cpp
+class ByteWriter {                     // appends to a caller-owned buffer, never allocates beyond a limit
+public:
+    explicit ByteWriter(std::vector<std::byte>& out, size_t maxBytes);
+    bool write(uint8_t); bool write(uint16_t); bool write(uint32_t); bool write(uint64_t);
+    bool write(int32_t); bool write(float); bool write(std::string_view);   // length-prefixed
+    bool writeBits(uint32_t value, uint8_t bitCount);                        // bit packing (Track 2)
+    size_t size() const; bool overflowed() const;
+};
+class ByteReader {                     // bounds-checked: every read fails cleanly past the end
+public:
+    explicit ByteReader(std::span<const std::byte> in);
+    std::optional<uint8_t> u8(); std::optional<uint16_t> u16(); std::optional<uint32_t> u32();
+    std::optional<uint64_t> u64(); std::optional<int32_t> i32(); std::optional<float> f32();
+    std::optional<std::string> string(size_t maxLength);
+    std::optional<uint32_t> bits(uint8_t bitCount);
+    size_t remaining() const; bool failed() const;
+};
+```
+
 ## Depends on
 
 - [ENG-04](ENG-04.md) — Core types: hash, Vec2/Rect/Color, Error, Result, BootError
