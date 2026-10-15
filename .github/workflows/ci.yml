@@ -3,7 +3,10 @@ name: CI
 
 on:
   push:
+    paths-ignore: ['docs/**', '**/*.md', 'index.html', 'app.js']
   pull_request:
+    paths-ignore: ['docs/**', '**/*.md', 'index.html', 'app.js']
+  workflow_dispatch:                     # run by hand from the Actions tab
 
 concurrency:
   group: ci-${{ github.ref }}
