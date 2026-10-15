@@ -44,6 +44,10 @@ if(NOT ENGINE_DYNAMIC_MODULES)
     target_compile_definitions(engine PUBLIC ENGINE_STATIC_DEFINE ENGINE_STATIC_MODULES)
 endif()
 
+if(WIN32)
+    target_link_libraries(engine PRIVATE bcrypt)
+endif()
+
 target_include_directories(engine
     PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>

@@ -5,13 +5,21 @@
 ** Os
 */
 
-// engine/src/os/Os.hpp
-// ENG-60 — OS layer: secure random, user data folder, executable folder, quit signals
-// Spec: docs/engine/reference/README.md · ADR 0044 · reference 01
-// Details: docs/tasks/ENG-60.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/Export.hpp"
+
+#include <cstddef>
+#include <filesystem>
+#include <functional>
+#include <span>
+#include <string_view>
+
+namespace engine::os {
+
+ENGINE_API void secureRandom(std::span<std::byte> out);
+ENGINE_API std::filesystem::path userDataDir(std::string_view app);
+ENGINE_API std::filesystem::path executableDir();
+ENGINE_API void onQuitSignal(std::move_only_function<void()> fn);
+
+}

@@ -29,3 +29,6 @@ engine_add_test(engine_core_tests SOURCES
     core/CoreTypesTest.cpp
     core/SignalTest.cpp
     core/TimeTest.cpp)
+
+engine_add_test(engine_os_tests SOURCES
+    os/OsTest.cpp)
