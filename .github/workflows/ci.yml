@@ -1,0 +1,78 @@
+# Build and test every push and pull request on Linux and Windows (ADR 0002, 0045 · ENG-61).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VCPKG_COMMIT: 20ceb8adbf0504d4b0d5e4058a32f9d4fc896391   # same as builtin-baseline in vcpkg.json
+
+jobs:
+  build:
+    name: ${{ matrix.preset }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { preset: linux-gcc-debug,    os: ubuntu-24.04, cxx: g++-14 }
+          - { preset: linux-clang-debug,  os: ubuntu-24.04, cxx: clang++-18 }
+          - { preset: linux-gcc-static,   os: ubuntu-24.04, cxx: g++-14 }
+          - { preset: windows-msvc-debug, os: windows-2022, cxx: cl }
+          - { preset: windows-msvc-static, os: windows-2022, cxx: cl }
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-cache
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: System packages (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build g++-14 clang-18 \
+            libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev \
+            autoconf autoconf-archive automake libtool pkg-config
+
+      - name: MSVC environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: vcpkg
+        shell: bash
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+          git -C "$VCPKG_ROOT" checkout "$VCPKG_COMMIT"
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          if [ "$RUNNER_OS" = "Windows" ]; then "$VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics; else "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics; fi
+
+      - name: vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-${{ matrix.preset }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ matrix.preset }}-
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DENGINE_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Test
+        run: ctest --preset ${{ matrix.preset }} --no-tests=ignore
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting
+        run: |
+          files=$(git ls-files 'engine/*.hpp' 'engine/*.cpp')
+          [ -z "$files" ] || clang-format-18 --dry-run --Werror $files
