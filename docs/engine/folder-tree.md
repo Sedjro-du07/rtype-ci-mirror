@@ -6,8 +6,16 @@ task: `ENG-xx` on the engine board, `SRV-xx` on the server board (see [`tasks.md
 ```
 engine/
 ├── benchmarks/
-│   ├── ecs_storage/                                      ENG-56
-│   └── net/                                              SRV-20
+│   ├── ecs_storage/
+│   │   ├── ArchetypeStore.cpp                            ENG-56
+│   │   ├── ArchetypeStore.hpp                            ENG-56
+│   │   ├── BenchComponents.hpp                           ENG-56
+│   │   ├── CMakeLists.txt                                ENG-56
+│   │   ├── EcsStorageBench.cpp                           ENG-56
+│   │   ├── SparseArray.hpp                               ENG-56
+│   │   └── SparseArray.inl                               ENG-56
+│   ├── net/                                              SRV-20
+│   └── CMakeLists.txt                                    ENG-56
 ├── cmake/
 │   ├── EngineFeatures.cmake                              ENG-03
 │   ├── EngineInstall.cmake                               ENG-62

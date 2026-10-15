@@ -21,4 +21,6 @@ One paged sparse set per component type: a paged sparse array maps an entity to 
 ## Consequences
 
 - Dense order changes on removal: never keep a pointer to a component.
-- A benchmark of the three goes into the comparative study.
+- A benchmark of the three goes into the comparative study: [01 · ECS storage](../study/01-ecs-storage.md)
+  (ENG-56). Archetypes walk multi-component queries 4–5× faster; the sparse set is kept for
+  predictable costs and simplicity, well within the frame budget.

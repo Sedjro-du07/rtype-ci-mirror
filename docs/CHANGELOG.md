@@ -7,10 +7,13 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2026-10-15] — engine ECS: ENG-16, ENG-17
+## [2026-10-15] — engine ECS: ENG-16, ENG-17, ENG-56
 
 ### Added
 
+- ECS storage benchmark (ENG-56, `engine/benchmarks/ecs_storage/`, built with `ENGINE_BUILD_BENCHMARKS=ON`):
+  sparse set vs sparse array vs a minimal archetype store, 10 000 entities; Google Benchmark added to
+  `vcpkg.json`. Results and reading in the new comparative study, `docs/study/01-ecs-storage.md`.
 - `IStorage` (with `ComponentId`) and the paged `SparseSet<T>` (pages of 4096, packed entities and
   components, swap-and-pop remove, raw access for type-erased callers); `IStorage.hpp` written by Sedjro;
   9 tests.

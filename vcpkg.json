@@ -15,6 +15,7 @@
     "imgui-sfml",
     "implot",
     "catch2",
+    "benchmark",
     "tl-expected"
   ],
   "overrides": [
