@@ -14,7 +14,7 @@
 #include <string>
 #include <utility>
 
-#if defined(ENGINE_USE_TL_EXPECTED) // set by the C++23 probe when <expected> is missing (ENG-03)
+#if defined(ENGINE_USE_TL_EXPECTED)
 #include <tl/expected.hpp>
 #else
 #include <expected>
@@ -42,15 +42,13 @@ enum class Errc : uint16_t {
 
 struct ENGINE_API Error {
     Errc code = Errc::InvalidArgument;
-    std::string message; // human readable, complete sentence
-    std::string file;    // optional: source file of the error (YAML, script)
-    int line = 0;        // optional: 1-based line in that file
+    std::string message;
+    std::string file;
+    int line = 0;
 
-    // "scenes/level1.yaml:14: unknown component 'Helth'", "client.yaml: …", or just the message.
     std::string toString() const;
 };
 
-// std::expected, or tl::expected when the compiler lacks it (same interface).
 #if defined(ENGINE_USE_TL_EXPECTED)
 template <class T, class E>
 using Expected = tl::expected<T, E>;
@@ -64,22 +62,19 @@ using std::unexpected;
 template <class T>
 using Result = Expected<T, Error>;
 
-// return fail(Errc::FileNotFound, "cannot open 'client.yaml'");   (works with both expected types)
 inline unexpected<Error> fail(Errc code, std::string message, std::string file = {}, int line = 0) {
     return unexpected<Error>(Error{code, std::move(message), std::move(file), line});
 }
 
-// The engine's only exception: thrown by Engine::boot() and load(), caught by run(), which returns
-// exitCode(): 1 config, 2 plugin, 3 game module or schedule, 4 scene (ADR 0024).
 class ENGINE_API BootError : public std::runtime_error {
+private:
+    int exitCode_;
+    Error error_;
+
 public:
     BootError(int exitCode, Error error);
     int exitCode() const noexcept { return exitCode_; }
     const Error& error() const noexcept { return error_; }
-
-private:
-    int exitCode_;
-    Error error_;
 };
 
-} // namespace engine
+}

@@ -14,7 +14,7 @@ ContinuationIndentWidth: 4
 ColumnLimit: 120
 AccessModifierOffset: -4
 NamespaceIndentation: None
-FixNamespaceComments: true
+FixNamespaceComments: false
 ReflowComments: false
 PointerAlignment: Left
 ReferenceAlignment: Left

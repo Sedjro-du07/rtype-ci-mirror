@@ -18,4 +18,4 @@ std::string Error::toString() const {
 BootError::BootError(int exitCode, Error error)
     : std::runtime_error(error.toString()), exitCode_(exitCode), error_(std::move(error)) {}
 
-} // namespace engine
+}

@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Code style: no comments in code besides the Epitech header; `private:` before `public:`
+  (`docs/engine/folder-tree.md`). Core files and tests rewritten accordingly; `.clang-format` no longer
+  adds `// namespace` comments (`FixNamespaceComments: false`).
 - GCC/Clang: `-Wno-missing-field-initializers` (aggregates are filled partially on purpose).
   MSVC: `/wd4251 /wd4275` (standard types in exported classes; same runtime everywhere).
 

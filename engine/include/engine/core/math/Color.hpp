@@ -24,4 +24,4 @@ struct Color {
     constexpr bool operator==(const Color&) const = default;
 };
 
-} // namespace engine
+}

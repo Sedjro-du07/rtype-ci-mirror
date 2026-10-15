@@ -38,14 +38,12 @@ struct Vec2 {
     constexpr float dot(Vec2 o) const { return x * o.x + y * o.y; }
     float length() const { return std::sqrt(dot(*this)); }
 
-    // Same direction, length 1. {0, 0} stays {0, 0}.
     Vec2 normalized() const {
         const float len = length();
         return len > 0.f ? Vec2{x / len, y / len} : Vec2{};
     }
 
-    // The point at t between a (t = 0) and b (t = 1).
     static constexpr Vec2 lerp(Vec2 a, Vec2 b, float t) { return a + (b - a) * t; }
 };
 
-} // namespace engine
+}

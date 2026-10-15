@@ -14,8 +14,6 @@
 
 using namespace engine;
 
-// Durations are only compared with each other or with zero: a CI machine can be slow at any moment.
-
 TEST_CASE("Time defaults", "[core][time]") {
     constexpr Time t;
     static_assert(t.fixedDelta == 1.0 / 60.0);
@@ -35,7 +33,6 @@ TEST_CASE("Clock::restart returns positive durations and starts again from zero"
     const double second = clock.restart();
     CHECK(second > 0.0);
 
-    // Right after a restart, the clock counts from zero again.
     CHECK(clock.elapsed() < second);
 }
 
@@ -47,5 +44,5 @@ TEST_CASE("Clock::elapsed does not reset", "[core][time]") {
     const double b = clock.elapsed();
     CHECK(a > 0.0);
     CHECK(b > a);
-    CHECK(clock.restart() >= b); // restart() saw everything elapsed() saw
+    CHECK(clock.restart() >= b);
 }

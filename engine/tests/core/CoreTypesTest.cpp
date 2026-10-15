@@ -18,7 +18,6 @@
 
 using namespace engine;
 
-// Reference values of 64-bit FNV-1a, checked at compile time.
 static_assert(fnv1a64("") == 0xcbf29ce484222325ull);
 static_assert(fnv1a64("a") == 0xaf63dc4c8601ec8cull);
 static_assert(fnv1a64("foobar") == 0x85944171f73967e8ull);
@@ -50,13 +49,13 @@ TEST_CASE("Vec2 arithmetic", "[core][math]") {
 
 TEST_CASE("Rect edges", "[core][math]") {
     constexpr Rect r{0, 0, 10, 10};
-    static_assert(r.contains({0, 0})); // left and top edges included
+    static_assert(r.contains({0, 0}));
     static_assert(r.contains({9.9f, 9.9f}));
-    static_assert(!r.contains({10, 5})); // right edge excluded
-    static_assert(!r.contains({5, 10})); // bottom edge excluded
+    static_assert(!r.contains({10, 5}));
+    static_assert(!r.contains({5, 10}));
     static_assert(r.intersects({5, 5, 10, 10}));
-    static_assert(!r.intersects({10, 0, 5, 5})); // touching on the right
-    static_assert(!r.intersects({0, 10, 5, 5})); // touching below
+    static_assert(!r.intersects({10, 0, 5, 5}));
+    static_assert(!r.intersects({0, 10, 5, 5}));
     static_assert(r.center() == Vec2{5, 5});
 }
 
@@ -79,7 +78,7 @@ Result<int> half(int value) {
     if (value % 2 != 0) return fail(Errc::InvalidArgument, "odd value");
     return value / 2;
 }
-} // namespace
+}
 
 TEST_CASE("Result carries a value or an Error", "[core][error]") {
     const auto even = half(4);

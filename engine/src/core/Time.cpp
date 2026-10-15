@@ -16,7 +16,7 @@ Clock::Clock() : start_(std::chrono::steady_clock::now()) {}
 double Clock::restart() {
     const auto now = std::chrono::steady_clock::now();
     const double seconds = Seconds(now - start_).count();
-    start_ = now; // the same instant ends this measure and starts the next: no time is lost between frames
+    start_ = now;
     return seconds;
 }
 
@@ -24,4 +24,4 @@ double Clock::elapsed() const {
     return Seconds(std::chrono::steady_clock::now() - start_).count();
 }
 
-} // namespace engine
+}

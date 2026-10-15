@@ -31,7 +31,7 @@ TEST_CASE("Signal calls listeners in connection order with the arguments", "[cor
 TEST_CASE("Signal without listeners and empty functions", "[core][signal]") {
     Signal<void()> sig;
     CHECK(sig.size() == 0);
-    sig.emit(); // nothing to call, no state allocated
+    sig.emit();
 
     const auto sub = sig.connect(nullptr);
     CHECK_FALSE(sub.active());
@@ -45,7 +45,7 @@ TEST_CASE("Destroying or resetting the Subscription stops calls", "[core][signal
     {
         const auto subB = sig.connect([&] { ++b; });
         sig.emit();
-    } // subB destroyed here
+    }
     sig.emit();
     CHECK(a == 2);
     CHECK(b == 1);
@@ -56,7 +56,7 @@ TEST_CASE("Destroying or resetting the Subscription stops calls", "[core][signal
     CHECK(sig.size() == 0);
     sig.emit();
     CHECK(a == 2);
-    subA.reset(); // twice is fine
+    subA.reset();
 }
 
 TEST_CASE("Subscription moves", "[core][signal]") {
@@ -67,10 +67,10 @@ TEST_CASE("Subscription moves", "[core][signal]") {
 
     Subscription moved = std::move(subA);
     CHECK(moved.active());
-    CHECK_FALSE(subA.active()); // NOLINT(bugprone-use-after-move): checking the moved-from state
+    CHECK_FALSE(subA.active());
     CHECK(sig.size() == 2);
 
-    moved = std::move(subB); // drops listener a, now holds listener b
+    moved = std::move(subB);
     CHECK(sig.size() == 1);
     sig.emit();
     CHECK(a == 0);
@@ -88,7 +88,7 @@ TEST_CASE("A listener can disconnect itself or a later listener during emit", "[
     Subscription selfSub, laterSub;
     selfSub = sig.connect([&] {
         ++self;
-        selfSub.reset(); // disconnects itself while running
+        selfSub.reset();
         laterSub.reset();
     });
     laterSub = sig.connect([&] { ++later; });
@@ -96,7 +96,7 @@ TEST_CASE("A listener can disconnect itself or a later listener during emit", "[
 
     sig.emit();
     CHECK(self == 1);
-    CHECK(later == 0); // disconnected before its turn
+    CHECK(later == 0);
     CHECK(last == 1);
     CHECK(sig.size() == 1);
 
@@ -110,8 +110,7 @@ TEST_CASE("A listener connected during emit is called from the next emit", "[cor
     int added = 0;
     std::vector<Subscription> subs;
     subs.push_back(sig.connect([&] {
-        if (subs.size() < 50) // many connects: the slot vector grows while it is being walked
-            subs.push_back(sig.connect([&] { ++added; }));
+        if (subs.size() < 50) subs.push_back(sig.connect([&] { ++added; }));
     }));
 
     sig.emit();
@@ -129,7 +128,7 @@ TEST_CASE("emit inside emit", "[core][signal]") {
         calls.push_back(depth);
         if (depth == 0) {
             sig.emit(1);
-            removed.reset(); // disconnected in the outer emit, after the inner one called it
+            removed.reset();
         }
     });
     removed = sig.connect([&](int depth) { calls.push_back(10 + depth); });
@@ -147,14 +146,14 @@ TEST_CASE("Signal destroyed before its Subscriptions", "[core][signal]") {
         CHECK(sub.active());
     }
     CHECK_FALSE(sub.active());
-    sub.reset(); // the Signal is gone: nothing to do, no crash
+    sub.reset();
 }
 
 TEST_CASE("A listener can destroy the Signal it is called from", "[core][signal]") {
     auto sig = std::make_unique<Signal<void()>>();
     int after = 0;
     const auto a = sig->connect([&] { sig.reset(); });
-    const auto b = sig->connect([&] { ++after; }); // still called: emit() keeps the listeners alive
+    const auto b = sig->connect([&] { ++after; });
     sig->emit();
     CHECK(sig == nullptr);
     CHECK(after == 1);

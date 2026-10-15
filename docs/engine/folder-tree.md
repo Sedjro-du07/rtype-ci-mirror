@@ -324,5 +324,8 @@ engine/
   ** Registry
   */
   ```
+- No comments in code besides the Epitech header: names carry the meaning; explanations go to the
+  docs and ADRs. A skeleton's task comment is removed when the task is implemented.
+- In a class, `private:` comes before `public:`.
 - The tree, the task tables, the per-task pages and the folder READMEs are generated from
   `docs/tasks/tasks.py` and `docs/tasks/details.py` by `python3 docs/tasks/generate.py`.
