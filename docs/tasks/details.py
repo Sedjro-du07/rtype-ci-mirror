@@ -11,7 +11,7 @@ DETAILS = {
 'ENG-01': dict(
     goal="Create the `engine` CMake project every other task builds into, with vcpkg, presets, exports, the C++23 setup and the build options.",
     todo=["Root `CMakeLists.txt`: `project(rtype)`, `add_subdirectory(engine)` (the game is added later); the engine still configures alone from `engine/`",
-          "Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua, sol2, miniaudio, imgui[sfml-binding], implot, catch2, tl-expected (ADR 0045)",
+          "Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua (override 5.4), sol2, miniaudio, imgui, imgui-sfml, implot, catch2, tl-expected (ADR 0045)",
           "Root `CMakePresets.json`: `linux-gcc`, `linux-clang`, `windows-msvc` × `debug` / `release`, plus `-static` variants; toolchain `$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake`; binary dir `build/<preset>`",
           "`engine/CMakeLists.txt`: `engine` library (SHARED when `ENGINE_DYNAMIC_MODULES`, else STATIC), `include/` public, `src/` private",
           "`generate_export_header` → `engine/Export.hpp` with `ENGINE_API`; hidden visibility everywhere (`CXX_VISIBILITY_PRESET hidden`, `VISIBILITY_INLINES_HIDDEN`) (ADR 0044)",

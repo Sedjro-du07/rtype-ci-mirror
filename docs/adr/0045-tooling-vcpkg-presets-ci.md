@@ -14,8 +14,8 @@ an installed, exported engine. Formatting and line endings were never fixed.
 ## Decision
 
 1. **vcpkg in manifest mode.** One `vcpkg.json` at the repository root (engine and game), with a
-   pinned `builtin-baseline`. Dependencies: sfml, yaml-cpp, asio, lua, sol2, miniaudio, imgui (with
-   the SFML binding), implot, catch2, tl-expected; raylib arrives with ENG-58. Triplets `x64-linux` and
+   pinned `builtin-baseline`. Dependencies: sfml, yaml-cpp, asio, lua (pinned to 5.4 by an override, for
+   sol2), sol2, miniaudio, imgui, imgui-sfml, implot, catch2, tl-expected; raylib arrives with ENG-58. Triplets `x64-linux` and
    `x64-windows` (dynamic CRT `/MD`, matching ADR 0002). vcpkg is found through `VCPKG_ROOT`.
 2. **CMake presets.** `CMakePresets.json` at the root is the only supported way to configure:
    `linux-gcc`, `linux-clang`, `windows-msvc`, each in `-debug` and `-release`, plus `-static`

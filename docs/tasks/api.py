@@ -46,8 +46,8 @@ add_subdirectory(engine)
   "name": "rtype", "version": "0.1.0",
   "builtin-baseline": "<pinned vcpkg commit>",
   "dependencies": [ "sfml", "yaml-cpp", "asio", "lua", "sol2", "miniaudio",
-                    { "name": "imgui", "features": [ "sfml-binding" ] }, "implot",
-                    "catch2", "tl-expected" ]
+                    "imgui", "imgui-sfml", "implot", "catch2", "tl-expected" ],
+  "overrides": [ { "name": "lua", "version": "5.4.8" } ]
 }'''),
     ('/CMakePresets.json (repository root)', 'json', '''configurePresets: base (hidden: toolchain $env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake, binaryDir build/${presetName})
   linux-gcc-debug, linux-gcc-release, linux-clang-debug, linux-clang-release,
