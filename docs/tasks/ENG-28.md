@@ -42,7 +42,8 @@ std::string_view             toName(Key k);  std::string_view toName(GamepadButt
 struct RawInputEvent {
     enum class Type : uint8_t { KeyDown, KeyUp, MouseDown, MouseUp, MouseMove, MouseWheel,
                                 GamepadDown, GamepadUp, GamepadAxis, GamepadConnected,
-                                GamepadDisconnected, TextEntered };
+                                GamepadDisconnected, TextEntered,
+                                TouchDown, TouchUp, TouchMove };      // touch: reserved for mobile (ADR 0044)
     Type          type;
     uint8_t       device = 0;          // gamepad index
     Key           key = Key::Unknown;
@@ -52,6 +53,7 @@ struct RawInputEvent {
     float         value = 0.f;         // axis value [-1,1], wheel delta
     Vec2          position;            // mouse, in virtual resolution
     char32_t      text = 0;            // TextEntered (console, name entry)
+    uint8_t       finger = 0;          // Touch*: which finger; position holds the point
 };
 ```
 
@@ -73,11 +75,12 @@ constexpr ActionId action(std::string_view name) noexcept;   // action("MoveUp")
 ## Read first
 
 - [ADR 0030](../adr/0030-actions-and-input-map.md)
+- [ADR 0044](../adr/0044-platforms-and-portability.md)
 
 ## To implement
 
 - [ ] `Key`, `MouseButton`, `GamepadButton`, `GamepadAxis` enums; name ↔ enum tables; `keyName`
-- [ ] `RawInputEvent`
+- [ ] `RawInputEvent`, with `TouchDown` / `TouchUp` / `TouchMove` and `finger` reserved for mobile (ADR 0044)
 - [ ] `ActionId`, `action()` constexpr
 
 ## Done when

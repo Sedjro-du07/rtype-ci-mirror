@@ -69,6 +69,8 @@ Dispatch points: after each `FixedUpdate` step (after `Commands::apply`) and aft
 | `QuitRequested` | — | `Context::requestQuit`, window close | quit asked |
 | `WindowResized` | `uint32_t width, height` | platform plugin | window size changed |
 | `WindowFocusChanged` | `bool focused` | platform plugin | focus lost or gained |
+| `AppSuspended` | — | platform plugin | reserved for mobile (ADR 0044): the app goes to the background; desktop plugins never send it |
+| `AppResumed` | — | platform plugin | reserved for mobile: back to the foreground |
 | `Collision` | `Entity a, b` | `engine.collision` | two colliders overlap this tick (once per pair) |
 | `SceneLoaded` | `std::string name` | `SceneManager` | after a scene finished loading |
 | `SceneUnloading` | `std::string name` | `SceneManager` | before a scene is cleared |

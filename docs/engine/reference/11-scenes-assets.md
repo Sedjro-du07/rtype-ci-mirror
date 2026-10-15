@@ -35,7 +35,8 @@ public:
     void release(MusicHandle);   void release(ScriptHandle);
     void collectUnused();                          // frees zero-count assets; called after a scene switch
     void reloadChanged();                          // dev: re-reads files whose timestamp changed (CVar asset_hot_reload)
-    std::filesystem::path resolve(std::string_view path) const; // game root + path; rejects "../" escapes
+    std::filesystem::path resolve(std::string_view path) const; // game root + path; rejects "../" escapes and
+                                                                 // a case that differs from the file on disk (ADR 0044)
     AssetStats stats() const;                      // counts and bytes per kind
 };
 

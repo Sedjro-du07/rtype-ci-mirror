@@ -27,6 +27,7 @@ tests/headless/config.yaml      role: client, game: testgame, scripting: ""
 
 - [ENG-08](ENG-08.md) — Engine: lifecycle, member order, fixed-step loop, error policy
 - [ENG-15](ENG-15.md) — Null Objects: NullPlatform, NullRenderer, NullAudio, NullNetwork, NullScripting
+- [ENG-61](ENG-61.md) — CI on GitHub Actions (GCC, Clang, MSVC; dynamic and static) and code style files
 
 ## Unlocks
 

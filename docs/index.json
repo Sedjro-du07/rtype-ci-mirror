@@ -428,6 +428,14 @@
     "title": "ADR 0043 — Protocol v1: what the game sees of it"
   },
   {
+    "file": "adr/0044-platforms-and-portability.md",
+    "title": "ADR 0044 — Platforms and portability"
+  },
+  {
+    "file": "adr/0045-tooling-vcpkg-presets-ci.md",
+    "title": "ADR 0045 — Tooling: vcpkg, presets, CI"
+  },
+  {
     "file": "../benchmark-graphics-rtype.md",
     "title": "Graphics library benchmark (FR)"
   },

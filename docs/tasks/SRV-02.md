@@ -70,6 +70,7 @@ public:
 - [SRV-01](SRV-01.md) — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping
 - [SRV-06](SRV-06.md) — StreamFramer: TCP message framing with size limit
 - [ENG-22](ENG-22.md) — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)
+- [ENG-60](ENG-60.md) — OS layer: secure random, user data folder, executable folder, quit signals
 
 ## Unlocks
 

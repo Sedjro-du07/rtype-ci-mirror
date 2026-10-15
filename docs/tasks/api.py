@@ -19,8 +19,12 @@ project(rtype_engine LANGUAGES CXX)
 include(cmake/EngineOptions.cmake)
 include(cmake/EngineModules.cmake)
 
-add_library(engine STATIC|SHARED <sources of src/**>)
-target_include_directories(engine PUBLIC include)
+add_library(engine SHARED|STATIC <sources of src/**>)        # SHARED when ENGINE_DYNAMIC_MODULES (ADR 0044)
+set_target_properties(engine PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+include(GenerateExportHeader)
+generate_export_header(engine BASE_NAME ENGINE EXPORT_MACRO_NAME ENGINE_API
+                       EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/include/engine/Export.hpp)
+target_include_directories(engine PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include)
 target_compile_features(engine PUBLIC cxx_std_23)
 target_link_libraries(engine PUBLIC <third-party targets>)   # yaml-cpp stays PRIVATE
 add_subdirectory(plugins/<each plugin>)
@@ -32,7 +36,49 @@ option(ENGINE_SANITIZERS         "Build with address and undefined sanitizers"  
 option(ENGINE_BUILD_TESTS        "Build engine/tests"                            ON)
 option(ENGINE_BUILD_BENCHMARKS   "Build engine/benchmarks"                       OFF)
 
-function(engine_set_warnings target)        # -Wall -Wextra -Wpedantic / /W4 (+ errors if enabled)'''),
+function(engine_set_warnings target)        # -Wall -Wextra -Wpedantic / /W4 (+ errors if enabled)
+function(engine_set_msvc_options target)    # /permissive- /Zc:__cplusplus /Zc:preprocessor /EHsc /utf-8'''),
+    ('/CMakeLists.txt (repository root)', 'cmake', '''cmake_minimum_required(VERSION 3.25)
+project(rtype LANGUAGES CXX)
+add_subdirectory(engine)
+# add_subdirectory(rtype)      # the game, later'''),
+    ('/vcpkg.json (repository root)', 'json', '''{
+  "name": "rtype", "version": "0.1.0",
+  "builtin-baseline": "<pinned vcpkg commit>",
+  "dependencies": [ "sfml", "yaml-cpp", "asio", "lua", "sol2", "miniaudio",
+                    { "name": "imgui", "features": [ "sfml-binding" ] }, "implot",
+                    "catch2", "tl-expected" ]
+}'''),
+    ('/CMakePresets.json (repository root)', 'json', '''configurePresets: base (hidden: toolchain $env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake, binaryDir build/${presetName})
+  linux-gcc-debug, linux-gcc-release, linux-clang-debug, linux-clang-release,
+  windows-msvc-debug, windows-msvc-release,
+  linux-gcc-static, windows-msvc-static        (ENGINE_DYNAMIC_MODULES=OFF)
+buildPresets and testPresets with the same names'''),
+]),
+'ENG-60': dict(extra=[
+    ('src/os/Os.hpp', 'cpp', '''// Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
+namespace engine::os {
+void                  secureRandom(std::span<std::byte> out);            // getrandom / BCryptGenRandom; aborts on failure
+std::filesystem::path userDataDir(std::string_view app);                  // created if missing
+std::filesystem::path executableDir();
+void                  onQuitSignal(std::move_only_function<void()> fn);  // SIGINT, SIGTERM / console control
+}'''),
+]),
+'ENG-61': dict(extra=[
+    ('.github/workflows/ci.yml (repository root)', 'yaml', '''on: [push, pull_request]
+jobs:
+  build:   matrix: { linux-gcc-debug, linux-clang-debug, windows-msvc-debug, linux-gcc-static, windows-msvc-static }
+           steps: checkout · setup vcpkg (binary cache) · cmake --preset $preset · cmake --build · ctest
+  format:  clang-format --dry-run --Werror on changed *.hpp *.cpp'''),
+]),
+'ENG-62': dict(extra=[
+    ('cmake/EngineInstall.cmake', 'cmake', '''install(TARGETS engine EXPORT rtype_engineTargets RUNTIME LIBRARY ARCHIVE)
+install(DIRECTORY include/ ${CMAKE_CURRENT_BINARY_DIR}/include/ DESTINATION include)
+install(FILES cmake/EngineModules.cmake DESTINATION lib/cmake/rtype_engine)
+install(EXPORT rtype_engineTargets NAMESPACE rtype_engine:: DESTINATION lib/cmake/rtype_engine)
+configure_package_config_file(cmake/rtype_engineConfig.cmake.in …)
+write_basic_package_version_file(… COMPATIBILITY SameMinorVersion)
+include(CPack)                         # TGZ on Linux, ZIP on Windows'''),
 ]),
 'ENG-03': dict(extra=[
     ('cmake/FeatureProbe.cpp', 'cpp', '''// One function per allowed feature (ADR 0017); compiled with try_compile, never linked.

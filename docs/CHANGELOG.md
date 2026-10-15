@@ -7,6 +7,27 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-15] — multiplatform and tooling
+
+### Added
+
+- ADR 0044: Linux and Windows built and tested; macOS best effort; Android and iOS designed for
+  (static mode as the mobile build, touch and suspend events reserved, read-only game root).
+  `libengine` is shared in dynamic mode with an `ENGINE_API` export header and hidden visibility on
+  every platform; operating-system calls live in `engine/src/os/`; portable coding rules.
+- ADR 0045: vcpkg in manifest mode (chosen by the team), `CMakePresets.json`, a root `CMakeLists.txt`,
+  CI on GitHub Actions (GCC, Clang, MSVC; dynamic and static; format check), code style files, an
+  installable engine (`find_package(rtype_engine)`) and CPack archives; Catch2 for tests.
+- Tasks ENG-60 (OS layer), ENG-61 (CI and code style), ENG-62 (install and packaging); tasks can now
+  own files at the repository root (`root_files`).
+
+### Changed
+
+- ENG-01 creates the vcpkg manifest, the presets, the root project and the export header; ENG-03 and
+  ENG-57 depend on the CI; ENG-10, ENG-45 and SRV-02 use the OS layer; ENG-27, ENG-28 reserve the
+  mobile events; ENG-40 checks path case. References 01, 02, 06, 07, 11, 12 and guides 01, 24, 27
+  updated; guide 01 now names the two game modules of ADR 0040.
+
 ## [2026-10-14] — protocol renamed MSEP
 
 ### Changed

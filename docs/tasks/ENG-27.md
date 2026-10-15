@@ -73,13 +73,14 @@ struct ConsoleCommand     { std::string line; };                          ENGINE
 ## Read first
 
 - [ADR 0029](../adr/0029-queued-event-bus.md)
+- [ADR 0044](../adr/0044-platforms-and-portability.md)
 - [reference 06](../engine/reference/06-events.md)
 
 ## To implement
 
 - [ ] `subscribe`, `publish` (queued), `emit` (immediate), `publishFromAnyThread` (mutex inbox)
 - [ ] `dispatch`: deliver in publish order; events published during dispatch wait
-- [ ] Engine events of reference 06 (player events included)
+- [ ] Engine events of reference 06 (player events included), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)
 
 ## Done when
 

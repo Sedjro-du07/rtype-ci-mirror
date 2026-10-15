@@ -9,9 +9,11 @@ engine/
 │   ├── ecs_storage/                                      ENG-56
 │   └── net/                                              SRV-20
 ├── cmake/
+│   ├── EngineInstall.cmake                               ENG-62
 │   ├── EngineModules.cmake                               ENG-02
 │   ├── EngineOptions.cmake                               ENG-01
-│   └── FeatureProbe.cpp                                  ENG-03
+│   ├── FeatureProbe.cpp                                  ENG-03
+│   └── rtype_engineConfig.cmake.in                       ENG-62
 ├── include/
 │   └── engine/
 │       ├── assets/
@@ -188,6 +190,9 @@ engine/
 │   │   ├── RoomNetwork.cpp                               SRV-14
 │   │   ├── StreamFramer.cpp                              SRV-06
 │   │   └── StreamFramer.hpp                              SRV-06
+│   ├── os/
+│   │   ├── Os.cpp                                        ENG-60
+│   │   └── Os.hpp                                        ENG-60
 │   ├── reflection/
 │   │   ├── ByteStream.cpp                                ENG-24
 │   │   ├── Codec.cpp                                     SRV-04

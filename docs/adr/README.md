@@ -51,6 +51,8 @@ rounds. A record is never edited once accepted. It is superseded by a new one, w
 | [0041](0041-netcode-means-in-engine-policy-in-game.md) | Network optimizations: the engine gives the means, the game team optimizes | NET-1 | Accepted (amends 0033) |
 | [0042](0042-admission-by-the-game.md) | Admission: the engine checks it can decode, the game decides who joins | NET-2 | Accepted (amends 0037) |
 | [0043](0043-protocol-v1-game-api.md) | Protocol v1: what the game sees of it | NET-3 | Accepted |
+| [0044](0044-platforms-and-portability.md) | Platforms and portability: Linux and Windows built, mobile designed for | P-1 | Accepted |
+| [0045](0045-tooling-vcpkg-presets-ci.md) | Tooling: vcpkg, CMake presets, CI on Linux and Windows, installable engine | T-1 | Accepted |
 
 ## Not yet recorded
 

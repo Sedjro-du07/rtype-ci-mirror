@@ -111,6 +111,7 @@ struct Color {
 - [ENG-28](ENG-28.md) — Keys, RawInputEvent, ActionId
 - [ENG-30](ENG-30.md) — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform
 - [ENG-44](ENG-44.md) — Logger and sinks (console, file, developer console)
+- [ENG-60](ENG-60.md) — OS layer: secure random, user data folder, executable folder, quit signals
 
 ## Read first
 

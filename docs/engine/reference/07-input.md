@@ -30,7 +30,8 @@ Keys are identified by **physical position** (scancode) so that ZQSD and WASD la
 struct RawInputEvent {
     enum class Type : uint8_t { KeyDown, KeyUp, MouseDown, MouseUp, MouseMove, MouseWheel,
                                 GamepadDown, GamepadUp, GamepadAxis, GamepadConnected,
-                                GamepadDisconnected, TextEntered };
+                                GamepadDisconnected, TextEntered,
+                                TouchDown, TouchUp, TouchMove };      // touch: reserved for mobile (ADR 0044)
     Type          type;
     uint8_t       device = 0;          // gamepad index
     Key           key = Key::Unknown;
@@ -40,6 +41,7 @@ struct RawInputEvent {
     float         value = 0.f;         // axis value [-1,1], wheel delta
     Vec2          position;            // mouse, in virtual resolution
     char32_t      text = 0;            // TextEntered (console, name entry)
+    uint8_t       finger = 0;          // Touch*: which finger; position holds the point
 };
 ```
 

@@ -54,6 +54,7 @@ struct CVarInfo {                      // read-only view for the console and the
 
 - [ENG-06](ENG-06.md) — Signal and RAII Subscription
 - [ENG-23](ENG-23.md) — YAML wrappers and field codecs
+- [ENG-60](ENG-60.md) — OS layer: secure random, user data folder, executable folder, quit signals
 
 ## Unlocks
 
@@ -63,12 +64,13 @@ struct CVarInfo {                      // read-only view for the console and the
 ## Read first
 
 - [ADR 0035](../adr/0035-services-and-tools.md)
+- [ADR 0044](../adr/0044-platforms-and-portability.md)
 
 ## To implement
 
 - [ ] `CVar<T>` with onChange
 - [ ] `CVars::define`, set, get, find, forEach
-- [ ] `loadArchive` / `saveArchive` (Archive flag)
+- [ ] `loadArchive` / `saveArchive` (Archive flag) in `os::userDataDir()/settings.yaml` (ADR 0044)
 - [ ] Engine CVars list of reference 12
 
 ## Done when

@@ -1,0 +1,12 @@
+// engine/src/os/Os.hpp
+// ENG-60 — OS layer: secure random, user data folder, executable folder, quit signals
+// Spec: docs/engine/reference/README.md · ADR 0044 · reference 01
+// Details: docs/tasks/ENG-60.md
+// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
+// Status: not implemented yet. Claim the task on the board before editing this file.
+
+#pragma once
+
+namespace engine {
+
+} // namespace engine

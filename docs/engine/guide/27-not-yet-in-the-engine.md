@@ -24,6 +24,8 @@ So nobody looks for a feature that does not exist. Each line says where it will 
 | Matchmaking (quick join, private codes) | not designed | Part 2 |
 | Random number service | not planned | games own a seeded generator (page 26) |
 | Localization (several languages) | not planned | — |
+| macOS | best effort, not in CI | ADR 0044 |
+| Android, iOS | designed for (static mode, touch and suspend events reserved, read-only game root), not built | a mobile platform plugin, Part 2 or later (ADR 0044) |
 
 If you need one of these before it exists, raise it with the team rather than building it inside a
 game module: engine features belong in the engine.

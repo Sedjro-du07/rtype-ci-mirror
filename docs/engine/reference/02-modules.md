@@ -10,6 +10,19 @@ Load backends (plugins) and the game (game module) at runtime, or from a static 
 
 ---
 
+## The engine's own exports — `engine/Export.hpp` (generated, ADR 0044)
+
+`generate_export_header` writes `ENGINE_API`: `__declspec(dllexport)` while building `engine.dll`,
+`dllimport` for its users, `visibility("default")` on Linux, empty in static mode. Every public
+non-template class and function under `include/engine/` carries it; templates and inline code do
+not need it. All libraries build with hidden visibility, so a missing `ENGINE_API` fails on Linux as
+on Windows.
+
+```cpp
+class ENGINE_API Registry { /* … */ };
+ENGINE_API Result<void> loadScene(…);
+```
+
 ## Versions and export macros — `module/Export.hpp`
 
 ```cpp

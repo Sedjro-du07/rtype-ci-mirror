@@ -46,7 +46,7 @@ def content(tid):
 def properties(tid):
     t = g.BY_ID[tid]
     p = {'Task': t['title'], 'userDefined:ID': tid, 'Phase': t['phase'], 'Depends on': ', '.join(t['deps']) or '—',
-         'File': ' · '.join(t['files']), 'Ref': t['ref'], 'Wave': g.WAVES[tid]}
+         'File': ' · '.join(t['files'] + ['/' + f for f in t.get('root_files', [])]), 'Ref': t['ref'], 'Wave': g.WAVES[tid]}
     if t['board'] == 'server':
         p['Details'] = GITHUB + tid + '.md'
     return p

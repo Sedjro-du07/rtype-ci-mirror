@@ -215,8 +215,25 @@ private:
 ```cpp
 int main(int argc, char** argv);
 // Loads EngineConfig from ENGINE_DEFAULT_CONFIG (set by engine_add_launcher) and argv,
-// installs SIGINT / SIGTERM (and the Windows console handler) to call Engine::requestQuit,
+// installs os::onQuitSignal (SIGINT / SIGTERM, Windows console handler) to call Engine::requestQuit,
 // then returns Engine::run(). Prints Error::toString() and returns 1 if the config is invalid.
 ```
 
 Games never write `main()`; CMake builds this file once per executable (ADR 0005, block 2).
+
+---
+
+## OS layer — `engine/src/os/Os.hpp` (private, ADR 0044)
+
+The only engine code with `#ifdef _WIN32` besides `DynamicLibrary`; plugins have their own.
+
+```cpp
+namespace engine::os {
+void                  secureRandom(std::span<std::byte> out);            // getrandom / BCryptGenRandom (MSEP tokens)
+std::filesystem::path userDataDir(std::string_view app);                  // $XDG_DATA_HOME / %APPDATA%; settings, logs
+std::filesystem::path executableDir();                                    // /proc/self/exe / GetModuleFileNameW
+void                  onQuitSignal(std::move_only_function<void()> fn);  // SIGINT, SIGTERM / console control handler
+}
+```
+
+The engine never writes under the game root: it may be read-only or packed on mobile.

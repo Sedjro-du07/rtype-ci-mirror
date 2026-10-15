@@ -12,13 +12,22 @@
 
 Game code is identical in both modes (`ENGINE_GAME_MODULE` and `engine_add_game_module` adapt).
 
-## Build types
+## Build types and presets
 
 ```bash
-cmake -B build-debug   -DCMAKE_BUILD_TYPE=Debug          # asserts, debug symbols for every module
-cmake -B build-release -DCMAKE_BUILD_TYPE=Release
-cmake --build build-release -j
+cmake --preset linux-gcc-debug       # asserts, debug symbols for every module
+cmake --preset linux-gcc-release
+cmake --build --preset linux-gcc-release
 ```
+
+| Preset | Platform | Mode |
+|---|---|---|
+| `linux-gcc-debug` / `-release` | Linux, GCC 14 | dynamic |
+| `linux-clang-debug` / `-release` | Linux, Clang 18 | dynamic |
+| `windows-msvc-debug` / `-release` | Windows, MSVC | dynamic |
+| `linux-gcc-static`, `windows-msvc-static` | Linux, Windows | static |
+
+Every preset uses the vcpkg toolchain from `VCPKG_ROOT` (ADR 0045).
 
 Every module (engine, plugins, game) must use the same build type and compiler: mixing a Debug
 plugin with a Release engine breaks the binary contract.
@@ -41,6 +50,28 @@ Do not ship `src/`, build folders, or `user/` (created at first run).
 
 - DLLs are looked up next to the executable; keep `plugins/` and `games/` beside it.
 - Build engine, plugins and game with the same Visual Studio version and runtime (`/MD`).
+- The engine's public classes are marked `ENGINE_API` (`engine/Export.hpp`, generated). Libraries
+  build with hidden visibility on Linux too, so a missing mark fails on both systems (ADR 0044).
+- Asset paths must match the file's case exactly; Windows is checked like Linux.
+
+## Packages and installing the engine
+
+- `cmake --install build/<preset> --prefix <dir>` installs headers, libraries, plugins and
+  `rtype_engineConfig.cmake`: another project uses `find_package(rtype_engine)` (task ENG-62).
+- `cpack --preset <preset>` builds `r-type-<version>-linux.tar.gz` or `…-windows.zip` with the layout
+  below and the runtime DLLs.
+
+## CI
+
+Every push and pull request builds GCC, Clang and MSVC in dynamic mode, GCC and MSVC in static mode,
+runs the tests and the headless smoke test, and checks formatting (`.github/workflows/ci.yml`,
+task ENG-61). A red job blocks the merge into `engine` and `develop`.
+
+## Mobile (designed for, not built)
+
+Static mode is the mobile build (iOS forbids loading code at runtime). A port is a platform plugin
+(`platform_raylib` runs on Android), touch events and `AppSuspended` / `AppResumed` are reserved,
+and the engine never writes under the game root (ADR 0044).
 
 ## Checklist before a defense
 

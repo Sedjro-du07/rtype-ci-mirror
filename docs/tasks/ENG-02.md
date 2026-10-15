@@ -38,7 +38,7 @@ engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
 
 ## Depends on
 
-- [ENG-01](ENG-01.md) — Engine CMake project, options and C++23 setup
+- [ENG-01](ENG-01.md) — Engine CMake project, vcpkg manifest, presets, options, exports and C++23 setup
 
 ## Unlocks
 
@@ -47,6 +47,7 @@ engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
 - [ENG-35](ENG-35.md) — audio_miniaudio plugin
 - [ENG-37](ENG-37.md) — network_asio plugin: UDP and TCP on an I/O thread
 - [ENG-49](ENG-49.md) — scripting_lua plugin: sol2 API, sandbox, reload
+- [ENG-62](ENG-62.md) — Installable engine: install, export, find_package(rtype_engine), CPack packages
 
 ## Read first
 

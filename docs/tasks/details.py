@@ -9,15 +9,19 @@ watch : traps and rules that are easy to miss.
 DETAILS = {
 # ---------------------------------------------------------------- 00 Build
 'ENG-01': dict(
-    goal="Create the `engine` CMake project every other task builds into, with the C++23 setup and the build options.",
-    todo=["`engine/CMakeLists.txt`: project, `engine` library target, `include/` as public include dir, `src/` sources by glob or list",
-          "`cmake/EngineOptions.cmake`: `ENGINE_DYNAMIC_MODULES` (ON), warnings as errors option, sanitizers option",
-          "C++23 required (`cxx_std_23`), `-Wall -Wextra -Wpedantic` / `/W4`, position-independent code",
-          "Package manager hook (Conan or vcpkg, chosen in the Tooling part): leave one clearly marked place for it",
+    goal="Create the `engine` CMake project every other task builds into, with vcpkg, presets, exports, the C++23 setup and the build options.",
+    todo=["Root `CMakeLists.txt`: `project(rtype)`, `add_subdirectory(engine)` (the game is added later); the engine still configures alone from `engine/`",
+          "Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua, sol2, miniaudio, imgui[sfml-binding], implot, catch2, tl-expected (ADR 0045)",
+          "Root `CMakePresets.json`: `linux-gcc`, `linux-clang`, `windows-msvc` × `debug` / `release`, plus `-static` variants; toolchain `$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake`; binary dir `build/<preset>`",
+          "`engine/CMakeLists.txt`: `engine` library (SHARED when `ENGINE_DYNAMIC_MODULES`, else STATIC), `include/` public, `src/` private",
+          "`generate_export_header` → `engine/Export.hpp` with `ENGINE_API`; hidden visibility everywhere (`CXX_VISIBILITY_PRESET hidden`, `VISIBILITY_INLINES_HIDDEN`) (ADR 0044)",
+          "`cmake/EngineOptions.cmake`: `ENGINE_DYNAMIC_MODULES` (ON), warnings as errors, sanitizers, tests, benchmarks",
+          "C++23 (`cxx_std_23`); GCC/Clang `-Wall -Wextra -Wpedantic`; MSVC `/W4 /permissive- /Zc:__cplusplus /Zc:preprocessor /EHsc /utf-8`; position-independent code",
           "Add `tests/` and `benchmarks/` as optional sub-directories"],
-    done=["`cmake -B build && cmake --build build` succeeds on Linux and Windows with an empty engine",
-          "Options appear in `cmake -LH`"],
+    done=["`cmake --preset linux-gcc-debug && cmake --build --preset linux-gcc-debug` and the `windows-msvc-debug` equivalent succeed with an empty engine",
+          "The `-static` presets build too; options appear in `cmake -LH`"],
     watch=["No global `include_directories` or `add_definitions`: everything on targets",
+           "Every public non-template class or function of `include/engine/` gets `ENGINE_API`; a forgotten one fails on Linux too thanks to hidden visibility",
            "Third-party types must never leak into public headers (reference README)"]),
 'ENG-02': dict(
     goal="Give games and plugins one-line CMake functions so nobody copies build boilerplate.",
@@ -82,9 +86,35 @@ DETAILS = {
     watch=["Context holds no state of its own; never cache it in game code"]),
 'ENG-10': dict(
     goal="The engine's `main()`, shared by every executable.",
-    todo=["Load `EngineConfig` from `ENGINE_DEFAULT_CONFIG` + argv", "SIGINT / SIGTERM and Windows console handler → `requestQuit()`", "Return `Engine::run()`; print the error and return 1 on bad config"],
+    todo=["Load `EngineConfig` from `ENGINE_DEFAULT_CONFIG` + argv", "`os::onQuitSignal` (ENG-60: SIGINT / SIGTERM, Windows console handler) → `requestQuit()`", "Return `Engine::run()`; print the error and return 1 on bad config"],
     done=["Ctrl+C on client and server shuts down cleanly (log shows shutdown, exit code 0)"],
     watch=["Signal handlers may only set an atomic flag"]),
+# ---------------------------------------------------------------- OS layer, CI, install (ADR 0044, 0045)
+'ENG-60': dict(
+    goal="Keep every operating-system call in one private place, so the rest of the engine is the same on Linux and Windows.",
+    todo=["`os::secureRandom(span<byte>)`: `getrandom` on Linux, `BCryptGenRandom` on Windows (MSEP tokens and keys)",
+          "`os::userDataDir(app)`: `$XDG_DATA_HOME` or `~/.local/share` / `%APPDATA%`, created on demand",
+          "`os::executableDir()`: `/proc/self/exe` / `GetModuleFileNameW`",
+          "`os::onQuitSignal(fn)`: SIGINT and SIGTERM / `SetConsoleCtrlHandler`; the callback only sets an atomic"],
+    done=["Tests: 1 000 random draws all differ; the user folder exists after the call; the executable folder contains the test binary"],
+    watch=["`#ifdef _WIN32` is allowed only here, in `DynamicLibrary` and in plugins (ADR 0044)",
+           "`NOMINMAX` and `WIN32_LEAN_AND_MEAN` before `<windows.h>`, inside `.cpp` files only"]),
+'ENG-61': dict(
+    goal="Build and test every commit on Linux and Windows from the first week, with one code style (ADR 0002, 0045).",
+    todo=["`.github/workflows/ci.yml`: matrix Ubuntu 24.04 (GCC 14, Clang 18) and Windows Server 2022 (MSVC); dynamic on all three, static on GCC and MSVC",
+          "Steps: checkout, vcpkg with binary caching, `cmake --preset`, build, `ctest --output-on-failure`",
+          "A format job: `clang-format --dry-run --Werror` on changed C++ files",
+          "`.clang-format` (LLVM base, 4 spaces, 120 columns), `.clang-tidy` (bugprone, modernize, performance as warnings), `.editorconfig`, `.gitattributes` (LF, binaries marked)"],
+    done=["A pull request shows five green build jobs and one green format job; a deliberate MSVC-only error turns the Windows job red"],
+    watch=["Cache vcpkg packages or every run rebuilds SFML", "Branch protection on `engine` and `develop` requires the CI to pass (set on GitHub once the workflow exists)"]),
+'ENG-62': dict(
+    goal="Make the engine usable from another project, and the game shippable as an archive (ADR 0045, guide 24).",
+    todo=["`cmake/EngineInstall.cmake`: `install(TARGETS engine … EXPORT rtype_engineTargets)`, public headers, the generated `Export.hpp`, the CMake functions of ENG-02, plugins",
+          "`rtype_engineConfig.cmake.in` + `write_basic_package_version_file`: `find_package(rtype_engine)` gives `rtype_engine::engine` and the functions",
+          "CPack: `.tar.gz` on Linux, `.zip` on Windows, laid out as guide 24 (executables, `plugins/`, `games/`, content, runtime DLLs)"],
+    done=["A tiny project outside the repo builds against an installed engine with `find_package(rtype_engine)` on Linux and Windows",
+          "`cpack` produces an archive that runs on a clean machine"],
+    watch=["Install the dependencies' runtime DLLs on Windows (vcpkg applocal or `install(RUNTIME_DEPENDENCY_SET)`)"]),
 # ---------------------------------------------------------------- 02 Modules
 'ENG-11': dict(
     goal="The contracts between the engine, plugins and games, plus the macros that export them.",
@@ -183,13 +213,13 @@ DETAILS = {
 'ENG-27': dict(
     goal="Typed queued events with RAII subscriptions, plus the engine's own events.",
     todo=["`subscribe`, `publish` (queued), `emit` (immediate), `publishFromAnyThread` (mutex inbox)", "`dispatch`: deliver in publish order; events published during dispatch wait",
-          "Engine events of reference 06 (player events included)"],
+          "Engine events of reference 06 (player events included), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)"],
     done=["Tests: order, publish during dispatch, unsubscribe during dispatch, thread inbox"],
     watch=["Events never leave the process"]),
 # ---------------------------------------------------------------- 07 Input
 'ENG-28': dict(
     goal="Device vocabulary and action ids.",
-    todo=["`Key`, `MouseButton`, `GamepadButton`, `GamepadAxis` enums; name ↔ enum tables; `keyName`", "`RawInputEvent`", "`ActionId`, `action()` constexpr"],
+    todo=["`Key`, `MouseButton`, `GamepadButton`, `GamepadAxis` enums; name ↔ enum tables; `keyName`", "`RawInputEvent`, with `TouchDown` / `TouchUp` / `TouchMove` and `finger` reserved for mobile (ADR 0044)", "`ActionId`, `action()` constexpr"],
     done=["Tests: every key name parses back to its enum"],
     watch=["Keys are physical positions (scancodes)"]),
 'ENG-29': dict(
@@ -262,7 +292,8 @@ DETAILS = {
     goal="Load each resource once behind a handle, with fallbacks.",
     todo=["texture, font, sound, music, script with cache", "pathOf, retain / release, collectUnused, reloadChanged, resolve (reject `../`), stats"],
     done=["Missing texture shows the checkerboard and logs once"],
-    watch=["On the server, handles are valid but nothing is decoded"]),
+    watch=["On the server, handles are valid but nothing is decoded",
+           "A path must match the file's case exactly, checked on Windows too; never write under the game root (ADR 0044)"]),
 'ENG-41': dict(
     goal="Prefabs: parsed once, instantiated with overrides and children.",
     todo=["`PrefabLibrary::get` (cached), `findByKey`, `instantiate`, `clear`"],
@@ -286,7 +317,7 @@ DETAILS = {
     watch=["Never a singleton"]),
 'ENG-45': dict(
     goal="Typed console variables with flags, ranges and persistence.",
-    todo=["`CVar<T>` with onChange", "`CVars::define`, set, get, find, forEach", "`loadArchive` / `saveArchive` (Archive flag)", "Engine CVars list of reference 12"],
+    todo=["`CVar<T>` with onChange", "`CVars::define`, set, get, find, forEach", "`loadArchive` / `saveArchive` (Archive flag) in `os::userDataDir()/settings.yaml` (ADR 0044)", "Engine CVars list of reference 12"],
     done=["Tests: range check, archive round trip"],
     watch=["`sim_tick_rate` is read-only"]),
 'ENG-46': dict(

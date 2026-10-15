@@ -21,7 +21,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ```cpp
 int main(int argc, char** argv);
 // Loads EngineConfig from ENGINE_DEFAULT_CONFIG (set by engine_add_launcher) and argv,
-// installs SIGINT / SIGTERM (and the Windows console handler) to call Engine::requestQuit,
+// installs os::onQuitSignal (SIGINT / SIGTERM, Windows console handler) to call Engine::requestQuit,
 // then returns Engine::run(). Prints Error::toString() and returns 1 if the config is invalid.
 ```
 
@@ -29,6 +29,7 @@ int main(int argc, char** argv);
 
 - [ENG-08](ENG-08.md) — Engine: lifecycle, member order, fixed-step loop, error policy
 - [ENG-02](ENG-02.md) — CMake functions engine_add_plugin, engine_add_game_module, engine_add_launcher
+- [ENG-60](ENG-60.md) — OS layer: secure random, user data folder, executable folder, quit signals
 
 ## Unlocks
 
@@ -42,7 +43,7 @@ int main(int argc, char** argv);
 ## To implement
 
 - [ ] Load `EngineConfig` from `ENGINE_DEFAULT_CONFIG` + argv
-- [ ] SIGINT / SIGTERM and Windows console handler → `requestQuit()`
+- [ ] `os::onQuitSignal` (ENG-60: SIGINT / SIGTERM, Windows console handler) → `requestQuit()`
 - [ ] Return `Engine::run()`; print the error and return 1 on bad config
 
 ## Done when

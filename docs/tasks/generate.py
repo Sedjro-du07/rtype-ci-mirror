@@ -207,7 +207,9 @@ def detail_page(t):
              f"**Wave {WAVES[t['id']]}** · status and owner live on the board.", '']
     if d.get('goal'):
         lines += ['## Goal', '', d['goal'], '']
-    lines += ['## Files', '', 'Relative to `engine/`. Each file already exists as a skeleton naming this task.', '']
+    lines += ['## Files', '']
+    if t['files']:
+        lines += ['Relative to `engine/`. Each file already exists as a skeleton naming this task.', '']
     own = owners()
     for f in t['files']:
         note = ''
@@ -215,6 +217,11 @@ def detail_page(t):
         if others:
             note = f" (shared with {', '.join(link_task(o, '') for o in others)})"
         lines.append(f'- `{f}`{note}')
+    if t.get('root_files'):
+        if t['files']:
+            lines.append('')
+        lines += ['At the repository root (no skeleton: this task creates them):', '']
+        lines += [f'- `{f}`' for f in t['root_files']]
     lines.append('')
     lines += api_section(t)
     lines += ['## Depends on', '']
@@ -274,7 +281,7 @@ def board_table(key):
     for t in in_wave_order(TASKS):
         if t['board'] != key:
             continue
-        files = '<br>'.join(f'`engine/{f}`' for f in t['files'])
+        files = '<br>'.join([f'`engine/{f}`' for f in t['files']] + [f'`{f}`' for f in t.get('root_files', [])])
         deps = ', '.join(t['deps']) or '—'
         lines.append(f"| {WAVES[t['id']]} | [{t['id']}]({base}{t['id']}.md) | {t['phase']} | {t['title']} | {files} | {deps} | {t['ref']} |")
     return '\n'.join(lines) + '\n'

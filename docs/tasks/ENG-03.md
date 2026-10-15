@@ -1,6 +1,6 @@
 # ENG-03 · C++23 feature probe compiled on GCC, Clang and MSVC in CI
 
-Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **00 Build** · **Wave 2** · status and owner live on the board.
+Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7)) · Phase **00 Build** · **Wave 3** · status and owner live on the board.
 
 ## Goal
 
@@ -37,7 +37,8 @@ try_compile(ENGINE_HAS_STD_EXPECTED ... SOURCES cmake/FeatureProbe.cpp ...)
 
 ## Depends on
 
-- [ENG-01](ENG-01.md) — Engine CMake project, options and C++23 setup
+- [ENG-01](ENG-01.md) — Engine CMake project, vcpkg manifest, presets, options, exports and C++23 setup
+- [ENG-61](ENG-61.md) — CI on GitHub Actions (GCC, Clang, MSVC; dynamic and static) and code style files
 
 ## Unlocks
 

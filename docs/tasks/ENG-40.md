@@ -42,7 +42,8 @@ public:
     void release(MusicHandle);   void release(ScriptHandle);
     void collectUnused();                          // frees zero-count assets; called after a scene switch
     void reloadChanged();                          // dev: re-reads files whose timestamp changed (CVar asset_hot_reload)
-    std::filesystem::path resolve(std::string_view path) const; // game root + path; rejects "../" escapes
+    std::filesystem::path resolve(std::string_view path) const; // game root + path; rejects "../" escapes and
+                                                                 // a case that differs from the file on disk (ADR 0044)
     AssetStats stats() const;                      // counts and bytes per kind
 };
 
@@ -63,6 +64,7 @@ struct AssetStats { uint32_t textures, fonts, sounds, musics, scripts; uint64_t 
 ## Read first
 
 - [ADR 0034](../adr/0034-scenes-prefabs-assets.md)
+- [ADR 0044](../adr/0044-platforms-and-portability.md)
 - [reference 11](../engine/reference/11-scenes-assets.md)
 
 ## To implement
@@ -77,6 +79,7 @@ struct AssetStats { uint32_t textures, fonts, sounds, musics, scripts; uint64_t 
 ## Watch out
 
 - On the server, handles are valid but nothing is decoded
+- A path must match the file's case exactly, checked on Windows too; never write under the game root (ADR 0044)
 
 ## Workflow
 
