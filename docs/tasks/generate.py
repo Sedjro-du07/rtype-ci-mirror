@@ -160,7 +160,7 @@ def api_section(t):
         return []
     lines = ['## Classes and methods', '',
              '**Declarations only**: what this task must write, without the bodies. Write the implementation in the '
-             'matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the '
+             'matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the '
              'pages in *Read first*.', '']
     if note:
         lines += [f'> {note}', '']

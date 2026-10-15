@@ -105,8 +105,8 @@ public:
 ```cpp
 struct Vec2  { float x = 0, y = 0; /* +, -, * scalar, dot, length, normalized, lerp */ };
 struct Rect  { float x = 0, y = 0, w = 0, h = 0; bool contains(Vec2) const; bool intersects(const Rect&) const; };
-struct Color { uint8_t r = 255, g = 255, b = 255, a = 255; static constexpr Color white(); /* black, red… */ };
-constexpr uint64_t fnv1a64(std::string_view) noexcept;   // core/Hash.hpp: compile-time hash for type, event and action keys
+struct Color { uint8_t r = 255, g = 255, b = 255, a = 255; static Color white(); /* black, red… */ };
+constexpr uint64_t fnv1a64(std::string_view) noexcept;   // core/Hash.hpp, body in Hash.inl: compile-time hash for type, event and action keys
 ```
 
 `Signal<void(Args...)>` and `Subscription` also live in `core/` (`core/Signal.hpp`); they are

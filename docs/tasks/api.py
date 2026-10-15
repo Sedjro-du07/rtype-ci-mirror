@@ -97,31 +97,31 @@ int                                probeToUnderlying();          // std::to_unde
 # ---------------------------------------------------------------- 01 Core
 'ENG-04': dict(skip=['core/math/'], extra=[
     ('include/engine/core/Hash.hpp', 'cpp', '''constexpr uint64_t fnv1a64(std::string_view text) noexcept;   // compile-time hash for type, event and action keys'''),
-    ('include/engine/core/math/Vec2.hpp', 'cpp', '''struct Vec2 {
+    ('include/engine/core/math/Vec2.hpp', 'cpp', '''struct ENGINE_API Vec2 {
     float x = 0, y = 0;
-    constexpr Vec2 operator+(Vec2 o) const;   constexpr Vec2 operator-(Vec2 o) const;
-    constexpr Vec2 operator*(float k) const;  constexpr Vec2 operator/(float k) const;
-    constexpr Vec2& operator+=(Vec2 o);       constexpr Vec2& operator-=(Vec2 o);
-    constexpr Vec2& operator*=(float k);
-    constexpr bool operator==(const Vec2&) const = default;
-    constexpr float dot(Vec2 o) const;
+    Vec2 operator+(Vec2 o) const;   Vec2 operator-(Vec2 o) const;
+    Vec2 operator*(float k) const;  Vec2 operator/(float k) const;
+    Vec2& operator+=(Vec2 o);       Vec2& operator-=(Vec2 o);
+    Vec2& operator*=(float k);
+    bool operator==(const Vec2&) const = default;
+    float dot(Vec2 o) const;
     float length() const;
     Vec2  normalized() const;                 // {0, 0} stays {0, 0}
-    static constexpr Vec2 lerp(Vec2 a, Vec2 b, float t);
+    static Vec2 lerp(Vec2 a, Vec2 b, float t);
 };'''),
-    ('include/engine/core/math/Rect.hpp', 'cpp', '''struct Rect {
+    ('include/engine/core/math/Rect.hpp', 'cpp', '''struct ENGINE_API Rect {
     float x = 0, y = 0, w = 0, h = 0;
-    constexpr bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
-    constexpr bool intersects(const Rect& o) const;  // touching edges do not intersect
-    constexpr Vec2 center() const;
-    constexpr bool operator==(const Rect&) const = default;
+    bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
+    bool intersects(const Rect& o) const;  // touching edges do not intersect
+    Vec2 center() const;
+    bool operator==(const Rect&) const = default;
 };'''),
-    ('include/engine/core/math/Color.hpp', 'cpp', '''struct Color {
+    ('include/engine/core/math/Color.hpp', 'cpp', '''struct ENGINE_API Color {
     uint8_t r = 255, g = 255, b = 255, a = 255;
-    static constexpr Color white(); static constexpr Color black();
-    static constexpr Color red();   static constexpr Color green(); static constexpr Color blue();
-    static constexpr Color transparent();
-    constexpr bool operator==(const Color&) const = default;
+    static Color white(); static Color black();
+    static Color red();   static Color green(); static Color blue();
+    static Color transparent();
+    bool operator==(const Color&) const = default;
 };'''),
 ]),
 # ---------------------------------------------------------------- 02 Modules
