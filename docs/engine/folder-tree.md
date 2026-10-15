@@ -337,5 +337,7 @@ engine/
 - A `.hpp` holds declarations only; the code goes to the `.cpp`. Code the compiler must see in every
   file that uses it (templates, `constexpr` functions) goes to a `.inl` next to the header, included at
   the end of it (`Signal.inl`, `Hash.inl`). A class with code in a `.cpp` is exported with `ENGINE_API`.
+- Includes start from `engine/include/` (`#include "engine/core/Signal.hpp"`), or name a private header next
+  to the source (`#include "PlayerTable.hpp"`); never `../`.
 - The tree, the task tables, the per-task pages and the folder READMEs are generated from
   `docs/tasks/tasks.py` and `docs/tasks/details.py` by `python3 docs/tasks/generate.py`.
