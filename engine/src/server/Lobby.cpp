@@ -14,4 +14,4 @@
 
 #include "engine/server/Lobby.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

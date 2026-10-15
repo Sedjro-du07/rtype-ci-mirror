@@ -14,4 +14,4 @@
 
 #include "engine/render/RenderQueue.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

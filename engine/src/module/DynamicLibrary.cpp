@@ -14,4 +14,4 @@
 
 #include "engine/module/DynamicLibrary.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

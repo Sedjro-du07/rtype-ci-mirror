@@ -26,7 +26,7 @@ else()
 endif()
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
-file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS include/*.hpp src/*.hpp)
+file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS include/*.hpp include/*.inl src/*.hpp)
 
 add_library(engine ${ENGINE_LIBRARY_KIND} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 add_library(rtype_engine::engine ALIAS engine)

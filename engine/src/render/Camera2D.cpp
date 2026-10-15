@@ -14,4 +14,4 @@
 
 #include "engine/render/Camera2D.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

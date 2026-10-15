@@ -14,4 +14,4 @@
 
 #include "engine/module/NullPlugins.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

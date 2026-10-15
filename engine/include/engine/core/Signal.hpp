@@ -7,101 +7,86 @@
 
 #pragma once
 
-#include <algorithm>
+#include "engine/Export.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <utility>
-#include <vector>
 
 namespace engine {
+
+struct SignalState;
+class SignalBase;
+
+class ENGINE_API Subscription {
+private:
+    friend class SignalBase;
+
+    std::weak_ptr<SignalState> state_;
+    uint64_t id_ = 0;
+
+    Subscription(std::weak_ptr<SignalState> state, uint64_t id) noexcept;
+
+public:
+    Subscription() = default;
+    Subscription(Subscription&& o) noexcept;
+    Subscription& operator=(Subscription&& o) noexcept;
+    Subscription(const Subscription&) = delete;
+    Subscription& operator=(const Subscription&) = delete;
+    ~Subscription();
+
+    void reset() noexcept;
+    bool active() const noexcept;
+};
+
+struct ENGINE_API SignalSlot {
+    uint64_t id = 0;
+    bool connected = true;
+
+    virtual ~SignalSlot();
+};
+
+class ENGINE_API SignalEmission {
+private:
+    std::shared_ptr<SignalState> state_;
+    size_t count_ = 0;
+
+public:
+    explicit SignalEmission(std::shared_ptr<SignalState> state);
+    SignalEmission(const SignalEmission&) = delete;
+    SignalEmission& operator=(const SignalEmission&) = delete;
+    ~SignalEmission();
+
+    size_t count() const noexcept;
+    SignalSlot* slot(size_t index) const noexcept;
+};
+
+class ENGINE_API SignalBase {
+private:
+    std::shared_ptr<SignalState> state_;
+
+protected:
+    Subscription attach(std::unique_ptr<SignalSlot> slot);
+    SignalEmission beginEmit() const;
+
+public:
+    size_t size() const;
+};
 
 template <class Sig>
 class Signal;
 
-class Subscription {
-private:
-    template <class Sig>
-    friend class Signal;
-
-    using Disconnect = void (*)(void* state, uint64_t id) noexcept;
-
-    std::weak_ptr<void> state_;
-    Disconnect disconnect_ = nullptr;
-    uint64_t id_ = 0;
-
-    Subscription(std::weak_ptr<void> state, Disconnect disconnect, uint64_t id) noexcept
-        : state_(std::move(state)), disconnect_(disconnect), id_(id) {}
-
-public:
-    Subscription() = default;
-    Subscription(Subscription&& o) noexcept
-        : state_(std::move(o.state_)), disconnect_(std::exchange(o.disconnect_, nullptr)),
-          id_(std::exchange(o.id_, 0)) {}
-    Subscription& operator=(Subscription&& o) noexcept {
-        if (this != &o) {
-            reset();
-            state_ = std::move(o.state_);
-            disconnect_ = std::exchange(o.disconnect_, nullptr);
-            id_ = std::exchange(o.id_, 0);
-        }
-        return *this;
-    }
-    Subscription(const Subscription&) = delete;
-    Subscription& operator=(const Subscription&) = delete;
-    ~Subscription() { reset(); }
-
-    void reset() noexcept {
-        if (const auto state = state_.lock()) disconnect_(state.get(), id_);
-        state_.reset();
-        disconnect_ = nullptr;
-        id_ = 0;
-    }
-
-    bool active() const noexcept { return disconnect_ != nullptr && !state_.expired(); }
-};
-
 template <class... Args>
-class Signal<void(Args...)> {
+class Signal<void(Args...)> : private SignalBase {
 private:
     using Listener = std::move_only_function<void(Args...)>;
 
-    struct Slot {
-        Slot(uint64_t i, Listener f) : id(i), fn(std::move(f)) {}
-        uint64_t id;
+    struct Slot : SignalSlot {
         Listener fn;
-        bool connected = true;
+
+        explicit Slot(Listener f);
     };
-
-    struct State {
-        std::vector<std::unique_ptr<Slot>> slots;
-        uint64_t nextId = 1;
-        size_t alive = 0;
-        int emitting = 0;
-    };
-
-    struct EmitScope {
-        explicit EmitScope(State& s) : state(s) { ++state.emitting; }
-        ~EmitScope() {
-            if (--state.emitting == 0 && state.alive != state.slots.size())
-                std::erase_if(state.slots, [](const auto& slot) { return !slot->connected; });
-        }
-        EmitScope(const EmitScope&) = delete;
-        EmitScope& operator=(const EmitScope&) = delete;
-        State& state;
-    };
-
-    std::shared_ptr<State> state_;
-
-    static void disconnect(void* p, uint64_t id) noexcept {
-        State& state = *static_cast<State*>(p);
-        const auto it = std::ranges::find_if(state.slots, [id](const auto& slot) { return slot->id == id; });
-        if (it == state.slots.end() || !(*it)->connected) return;
-        (*it)->connected = false;
-        --state.alive;
-        if (state.emitting == 0) state.slots.erase(it);
-    }
 
 public:
     Signal() = default;
@@ -110,27 +95,11 @@ public:
     Signal(const Signal&) = delete;
     Signal& operator=(const Signal&) = delete;
 
-    [[nodiscard]] Subscription connect(Listener fn) {
-        if (!fn) return {};
-        if (!state_) state_ = std::make_shared<State>();
-        const uint64_t id = state_->nextId++;
-        state_->slots.push_back(std::make_unique<Slot>(id, std::move(fn)));
-        ++state_->alive;
-        return Subscription(state_, &Signal::disconnect, id);
-    }
-
-    void emit(Args... args) {
-        if (!state_) return;
-        const auto state = state_;
-        const EmitScope scope{*state};
-        const size_t count = state->slots.size();
-        for (size_t i = 0; i < count; ++i) {
-            Slot& slot = *state->slots[i];
-            if (slot.connected) slot.fn(args...);
-        }
-    }
-
-    size_t size() const { return state_ ? state_->alive : 0; }
+    [[nodiscard]] Subscription connect(Listener fn);
+    void emit(Args... args);
+    using SignalBase::size;
 };
 
 }
+
+#include "engine/core/Signal.inl"

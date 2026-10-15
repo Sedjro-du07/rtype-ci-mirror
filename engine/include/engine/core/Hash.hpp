@@ -12,13 +12,8 @@
 
 namespace engine {
 
-constexpr uint64_t fnv1a64(std::string_view text) noexcept {
-    uint64_t hash = 0xcbf29ce484222325ull;
-    for (char c : text) {
-        hash ^= static_cast<uint8_t>(c);
-        hash *= 0x100000001b3ull;
-    }
-    return hash;
-}
+constexpr uint64_t fnv1a64(std::string_view text) noexcept;
 
 }
+
+#include "engine/core/Hash.inl"

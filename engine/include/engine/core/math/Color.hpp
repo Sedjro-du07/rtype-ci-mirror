@@ -7,21 +7,23 @@
 
 #pragma once
 
+#include "engine/Export.hpp"
+
 #include <cstdint>
 
 namespace engine {
 
-struct Color {
+struct ENGINE_API Color {
     uint8_t r = 255, g = 255, b = 255, a = 255;
 
-    static constexpr Color white() { return {255, 255, 255, 255}; }
-    static constexpr Color black() { return {0, 0, 0, 255}; }
-    static constexpr Color red() { return {255, 0, 0, 255}; }
-    static constexpr Color green() { return {0, 255, 0, 255}; }
-    static constexpr Color blue() { return {0, 0, 255, 255}; }
-    static constexpr Color transparent() { return {0, 0, 0, 0}; }
+    static Color white();
+    static Color black();
+    static Color red();
+    static Color green();
+    static Color blue();
+    static Color transparent();
 
-    constexpr bool operator==(const Color&) const = default;
+    bool operator==(const Color&) const = default;
 };
 
 }

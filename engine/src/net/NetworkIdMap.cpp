@@ -14,4 +14,4 @@
 
 #include "engine/net/NetworkIdMap.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

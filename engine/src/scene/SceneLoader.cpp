@@ -14,4 +14,4 @@
 
 #include "engine/scene/SceneLoader.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
-#include <utility>
 
 #if defined(ENGINE_USE_TL_EXPECTED)
 #include <tl/expected.hpp>
@@ -62,9 +61,7 @@ using std::unexpected;
 template <class T>
 using Result = Expected<T, Error>;
 
-inline unexpected<Error> fail(Errc code, std::string message, std::string file = {}, int line = 0) {
-    return unexpected<Error>(Error{code, std::move(message), std::move(file), line});
-}
+ENGINE_API unexpected<Error> fail(Errc code, std::string message, std::string file = {}, int line = 0);
 
 class ENGINE_API BootError : public std::runtime_error {
 private:
@@ -73,8 +70,8 @@ private:
 
 public:
     BootError(int exitCode, Error error);
-    int exitCode() const noexcept { return exitCode_; }
-    const Error& error() const noexcept { return error_; }
+    int exitCode() const noexcept;
+    const Error& error() const noexcept;
 };
 
 }

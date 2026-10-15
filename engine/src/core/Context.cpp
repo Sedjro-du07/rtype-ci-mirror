@@ -14,4 +14,4 @@
 
 #include "engine/Context.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

@@ -14,4 +14,4 @@
 
 #include "ReplicationState.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

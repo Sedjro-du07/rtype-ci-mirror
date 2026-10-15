@@ -14,4 +14,4 @@
 
 #include "PlayerTable.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

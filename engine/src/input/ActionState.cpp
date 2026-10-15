@@ -14,4 +14,4 @@
 
 #include "engine/input/ActionState.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

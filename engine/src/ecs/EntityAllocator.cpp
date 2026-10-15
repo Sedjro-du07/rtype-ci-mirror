@@ -14,4 +14,4 @@
 
 #include "engine/ecs/EntityAllocator.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

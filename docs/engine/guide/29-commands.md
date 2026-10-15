@@ -114,7 +114,7 @@ Another project then uses `find_package(rtype_engine REQUIRED)`: [24 · Building
 
 ```bash
 clang-format -i engine/src/ecs/Registry.cpp                         # format one file (editors do it on save)
-git ls-files 'engine/*.hpp' 'engine/*.cpp' | xargs clang-format --dry-run --Werror   # what CI checks
+git ls-files 'engine/*.hpp' 'engine/*.inl' 'engine/*.cpp' | xargs clang-format --dry-run --Werror   # what CI checks
 clang-tidy -p build/linux-gcc-debug engine/src/ecs/Registry.cpp    # static analysis, warnings only
 ```
 

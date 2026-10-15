@@ -14,4 +14,4 @@
 
 #include "engine/ServiceContext.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

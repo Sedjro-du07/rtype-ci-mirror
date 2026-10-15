@@ -29,7 +29,7 @@ function(engine_install_engine)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            FILES_MATCHING PATTERN "*.hpp")
+            FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl")
     install(FILES ${PROJECT_BINARY_DIR}/include/engine/Export.hpp
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/engine)
 

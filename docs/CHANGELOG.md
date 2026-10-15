@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Code style: a `.hpp` holds declarations only; bodies go to the `.cpp`, templates and `constexpr`
+  functions to a `.inl` included at the end of the header. `Vec2`, `Rect`, `Color` (now `.cpp`, no longer
+  `constexpr`), `fail()`, `BootError`, `Subscription` and the non-template part of `Signal`
+  (`SignalBase`, `SignalEmission`, `SignalSlot` in `Signal.cpp`) follow it.
 - Code style: no comments in code besides the Epitech header; `private:` before `public:`
   (`docs/engine/folder-tree.md`). Core files and tests rewritten accordingly; `.clang-format` no longer
   adds `// namespace` comments (`FixNamespaceComments: false`).

@@ -14,4 +14,4 @@
 
 #include "AsioNetwork.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

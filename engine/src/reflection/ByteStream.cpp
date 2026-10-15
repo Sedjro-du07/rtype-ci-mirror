@@ -14,4 +14,4 @@
 
 #include "engine/reflection/ByteStream.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

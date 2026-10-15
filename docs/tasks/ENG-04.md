@@ -11,11 +11,15 @@ Write the leaf vocabulary every block uses: hashing, math types, errors and resu
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/core/Hash.hpp`
+- `include/engine/core/Hash.inl`
 - `include/engine/core/math/Vec2.hpp`
 - `include/engine/core/math/Rect.hpp`
 - `include/engine/core/math/Color.hpp`
 - `include/engine/core/Error.hpp`
 - `src/core/Error.cpp`
+- `src/core/math/Vec2.cpp`
+- `src/core/math/Rect.cpp`
+- `src/core/math/Color.cpp`
 
 ## Classes and methods
 

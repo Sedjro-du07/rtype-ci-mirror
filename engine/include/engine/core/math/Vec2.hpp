@@ -7,43 +7,26 @@
 
 #pragma once
 
-#include <cmath>
+#include "engine/Export.hpp"
 
 namespace engine {
 
-struct Vec2 {
+struct ENGINE_API Vec2 {
     float x = 0, y = 0;
 
-    constexpr Vec2 operator+(Vec2 o) const { return {x + o.x, y + o.y}; }
-    constexpr Vec2 operator-(Vec2 o) const { return {x - o.x, y - o.y}; }
-    constexpr Vec2 operator*(float k) const { return {x * k, y * k}; }
-    constexpr Vec2 operator/(float k) const { return {x / k, y / k}; }
-    constexpr Vec2& operator+=(Vec2 o) {
-        x += o.x;
-        y += o.y;
-        return *this;
-    }
-    constexpr Vec2& operator-=(Vec2 o) {
-        x -= o.x;
-        y -= o.y;
-        return *this;
-    }
-    constexpr Vec2& operator*=(float k) {
-        x *= k;
-        y *= k;
-        return *this;
-    }
-    constexpr bool operator==(const Vec2&) const = default;
+    Vec2 operator+(Vec2 o) const;
+    Vec2 operator-(Vec2 o) const;
+    Vec2 operator*(float k) const;
+    Vec2 operator/(float k) const;
+    Vec2& operator+=(Vec2 o);
+    Vec2& operator-=(Vec2 o);
+    Vec2& operator*=(float k);
+    bool operator==(const Vec2&) const = default;
 
-    constexpr float dot(Vec2 o) const { return x * o.x + y * o.y; }
-    float length() const { return std::sqrt(dot(*this)); }
-
-    Vec2 normalized() const {
-        const float len = length();
-        return len > 0.f ? Vec2{x / len, y / len} : Vec2{};
-    }
-
-    static constexpr Vec2 lerp(Vec2 a, Vec2 b, float t) { return a + (b - a) * t; }
+    float dot(Vec2 o) const;
+    float length() const;
+    Vec2 normalized() const;
+    static Vec2 lerp(Vec2 a, Vec2 b, float t);
 };
 
 }

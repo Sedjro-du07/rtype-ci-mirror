@@ -14,4 +14,4 @@
 
 #include "engine/input/InputMap.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

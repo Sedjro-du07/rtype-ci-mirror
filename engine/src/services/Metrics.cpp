@@ -14,4 +14,4 @@
 
 #include "engine/services/Metrics.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

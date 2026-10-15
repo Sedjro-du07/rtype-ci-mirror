@@ -28,13 +28,13 @@ TEST_CASE("fnv1a64 distinguishes close names", "[core][hash]") {
 }
 
 TEST_CASE("Vec2 arithmetic", "[core][math]") {
-    constexpr Vec2 a{3, 4};
-    static_assert(a + Vec2{1, 1} == Vec2{4, 5});
-    static_assert(a - Vec2{1, 1} == Vec2{2, 3});
-    static_assert(a * 2.f == Vec2{6, 8});
-    static_assert(a / 2.f == Vec2{1.5f, 2});
-    static_assert(a.dot({1, 0}) == 3.f);
-    static_assert(Vec2::lerp({0, 0}, {10, 20}, 0.5f) == Vec2{5, 10});
+    const Vec2 a{3, 4};
+    CHECK(a + Vec2{1, 1} == Vec2{4, 5});
+    CHECK(a - Vec2{1, 1} == Vec2{2, 3});
+    CHECK(a * 2.f == Vec2{6, 8});
+    CHECK(a / 2.f == Vec2{1.5f, 2});
+    CHECK(a.dot({1, 0}) == 3.f);
+    CHECK(Vec2::lerp({0, 0}, {10, 20}, 0.5f) == Vec2{5, 10});
 
     CHECK(a.length() == Catch::Approx(5.f));
     CHECK(a.normalized().length() == Catch::Approx(1.f));
@@ -48,21 +48,21 @@ TEST_CASE("Vec2 arithmetic", "[core][math]") {
 }
 
 TEST_CASE("Rect edges", "[core][math]") {
-    constexpr Rect r{0, 0, 10, 10};
-    static_assert(r.contains({0, 0}));
-    static_assert(r.contains({9.9f, 9.9f}));
-    static_assert(!r.contains({10, 5}));
-    static_assert(!r.contains({5, 10}));
-    static_assert(r.intersects({5, 5, 10, 10}));
-    static_assert(!r.intersects({10, 0, 5, 5}));
-    static_assert(!r.intersects({0, 10, 5, 5}));
-    static_assert(r.center() == Vec2{5, 5});
+    const Rect r{0, 0, 10, 10};
+    CHECK(r.contains({0, 0}));
+    CHECK(r.contains({9.9f, 9.9f}));
+    CHECK(!r.contains({10, 5}));
+    CHECK(!r.contains({5, 10}));
+    CHECK(r.intersects({5, 5, 10, 10}));
+    CHECK(!r.intersects({10, 0, 5, 5}));
+    CHECK(!r.intersects({0, 10, 5, 5}));
+    CHECK(r.center() == Vec2{5, 5});
 }
 
 TEST_CASE("Color constants", "[core][math]") {
-    static_assert(Color{} == Color::white());
-    static_assert(Color::black() == Color{0, 0, 0, 255});
-    static_assert(Color::transparent().a == 0);
+    CHECK(Color{} == Color::white());
+    CHECK(Color::black() == Color{0, 0, 0, 255});
+    CHECK(Color::transparent().a == 0);
     CHECK(Color::red() != Color::blue());
 }
 

@@ -11,6 +11,8 @@ Synchronous observer list with RAII unsubscription, used by component hooks, CVa
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/core/Signal.hpp`
+- `include/engine/core/Signal.inl`
+- `src/core/Signal.cpp`
 
 ## Classes and methods
 

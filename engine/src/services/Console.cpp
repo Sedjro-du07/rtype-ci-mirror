@@ -14,4 +14,4 @@
 
 #include "engine/services/Console.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}
