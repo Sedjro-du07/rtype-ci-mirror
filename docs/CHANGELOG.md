@@ -7,12 +7,14 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2026-10-15] — engine core: ENG-04, ENG-05
+## [2026-10-15] — engine core: ENG-04, ENG-05, ENG-06
 
 ### Added
 
 - `Time` (fixed step, tick, alpha, simulated and frame time) and `Clock` on `steady_clock` (ENG-05);
   3 tests.
+- `Signal<void(Args...)>` and RAII `Subscription` (ENG-06): shared state so a Subscription can
+  outlive its Signal; connect, disconnect and emit are safe from inside a listener; 11 tests.
 - Core types: `fnv1a64` (compile time), `Vec2`, `Rect`, `Color`, `Errc`, `Error`, `Result<T>`
   (`std::expected` or `tl::expected`), `fail()`, `BootError`.
 - First test setup: `engine_add_test` and Catch2 in `engine/tests/CMakeLists.txt`; 7 tests for ENG-04.

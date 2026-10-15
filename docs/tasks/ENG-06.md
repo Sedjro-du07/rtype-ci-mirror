@@ -31,6 +31,7 @@ public:
 template <class... Args>
 class Signal<void(Args...)> {
 public:
+    Signal() = default;              // move-only; allocates nothing until the first connect()
     [[nodiscard]] Subscription connect(std::move_only_function<void(Args...)> fn);
     void emit(Args... args);         // calls every listener now, in connection order
     size_t size() const;
