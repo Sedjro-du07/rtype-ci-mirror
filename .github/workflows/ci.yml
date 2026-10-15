@@ -29,7 +29,8 @@ jobs:
           - { preset: windows-msvc-debug, os: windows-2022, cxx: cl }
           - { preset: windows-msvc-static, os: windows-2022, cxx: cl }
     env:
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      # Our own name: the MSVC action sets VCPKG_ROOT to the copy bundled with Visual Studio.
+      RTYPE_VCPKG: ${{ github.workspace }}/vcpkg
       VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-cache
     steps:
       - uses: actions/checkout@v4
@@ -49,10 +50,10 @@ jobs:
       - name: vcpkg
         shell: bash
         run: |
-          git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
-          git -C "$VCPKG_ROOT" checkout "$VCPKG_COMMIT"
+          git clone https://github.com/microsoft/vcpkg.git "$RTYPE_VCPKG"
+          git -C "$RTYPE_VCPKG" checkout "$VCPKG_COMMIT"
           mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
-          if [ "$RUNNER_OS" = "Windows" ]; then "$VCPKG_ROOT/bootstrap-vcpkg.bat" -disableMetrics; else "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics; fi
+          if [ "$RUNNER_OS" = "Windows" ]; then "$RTYPE_VCPKG/bootstrap-vcpkg.bat" -disableMetrics; else "$RTYPE_VCPKG/bootstrap-vcpkg.sh" -disableMetrics; fi
 
       - name: vcpkg binary cache
         uses: actions/cache@v4
@@ -62,7 +63,8 @@ jobs:
           restore-keys: vcpkg-${{ matrix.preset }}-
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DENGINE_WARNINGS_AS_ERRORS=ON
+        shell: bash
+        run: VCPKG_ROOT="$RTYPE_VCPKG" cmake --preset ${{ matrix.preset }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DENGINE_WARNINGS_AS_ERRORS=ON
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }}

@@ -14,7 +14,7 @@ ReferenceAlignment: Left
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLambdasOnASingleLine: All
-BreakTemplateDeclarations: Yes
+AlwaysBreakTemplateDeclarations: Yes
 AlignConsecutiveAssignments: false
 AlignTrailingComments: true
 SortIncludes: CaseSensitive
