@@ -7,6 +7,19 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-15] — engine core: ENG-04
+
+### Added
+
+- Core types: `fnv1a64` (compile time), `Vec2`, `Rect`, `Color`, `Errc`, `Error`, `Result<T>`
+  (`std::expected` or `tl::expected`), `fail()`, `BootError`.
+- First test setup: `engine_add_test` and Catch2 in `engine/tests/CMakeLists.txt`; 7 tests for ENG-04.
+
+### Changed
+
+- GCC/Clang: `-Wno-missing-field-initializers` (aggregates are filled partially on purpose).
+  MSVC: `/wd4251 /wd4275` (standard types in exported classes; same runtime everywhere).
+
 ## [2026-10-15] — engine build (ENG-01, ENG-61)
 
 ### Added

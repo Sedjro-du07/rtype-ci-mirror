@@ -38,7 +38,12 @@ struct Error {
     std::string toString() const; // "scenes/level1.yaml:14: unknown component 'Helth' (did you mean 'Health'?)"
 };
 
-template <class T> using Result = std::expected<T, Error>;
+template <class T, class E> using Expected = std::expected<T, E>;   // tl::expected when the probe says so (ENG-03)
+using std::unexpected;                                                // tl::unexpected in that case
+template <class T> using Result = Expected<T, Error>;
+
+// return fail(Errc::FileNotFound, "cannot open 'client.yaml'");   (works with both expected types)
+unexpected<Error> fail(Errc code, std::string message, std::string file = {}, int line = 0);
 
 class BootError : public std::runtime_error {      // thrown only by boot() and load()
 public:
@@ -124,7 +129,8 @@ struct Color {
 - [ ] `fnv1a64` as `constexpr` (usable in templates and macros)
 - [ ] `Vec2` (operators, `dot`, `length`, `normalized`, `lerp`), `Rect` (`contains`, `intersects`), `Color` (named constants)
 - [ ] `Errc` (15 codes), `Error` with `toString()` → `file:line: message`
-- [ ] `Result<T>` alias, `BootError` with exit code
+- [ ] `Result<T>` alias (`std::expected`, or `tl::expected` with `ENGINE_USE_TL_EXPECTED`), `fail()` helper, `BootError` with exit code
+- [ ] First test setup in `tests/CMakeLists.txt` (`engine_add_test`, Catch2), completed later by ENG-53
 
 ## Done when
 

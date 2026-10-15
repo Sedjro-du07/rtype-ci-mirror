@@ -1,10 +1,16 @@
-// engine/src/core/Error.cpp
-// ENG-04 — Core types: hash, Vec2/Rect/Color, Error, Result, BootError
-// Spec: docs/engine/reference/01-core.md · ADR 0017, 0024 · reference 01
-// Details: docs/tasks/ENG-04.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+// ENG-04 · docs/engine/reference/01-core.md
 
 #include "engine/core/Error.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {
+
+std::string Error::toString() const {
+    if (file.empty()) return message;
+    if (line > 0) return file + ":" + std::to_string(line) + ": " + message;
+    return file + ": " + message;
+}
+
+BootError::BootError(int exitCode, Error error)
+    : std::runtime_error(error.toString()), exitCode_(exitCode), error_(std::move(error)) {}
+
+} // namespace engine

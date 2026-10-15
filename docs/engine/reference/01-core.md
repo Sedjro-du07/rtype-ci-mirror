@@ -84,7 +84,12 @@ struct Error {
     std::string toString() const; // "scenes/level1.yaml:14: unknown component 'Helth' (did you mean 'Health'?)"
 };
 
-template <class T> using Result = std::expected<T, Error>;
+template <class T, class E> using Expected = std::expected<T, E>;   // tl::expected when the probe says so (ENG-03)
+using std::unexpected;                                                // tl::unexpected in that case
+template <class T> using Result = Expected<T, Error>;
+
+// return fail(Errc::FileNotFound, "cannot open 'client.yaml'");   (works with both expected types)
+unexpected<Error> fail(Errc code, std::string message, std::string file = {}, int line = 0);
 
 class BootError : public std::runtime_error {      // thrown only by boot() and load()
 public:

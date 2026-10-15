@@ -1,10 +1,21 @@
-// engine/include/engine/core/Hash.hpp
-// ENG-04 — Core types: hash, Vec2/Rect/Color, Error, Result, BootError
-// Spec: docs/engine/reference/01-core.md · ADR 0017, 0024 · reference 01
-// Details: docs/tasks/ENG-04.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+// Compile-time string hash for type, event and action keys (ADR 0027).
+// ENG-04 · docs/engine/reference/01-core.md
 
 #pragma once
 
-namespace engine {} // namespace engine
+#include <cstdint>
+#include <string_view>
+
+namespace engine {
+
+// FNV-1a, 64 bits. constexpr so keys can be computed in templates and macros.
+constexpr uint64_t fnv1a64(std::string_view text) noexcept {
+    uint64_t hash = 0xcbf29ce484222325ull;
+    for (char c : text) {
+        hash ^= static_cast<uint8_t>(c); // as unsigned: char may be signed
+        hash *= 0x100000001b3ull;
+    }
+    return hash;
+}
+
+} // namespace engine
