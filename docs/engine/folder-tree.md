@@ -312,5 +312,16 @@ engine/
   `engine/server/`; game `client/` → also `engine/client/`.
 - A header that only the engine uses is **private**: it lives next to its source in `engine/src/<block>/`, not in
   `include/`, so games cannot include it (example: `src/net/PlayerTable.hpp`).
+- Every file starts with the Epitech header; `File description` is the file name without extension.
+  C++ uses `/* ** … */`, CMake `##`, Lua `--`. Skeletons already have it; keep it when you replace a
+  skeleton's task comment with code.
+  ```cpp
+  /*
+  ** EPITECH PROJECT, 2026
+  ** G-ING-500-COT-5-1-rtype-2
+  ** File description:
+  ** Registry
+  */
+  ```
 - The tree, the task tables, the per-task pages and the folder READMEs are generated from
   `docs/tasks/tasks.py` and `docs/tasks/details.py` by `python3 docs/tasks/generate.py`.

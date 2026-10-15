@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Signal
+*/
+
 // engine/include/engine/core/Signal.hpp
 // ENG-06 — Signal and RAII Subscription
 // Spec: docs/engine/reference/06-events.md · ADR 0026, 0029 · reference 06

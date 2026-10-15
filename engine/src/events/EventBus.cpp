@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** EventBus
+*/
+
 // engine/src/events/EventBus.cpp
 // ENG-27 — EventBus: queued, immediate, thread inbox; engine events
 // Spec: docs/engine/reference/06-events.md · ADR 0029, 0044 · reference 06

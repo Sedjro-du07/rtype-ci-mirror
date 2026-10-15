@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Parallax
+*/
+
 // engine/include/engine/components/Parallax.hpp
 // ENG-25 — Engine components and their registration
 // Spec: docs/engine/reference/13-components-systems.md · ADR 0016 · reference 13

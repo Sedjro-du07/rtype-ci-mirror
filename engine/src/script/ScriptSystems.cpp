@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** ScriptSystems
+*/
+
 // engine/src/script/ScriptSystems.cpp
 // ENG-48 — IScripting, Script component, script systems
 // Spec: docs/engine/reference/12-services.md · ADR 0019, 0035

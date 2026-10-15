@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Yaml
+*/
+
 // engine/src/reflection/Yaml.cpp
 // ENG-23 — YAML wrappers and field codecs
 // Spec: docs/engine/reference/04-reflection.md · ADR 0018, 0027

@@ -1,5 +1,9 @@
-// Errors and results: an expected failure is returned, never thrown (ADR 0024).
-// ENG-04 · ADR 0017, 0024 · docs/engine/reference/01-core.md
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Error
+*/
 
 #pragma once
 

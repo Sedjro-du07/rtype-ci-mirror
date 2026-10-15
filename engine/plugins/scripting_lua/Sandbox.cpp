@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Sandbox
+*/
+
 // engine/plugins/scripting_lua/Sandbox.cpp
 // ENG-49 — scripting_lua plugin: sol2 API, sandbox, reload
 // Spec: docs/engine/reference/12-services.md · ADR 0019 · guide 11

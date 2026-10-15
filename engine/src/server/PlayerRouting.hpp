@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** PlayerRouting
+*/
+
 // engine/src/server/PlayerRouting.hpp
 // SRV-14 — Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset
 // Spec: docs/engine/reference/10-network.md · ADR 0037, 0039 · reference 14

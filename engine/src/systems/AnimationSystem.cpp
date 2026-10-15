@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** AnimationSystem
+*/
+
 // engine/src/systems/AnimationSystem.cpp
 // ENG-52 — Render systems: sprites (interpolated), text, animation, debug colliders
 // Spec: docs/engine/reference/13-components-systems.md · ADR 0003, 0031

@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Core types: `fnv1a64` (compile time), `Vec2`, `Rect`, `Color`, `Errc`, `Error`, `Result<T>`
   (`std::expected` or `tl::expected`), `fail()`, `BootError`.
 - First test setup: `engine_add_test` and Catch2 in `engine/tests/CMakeLists.txt`; 7 tests for ENG-04.
+- Epitech header at the top of every file (rule in `docs/engine/folder-tree.md`): ENG-04 files, and
+  every skeleton through `generate.py` (C++ `/* ** */`, CMake `##`, Lua `--`).
 
 ### Changed
 

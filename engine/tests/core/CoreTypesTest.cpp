@@ -1,4 +1,9 @@
-// ENG-04: hash, Vec2, Rect, Color, Error, Result, BootError.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** CoreTypesTest
+*/
 
 #include "engine/core/Error.hpp"
 #include "engine/core/Hash.hpp"

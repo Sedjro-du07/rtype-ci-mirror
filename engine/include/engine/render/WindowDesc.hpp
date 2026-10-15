@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** WindowDesc
+*/
+
 // engine/include/engine/render/WindowDesc.hpp
 // ENG-30 — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform
 // Spec: docs/engine/reference/08-rendering.md · ADR 0006, 0031 · reference 08

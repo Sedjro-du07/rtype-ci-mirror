@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** NetworkSession
+*/
+
 // engine/src/net/NetworkSession.cpp
 // ENG-38 — NetworkSession core: connections, bounded inbox, validation, heartbeat, timeouts
 // Spec: docs/engine/reference/10-network.md · ADR 0011, 0033, 0037 · reference 10 · RFC §4, §6.5, §11

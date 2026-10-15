@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** InputMap
+*/
+
 // engine/src/input/InputMap.cpp
 // ENG-29 — InputMap and ActionState: input.yaml, rebinding, accessibility options, masks
 // Spec: docs/engine/reference/07-input.md · ADR 0030 · reference 07

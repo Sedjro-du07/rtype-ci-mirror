@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Prefab
+*/
+
 // engine/include/engine/scene/Prefab.hpp
 // ENG-41 — PrefabLibrary and instantiate
 // Spec: docs/engine/reference/11-scenes-assets.md · ADR 0034

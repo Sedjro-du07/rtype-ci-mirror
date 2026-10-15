@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** NetTypes
+*/
+
 // engine/include/engine/net/NetTypes.hpp
 // ENG-36 — INetwork and network types
 // Spec: docs/engine/reference/10-network.md · ADR 0033 · reference 10

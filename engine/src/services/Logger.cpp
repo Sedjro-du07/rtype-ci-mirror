@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Logger
+*/
+
 // engine/src/services/Logger.cpp
 // ENG-44 — Logger and sinks (console, file, developer console)
 // Spec: docs/engine/reference/12-services.md · ADR 0035 · reference 12

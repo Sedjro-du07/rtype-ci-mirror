@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** DebugOverlaySystem
+*/
+
 // engine/src/systems/DebugOverlaySystem.cpp
 // ENG-47 — Metrics and engine.debug_overlay (ImGui, ImPlot)
 // Spec: docs/engine/reference/12-services.md · ADR 0035

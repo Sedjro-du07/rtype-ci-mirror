@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** ThreadPoolRoomHost
+*/
+
 // engine/src/server/ThreadPoolRoomHost.hpp
 // SRV-12 — WorkerPool, IRoomHost and ThreadPoolRoomHost: rooms in parallel on a thread pool
 // Spec: docs/engine/reference/14-rooms.md · ADR 0038, 0039 · reference 14
