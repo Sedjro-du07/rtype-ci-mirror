@@ -54,6 +54,7 @@ engine/
 │       │   ├── IStorage.hpp                              ENG-17
 │       │   ├── Registry.hpp                              ENG-18, ENG-21
 │       │   ├── SparseSet.hpp                             ENG-17
+│       │   ├── SparseSet.inl                             ENG-17
 │       │   └── View.hpp                                  ENG-19
 │       ├── events/
 │       │   ├── EngineEvents.hpp                          ENG-27

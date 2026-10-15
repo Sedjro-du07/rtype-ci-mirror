@@ -40,6 +40,8 @@ public:
 ## `class IStorage` — `ecs/IStorage.hpp`
 
 ```cpp
+using ComponentId = uint32_t;        // dense index assigned by the TypeRegistry at registration (ENG-22)
+
 class IStorage {
 public:
     virtual ~IStorage() = default;

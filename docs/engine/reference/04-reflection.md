@@ -31,7 +31,7 @@ template <class T> struct TypeName;               // specialised by the macros b
 
 template <class T> concept HasTypeName = requires { TypeName<T>::key; };
 template <class T> constexpr uint64_t typeKey() noexcept;   // TypeName<T>::key
-using ComponentId = uint32_t;                                // dense index assigned at registration
+// ComponentId (uint32_t, dense index assigned at registration) is declared in ecs/IStorage.hpp (ENG-17)
 ```
 
 | Macro | Category | Becomes | Example |
