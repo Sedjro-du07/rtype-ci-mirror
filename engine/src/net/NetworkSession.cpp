@@ -8,6 +8,4 @@
 
 #include "engine/net/NetworkSession.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

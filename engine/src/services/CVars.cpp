@@ -7,6 +7,4 @@
 
 #include "engine/services/CVars.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

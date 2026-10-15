@@ -7,6 +7,4 @@
 
 #include "engine/reflection/Yaml.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

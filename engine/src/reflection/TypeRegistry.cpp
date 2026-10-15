@@ -7,6 +7,4 @@
 
 #include "engine/reflection/TypeRegistry.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

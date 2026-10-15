@@ -7,6 +7,4 @@
 
 #include "engine/server/RoomHandle.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

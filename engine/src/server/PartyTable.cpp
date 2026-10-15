@@ -7,6 +7,4 @@
 
 #include "PartyTable.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

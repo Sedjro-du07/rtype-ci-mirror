@@ -46,8 +46,8 @@ add_subdirectory(engine)
   "name": "rtype", "version": "0.1.0",
   "builtin-baseline": "<pinned vcpkg commit>",
   "dependencies": [ "sfml", "yaml-cpp", "asio", "lua", "sol2", "miniaudio",
-                    { "name": "imgui", "features": [ "sfml-binding" ] }, "implot",
-                    "catch2", "tl-expected" ]
+                    "imgui", "imgui-sfml", "implot", "catch2", "tl-expected" ],
+  "overrides": [ { "name": "lua", "version": "5.4.8" } ]
 }'''),
     ('/CMakePresets.json (repository root)', 'json', '''configurePresets: base (hidden: toolchain $env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake, binaryDir build/${presetName})
   linux-gcc-debug, linux-gcc-release, linux-clang-debug, linux-clang-release,
@@ -72,13 +72,15 @@ jobs:
   format:  clang-format --dry-run --Werror on changed *.hpp *.cpp'''),
 ]),
 'ENG-62': dict(extra=[
-    ('cmake/EngineInstall.cmake', 'cmake', '''install(TARGETS engine EXPORT rtype_engineTargets RUNTIME LIBRARY ARCHIVE)
-install(DIRECTORY include/ ${CMAKE_CURRENT_BINARY_DIR}/include/ DESTINATION include)
-install(FILES cmake/EngineModules.cmake DESTINATION lib/cmake/rtype_engine)
-install(EXPORT rtype_engineTargets NAMESPACE rtype_engine:: DESTINATION lib/cmake/rtype_engine)
-configure_package_config_file(cmake/rtype_engineConfig.cmake.in …)
-write_basic_package_version_file(… COMPATIBILITY SameMinorVersion)
-include(CPack)                         # TGZ on Linux, ZIP on Windows'''),
+    ('cmake/EngineInstall.cmake', 'cmake', '''engine_install_engine()      # engine + headers + Export.hpp + plugins (export set rtype_engineTargets),
+                             # CMake helpers and launcher main.cpp into lib/cmake/rtype_engine,
+                             # rtype_engineConfig.cmake + version file (SameMinorVersion)
+engine_enable_packaging(NAME <name> [VENDOR <vendor>])   # CPack: TGZ on Linux, ZIP on Windows'''),
+    ('cmake/rtype_engineConfig.cmake.in', 'cmake', '''@PACKAGE_INIT@
+find_dependency(tl-expected) when the engine was built with the fallback
+include(rtype_engineTargets.cmake)                     # rtype_engine::engine, rtype_engine::<plugins>
+set(ENGINE_DYNAMIC_MODULES <engine's mode>); ENGINE_LAUNCHER_SOURCE; ENGINE_PLUGIN_TARGETS
+include(EngineOptions) include(EngineModules) include(EngineInstall)'''),
 ]),
 'ENG-03': dict(extra=[
     ('cmake/FeatureProbe.cpp', 'cpp', '''// One function per allowed feature (ADR 0017); compiled with try_compile, never linked.
@@ -88,8 +90,9 @@ void                               probePrint();                 // std::print
 struct ProbeDeducingThis { template <class Self> auto& get(this Self& self); };
 int                                probeToUnderlying();          // std::to_underlying
 [[noreturn]] void                  probeUnreachable();           // std::unreachable'''),
-    ('cmake/EngineOptions.cmake', 'cmake', '''try_compile(ENGINE_HAS_STD_EXPECTED ... SOURCES cmake/FeatureProbe.cpp ...)
-# if FALSE: target_compile_definitions(engine PUBLIC ENGINE_USE_TL_EXPECTED)'''),
+    ('cmake/EngineFeatures.cmake', 'cmake', '''engine_probe_cxx23(<target>)   # try_compile FeatureProbe.cpp with -DPROBE_<FEATURE> for each feature
+# EXPECTED missing → ENGINE_USE_TL_EXPECTED + tl::expected; PRINT missing → ENGINE_NO_STD_PRINT;
+# MOVE_ONLY_FUNCTION, DEDUCING_THIS, TO_UNDERLYING, UNREACHABLE missing → configure error'''),
 ]),
 # ---------------------------------------------------------------- 01 Core
 'ENG-04': dict(skip=['core/math/'], extra=[

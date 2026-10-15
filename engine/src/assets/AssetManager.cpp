@@ -7,6 +7,4 @@
 
 #include "engine/assets/AssetManager.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

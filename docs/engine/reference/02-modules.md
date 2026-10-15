@@ -178,9 +178,29 @@ engine_add_game_module(<name> [SHARED_SOURCES ...] [SERVER_SOURCES ...] [CLIENT_
                        [SOURCES ...] [DEPENDS <targets>])
 # ADR 0040. With SERVER_SOURCES / CLIENT_SOURCES: builds lib<name>_server (shared + server) and
 # lib<name>_client (shared + client) in <bin>/games. With SOURCES only: one lib<name> for every role.
-# Defines ENGINE_GAME_SERVER or ENGINE_GAME_CLIENT in the role builds.
+# Defines ENGINE_GAME_SERVER or ENGINE_GAME_CLIENT in the role builds. CMake targets are named
+# game_<name>_server / game_<name>_client (or game_<name>), so a launcher may be called <name>_client.
 
-engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
-# Builds engine/launcher/main.cpp with ENGINE_DEFAULT_CONFIG="<file.yaml>"; copies the config next
-# to the executable; in static mode links every plugin and the named game into the executable.
+engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>] [ROLE client|server|editor])
+# Builds the launcher main() (ENGINE_LAUNCHER_SOURCE, default engine/launcher/main.cpp) with
+# ENGINE_DEFAULT_CONFIG="<file.yaml>" into <bin>; copies the config next to it. Dynamic mode: builds
+# the plugins and the game with it. Static mode: links every plugin and the game whole
+# (WHOLE_ARCHIVE), so their registrars run; ROLE picks lib<name>_server (server) or lib<name>_client
+# (client, editor) for a split game and is required there.
+# Declare plugins and games before the launchers that use them.
 ```
+
+## Build helpers — `EngineOptions.cmake`, `EngineFeatures.cmake`, `EngineInstall.cmake`
+
+```cmake
+engine_configure_target(<target>)   # C++23, hidden visibility, warnings, MSVC conformance, sanitizers
+engine_probe_cxx23(<target>)        # ENG-03: compiles cmake/FeatureProbe.cpp per allowed feature;
+                                    # std::expected missing → ENGINE_USE_TL_EXPECTED + tl::expected,
+                                    # std::print missing → ENGINE_NO_STD_PRINT; other features required
+engine_install_engine()             # ENG-62: install rules + rtype_engineConfig.cmake (find_package)
+engine_enable_packaging(NAME <n> [VENDOR <v>])   # CPack: <n>-<version>-<System>.tar.gz / .zip
+```
+
+`find_package(rtype_engine)` gives `rtype_engine::engine`, the engine's plugins as
+`rtype_engine::<kind>_<name>`, and the functions above, in the engine's mode (dynamic or static).
+Installing a game built against an installed engine also installs that engine's library.

@@ -1,0 +1,10 @@
+# Static analysis (ADR 0045 · ENG-61). Warnings only: run with `clang-tidy -p build/<preset>`.
+Checks: >
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  -modernize-use-trailing-return-type,
+  -bugprone-easily-swappable-parameters
+WarningsAsErrors: ''
+HeaderFilterRegex: 'engine/(include|src)/.*'
+FormatStyle: file

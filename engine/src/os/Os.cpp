@@ -7,6 +7,4 @@
 
 #include "Os.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

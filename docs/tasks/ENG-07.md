@@ -24,7 +24,7 @@ enum class Role : uint8_t { Client, Server, Editor };
 
 struct EngineConfig {
     Role                  role = Role::Client;
-    std::string           game;             // game module name: "rtype" → games/librtype.so
+    std::string           game;             // game module name: "rtype" → games/librtype_<role>.so (ADR 0040)
     std::string           platform = "sfml";// platform plugin (client, editor)
     std::string           audio = "miniaudio";
     std::string           network = "asio";

@@ -7,6 +7,4 @@
 
 #include "engine/input/Keys.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

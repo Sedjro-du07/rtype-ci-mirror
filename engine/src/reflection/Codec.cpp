@@ -7,6 +7,4 @@
 
 #include "Codec.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

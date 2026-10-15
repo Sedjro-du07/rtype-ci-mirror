@@ -7,6 +7,4 @@
 
 #include "engine/core/Time.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

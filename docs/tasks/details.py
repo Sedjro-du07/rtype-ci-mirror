@@ -11,7 +11,7 @@ DETAILS = {
 'ENG-01': dict(
     goal="Create the `engine` CMake project every other task builds into, with vcpkg, presets, exports, the C++23 setup and the build options.",
     todo=["Root `CMakeLists.txt`: `project(rtype)`, `add_subdirectory(engine)` (the game is added later); the engine still configures alone from `engine/`",
-          "Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua, sol2, miniaudio, imgui[sfml-binding], implot, catch2, tl-expected (ADR 0045)",
+          "Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua (override 5.4), sol2, miniaudio, imgui, imgui-sfml, implot, catch2, tl-expected (ADR 0045)",
           "Root `CMakePresets.json`: `linux-gcc`, `linux-clang`, `windows-msvc` × `debug` / `release`, plus `-static` variants; toolchain `$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake`; binary dir `build/<preset>`",
           "`engine/CMakeLists.txt`: `engine` library (SHARED when `ENGINE_DYNAMIC_MODULES`, else STATIC), `include/` public, `src/` private",
           "`generate_export_header` → `engine/Export.hpp` with `ENGINE_API`; hidden visibility everywhere (`CXX_VISIBILITY_PRESET hidden`, `VISIBILITY_INLINES_HIDDEN`) (ADR 0044)",
@@ -27,7 +27,8 @@ DETAILS = {
     goal="Give games and plugins one-line CMake functions so nobody copies build boilerplate.",
     todo=["`engine_add_plugin(<kind>_<name> SOURCES … [DEPENDS …])`: SHARED or STATIC per option, output to `<bin>/plugins`, hidden visibility, `ENGINE_BUILDING_PLUGIN`",
           "`engine_add_game_module(<name> SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES …)`: builds `lib<name>_server` and `lib<name>_client` in `<bin>/games` (or one `lib<name>` with `SOURCES`), defines `ENGINE_GAME_SERVER` / `ENGINE_GAME_CLIENT` (ADR 0040)",
-          "`engine_add_launcher(<exe> CONFIG <file> [GAME <name>])`: builds `launcher/main.cpp` with `ENGINE_DEFAULT_CONFIG`, copies the config, links plugins and the game in static mode"],
+          "`engine_add_launcher(<exe> CONFIG <file> [GAME <name>] [ROLE client|server|editor])`: builds `launcher/main.cpp` (`ENGINE_LAUNCHER_SOURCE`) with `ENGINE_DEFAULT_CONFIG` into `bin/`, copies the config, links plugins and the role's game build whole in static mode",
+          "Game targets named `game_<name>_server` / `game_<name>_client` (files keep `lib<name>_<role>`), so launchers may be called `<name>_client`"],
     done=["A test plugin and a test game (ENG-53 fixtures) build in both modes",
           "`ENGINE_DYNAMIC_MODULES=OFF` produces one executable with no `.so` / `.dll` next to it"],
     watch=["Windows: `.dll` must land next to the executable or in `plugins/` with the search path set",
@@ -35,7 +36,8 @@ DETAILS = {
 'ENG-03': dict(
     goal="Prove early that every C++23 feature on our allow-list compiles on GCC, Clang and MSVC.",
     todo=["`cmake/FeatureProbe.cpp` using each allowed feature: `std::expected`, `std::move_only_function`, `std::print`, deducing this, `std::to_underlying`, `std::unreachable`",
-          "`try_compile` in CMake; on `std::expected` failure, switch `Result` to `tl::expected` with a define"],
+          "`cmake/EngineFeatures.cmake`: `engine_probe_cxx23(target)`, one `try_compile` per feature (module scanning off); summary line at configure",
+          "`std::expected` missing → `ENGINE_USE_TL_EXPECTED` + `tl::expected`; `std::print` missing → `ENGINE_NO_STD_PRINT`; the other four missing → configure error naming the supported compilers"],
     done=["CI job compiles the probe on the three compilers and prints which fallbacks are active"],
     watch=["Features outside the allow-list (ADR 0017) must not be added here silently: they need an ADR change"]),
 # ---------------------------------------------------------------- 01 Core

@@ -1,0 +1,21 @@
+# Text files are stored with LF on every platform (ADR 0044 · ENG-61).
+* text=auto eol=lf
+
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary assets: never converted or merged as text.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.ttf  binary
+*.otf  binary
+*.wav  binary
+*.ogg  binary
+*.mp3  binary
+*.flac binary
+*.pdf  binary
+*.zip  binary

@@ -25,7 +25,7 @@ The role of the process. Decides which plugins load (ADR 0004) and is passed to
 ```cpp
 struct EngineConfig {
     Role                  role = Role::Client;
-    std::string           game;             // game module name: "rtype" → games/librtype.so
+    std::string           game;             // game module name: "rtype" → games/librtype_<role>.so (ADR 0040)
     std::string           platform = "sfml";// platform plugin (client, editor)
     std::string           audio = "miniaudio";
     std::string           network = "asio";
