@@ -118,6 +118,23 @@ git ls-files 'engine/*.hpp' 'engine/*.cpp' | xargs clang-format --dry-run --Werr
 clang-tidy -p build/linux-gcc-debug engine/src/ecs/Registry.cpp    # static analysis, warnings only
 ```
 
+## 6b · CI on the private mirror
+
+The organisation has no GitHub Actions budget, so the CI runs on a private mirror,
+`Sedjro-du07/rtype-ci-mirror` (2 000 minutes a month; a Windows minute counts double, so commits
+that only touch documentation do not start it). Set it up once per clone:
+
+```bash
+gh repo create Sedjro-du07/rtype-ci-mirror --private      # done once by its owner
+git remote set-url --add --push origin git@github.com:EpitechPGE3-2026/G-ING-500-COT-5-1-rtype-2.git
+git remote set-url --add --push origin git@github.com:Sedjro-du07/rtype-ci-mirror.git
+git push origin --all                                     # every push now goes to both
+gh run list -R Sedjro-du07/rtype-ci-mirror                # results; or the Actions tab of the mirror
+gh workflow run CI -R Sedjro-du07/rtype-ci-mirror --ref feature/engine-build   # run by hand
+```
+
+Teammates need read access to the mirror to see the results (Settings › Collaborators).
+
 ## 7 · Project documentation and tasks
 
 ```bash
