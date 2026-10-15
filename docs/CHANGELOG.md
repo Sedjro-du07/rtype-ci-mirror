@@ -7,6 +7,24 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-15] — engine ECS: ENG-16, ENG-17, ENG-56
+
+### Added
+
+- ECS storage benchmark (ENG-56, `engine/benchmarks/ecs_storage/`, built with `ENGINE_BUILD_BENCHMARKS=ON`):
+  sparse set vs sparse array vs a minimal archetype store, 10 000 entities; Google Benchmark added to
+  `vcpkg.json`. Results and reading in the new comparative study, `docs/study/01-ecs-storage.md`.
+- `IStorage` (with `ComponentId`) and the paged `SparseSet<T>` (pages of 4096, packed entities and
+  components, swap-and-pop remove, raw access for type-erased callers); `IStorage.hpp` written by Sedjro;
+  9 tests.
+- `Entity` (index + generation, `null()`, `isNull()`, `==`, `std::hash`) and `EntityAllocator` (free list,
+  generation bumped on release, `alive`, `aliveCount`), written by Sedjro; 7 tests in `engine_ecs_tests`.
+
+### Changed
+
+- Every `.inl` starts with `#pragma once`, includes its own header and the standard headers it uses, so an
+  editor can open it alone (`Hash.inl`, `Signal.inl`, `Entity.inl`).
+
 ## [2026-10-15] — engine core: ENG-04, ENG-05, ENG-06, ENG-60
 
 ### Added

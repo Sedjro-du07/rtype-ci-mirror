@@ -5,6 +5,13 @@
 ** Hash
 */
 
+#pragma once
+
+#include "engine/core/Hash.hpp"
+
+#include <cstdint>
+#include <string_view>
+
 namespace engine {
 
 constexpr uint64_t fnv1a64(std::string_view text) noexcept {

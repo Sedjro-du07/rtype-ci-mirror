@@ -32,3 +32,7 @@ engine_add_test(engine_core_tests SOURCES
 
 engine_add_test(engine_os_tests SOURCES
     os/OsTest.cpp)
+
+engine_add_test(engine_ecs_tests SOURCES
+    ecs/EntityTest.cpp
+    ecs/SparseSetTest.cpp)

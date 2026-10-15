@@ -5,6 +5,12 @@
 ** Signal
 */
 
+#pragma once
+
+#include "engine/core/Signal.hpp"
+
+#include <cstddef>
+#include <memory>
 #include <utility>
 
 namespace engine {

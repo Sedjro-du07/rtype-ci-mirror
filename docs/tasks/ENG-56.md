@@ -10,7 +10,14 @@ Measure ECS storage choices for the comparative study.
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `benchmarks/ecs_storage/`
+- `benchmarks/CMakeLists.txt`
+- `benchmarks/ecs_storage/CMakeLists.txt`
+- `benchmarks/ecs_storage/BenchComponents.hpp`
+- `benchmarks/ecs_storage/SparseArray.hpp`
+- `benchmarks/ecs_storage/SparseArray.inl`
+- `benchmarks/ecs_storage/ArchetypeStore.hpp`
+- `benchmarks/ecs_storage/ArchetypeStore.cpp`
+- `benchmarks/ecs_storage/EcsStorageBench.cpp`
 
 ## Classes and methods
 

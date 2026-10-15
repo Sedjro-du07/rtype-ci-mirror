@@ -11,7 +11,9 @@ Entity handles with generations so stale handles are detected.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/ecs/Entity.hpp`
+- `include/engine/ecs/Entity.inl`
 - `include/engine/ecs/EntityAllocator.hpp`
+- `src/ecs/Entity.cpp`
 - `src/ecs/EntityAllocator.cpp`
 
 ## Classes and methods

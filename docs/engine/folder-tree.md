@@ -6,8 +6,16 @@ task: `ENG-xx` on the engine board, `SRV-xx` on the server board (see [`tasks.md
 ```
 engine/
 ├── benchmarks/
-│   ├── ecs_storage/                                      ENG-56
-│   └── net/                                              SRV-20
+│   ├── ecs_storage/
+│   │   ├── ArchetypeStore.cpp                            ENG-56
+│   │   ├── ArchetypeStore.hpp                            ENG-56
+│   │   ├── BenchComponents.hpp                           ENG-56
+│   │   ├── CMakeLists.txt                                ENG-56
+│   │   ├── EcsStorageBench.cpp                           ENG-56
+│   │   ├── SparseArray.hpp                               ENG-56
+│   │   └── SparseArray.inl                               ENG-56
+│   ├── net/                                              SRV-20
+│   └── CMakeLists.txt                                    ENG-56
 ├── cmake/
 │   ├── EngineFeatures.cmake                              ENG-03
 │   ├── EngineInstall.cmake                               ENG-62
@@ -49,10 +57,12 @@ engine/
 │       ├── ecs/
 │       │   ├── Commands.hpp                              ENG-20
 │       │   ├── Entity.hpp                                ENG-16
+│       │   ├── Entity.inl                                ENG-16
 │       │   ├── EntityAllocator.hpp                       ENG-16
 │       │   ├── IStorage.hpp                              ENG-17
 │       │   ├── Registry.hpp                              ENG-18, ENG-21
 │       │   ├── SparseSet.hpp                             ENG-17
+│       │   ├── SparseSet.inl                             ENG-17
 │       │   └── View.hpp                                  ENG-19
 │       ├── events/
 │       │   ├── EngineEvents.hpp                          ENG-27
@@ -167,6 +177,7 @@ engine/
 │   │   └── Time.cpp                                      ENG-05
 │   ├── ecs/
 │   │   ├── Commands.cpp                                  ENG-20
+│   │   ├── Entity.cpp                                    ENG-16
 │   │   ├── EntityAllocator.cpp                           ENG-16
 │   │   └── Registry.cpp                                  ENG-18
 │   ├── events/
