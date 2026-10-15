@@ -5,7 +5,7 @@
 ```cmake
 cmake_minimum_required(VERSION 3.25)
 project(mygame CXX)
-find_package(engine REQUIRED)                       # or add_subdirectory(engine) inside the monorepo
+find_package(rtype_engine REQUIRED)                 # or add_subdirectory(engine) inside the monorepo
 
 engine_add_game_module(mygame                       # one code, two builds (ADR 0040)
     SHARED_SOURCES shared/Types.cpp shared/Movement.cpp
@@ -47,7 +47,7 @@ Every key, with its default. Unknown keys are an error reported with `file:line`
 
 ```yaml
 role: client                 # client | server | editor
-game: mygame                 # game module name (games/libmygame.so)
+game: mygame                 # game module name (games/libmygame_client.so or _server, ADR 0040)
 platform: sfml               # sfml | raylib            (client, editor)
 audio: miniaudio             #                          (client, editor)
 network: asio

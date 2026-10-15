@@ -20,6 +20,7 @@ cmake --build --preset linux-gcc-debug
 ctest --preset linux-gcc-debug
 ```
 
+Installing vcpkg and the compilers, and every other command: [29 · Every command](29-commands.md).
 The presets (`CMakePresets.json`) are the only supported way to configure; VS Code, CLion and Visual
 Studio list them too. `-static` presets build one executable with no `.so` / `.dll`.
 
