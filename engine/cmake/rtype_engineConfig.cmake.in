@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## rtype_engineConfig
+##
+
 # find_package(rtype_engine) for projects that use an installed engine (ENG-62 · ADR 0045).
 # Gives the target rtype_engine::engine, its plugins, and the CMake functions of reference 02.
 

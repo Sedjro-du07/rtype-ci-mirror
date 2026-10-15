@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## CMakeLists
+##
+
 # Engine unit tests: Catch2 v3, registered with ctest (ADR 0045).
 # ENG-53 owns this file and completes it; earlier tasks add their tests with engine_add_test.
 

@@ -313,7 +313,8 @@ engine/
 - A header that only the engine uses is **private**: it lives next to its source in `engine/src/<block>/`, not in
   `include/`, so games cannot include it (example: `src/net/PlayerTable.hpp`).
 - Every file starts with the Epitech header; `File description` is the file name without extension.
-  C++ uses `/* ** … */`, CMake `##`, Lua `--`. Skeletons already have it; keep it when you replace a
+  C++ uses `/* ** … */`, CMake, YAML and Git files `##`, Lua `--`; JSON files cannot hold comments.
+  Skeletons already have it; keep it when you replace a
   skeleton's task comment with code.
   ```cpp
   /*

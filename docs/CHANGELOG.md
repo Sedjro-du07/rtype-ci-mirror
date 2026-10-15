@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First test setup: `engine_add_test` and Catch2 in `engine/tests/CMakeLists.txt`; 7 tests for ENG-04.
 - Epitech header at the top of every file (rule in `docs/engine/folder-tree.md`): ENG-04 files, and
   every skeleton through `generate.py` (C++ `/* ** */`, CMake `##`, Lua `--`).
+- The same header on the build files already merged: the CMake files, `FeatureProbe.cpp`, the CI
+  workflow, `.clang-format`, `.clang-tidy`, `.editorconfig`, `.gitattributes`, `.gitignore`. The two
+  JSON files (`CMakePresets.json`, `vcpkg.json`) cannot hold comments and keep none.
 
 ### Changed
 

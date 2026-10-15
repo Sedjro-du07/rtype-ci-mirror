@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## gitattributes
+##
+
 # Text files are stored with LF on every platform (ADR 0044 · ENG-61).
 * text=auto eol=lf
 

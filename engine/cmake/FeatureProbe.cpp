@@ -1,5 +1,9 @@
-// One probe per C++23 feature on the allow-list (ADR 0017). EngineFeatures.cmake compiles this file
-// once per feature with -DPROBE_<NAME>; it is never linked into the engine. ENG-03
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** FeatureProbe
+*/
 
 #if defined(PROBE_EXPECTED)
 #include <expected>

@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## EngineFeatures
+##
+
 # C++23 feature probe (ADR 0017 · ENG-03): compiles cmake/FeatureProbe.cpp once per allowed feature
 # and tells the engine which fallbacks to use. Results are printed at configure time.
 #

@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## EngineOptions
+##
+
 # Build options and per-target settings shared by the engine, its plugins and games.
 # ENG-01 · ADR 0009 (linking mode), 0017 (C++23), 0044 (portability), 0045 (tooling)
 

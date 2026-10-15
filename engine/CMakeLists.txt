@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## CMakeLists
+##
+
 # The engine library. Builds alone from engine/ or as part of the root project.
 # ENG-01 · ADR 0009, 0017, 0044, 0045 · docs/engine/reference/02-modules.md
 

@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## EngineInstall
+##
+
 # Install the engine so another project can use find_package(rtype_engine), and package a game.
 # ENG-62 · ADR 0045 · guide 24
 #
