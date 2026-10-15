@@ -20,13 +20,20 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ### `cmake/EngineInstall.cmake`
 
 ```cmake
-install(TARGETS engine EXPORT rtype_engineTargets RUNTIME LIBRARY ARCHIVE)
-install(DIRECTORY include/ ${CMAKE_CURRENT_BINARY_DIR}/include/ DESTINATION include)
-install(FILES cmake/EngineModules.cmake DESTINATION lib/cmake/rtype_engine)
-install(EXPORT rtype_engineTargets NAMESPACE rtype_engine:: DESTINATION lib/cmake/rtype_engine)
-configure_package_config_file(cmake/rtype_engineConfig.cmake.in …)
-write_basic_package_version_file(… COMPATIBILITY SameMinorVersion)
-include(CPack)                         # TGZ on Linux, ZIP on Windows
+engine_install_engine()      # engine + headers + Export.hpp + plugins (export set rtype_engineTargets),
+                             # CMake helpers and launcher main.cpp into lib/cmake/rtype_engine,
+                             # rtype_engineConfig.cmake + version file (SameMinorVersion)
+engine_enable_packaging(NAME <name> [VENDOR <vendor>])   # CPack: TGZ on Linux, ZIP on Windows
+```
+
+### `cmake/rtype_engineConfig.cmake.in`
+
+```cmake
+@PACKAGE_INIT@
+find_dependency(tl-expected) when the engine was built with the fallback
+include(rtype_engineTargets.cmake)                     # rtype_engine::engine, rtype_engine::<plugins>
+set(ENGINE_DYNAMIC_MODULES <engine's mode>); ENGINE_LAUNCHER_SOURCE; ENGINE_PLUGIN_TARGETS
+include(EngineOptions) include(EngineModules) include(EngineInstall)
 ```
 
 ## Depends on
