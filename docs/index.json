@@ -1,0 +1,438 @@
+[
+  {
+    "file": "engine/architecture.md",
+    "title": "Engine — architecture overview"
+  },
+  {
+    "file": "engine/guide/README.md",
+    "title": "Engine guide — index"
+  },
+  {
+    "file": "engine/making-a-game.md",
+    "title": "Guide · Tutorial: make a Pong"
+  },
+  {
+    "file": "engine/guide/01-getting-started.md",
+    "title": "Guide · 01 Getting started"
+  },
+  {
+    "file": "engine/guide/02-project-and-config.md",
+    "title": "Guide · 02 Project and configuration"
+  },
+  {
+    "file": "engine/guide/03-components.md",
+    "title": "Guide · 03 Components"
+  },
+  {
+    "file": "engine/guide/04-systems.md",
+    "title": "Guide · 04 Systems and scheduling"
+  },
+  {
+    "file": "engine/guide/05-entities.md",
+    "title": "Guide · 05 Entities, views and commands"
+  },
+  {
+    "file": "engine/guide/06-events.md",
+    "title": "Guide · 06 Events"
+  },
+  {
+    "file": "engine/guide/07-input.md",
+    "title": "Guide · 07 Input"
+  },
+  {
+    "file": "engine/guide/08-rendering.md",
+    "title": "Guide · 08 Rendering"
+  },
+  {
+    "file": "engine/guide/09-audio.md",
+    "title": "Guide · 09 Audio"
+  },
+  {
+    "file": "engine/guide/10-scenes-prefabs-assets.md",
+    "title": "Guide · 10 Scenes, prefabs and assets"
+  },
+  {
+    "file": "engine/guide/11-scripting-lua.md",
+    "title": "Guide · 11 Scripting with Lua"
+  },
+  {
+    "file": "engine/guide/12-networking.md",
+    "title": "Guide · 12 Networking"
+  },
+  {
+    "file": "engine/guide/13-console-cvars-metrics.md",
+    "title": "Guide · 13 Console, CVars and metrics"
+  },
+  {
+    "file": "engine/guide/14-writing-a-plugin.md",
+    "title": "Guide · 14 Writing a plugin"
+  },
+  {
+    "file": "engine/guide/15-troubleshooting.md",
+    "title": "Guide · 15 Troubleshooting"
+  },
+  {
+    "file": "engine/guide/16-time-and-loop.md",
+    "title": "Guide · 16 Time and the game loop"
+  },
+  {
+    "file": "engine/guide/17-context.md",
+    "title": "Guide · 17 The Context"
+  },
+  {
+    "file": "engine/guide/18-collisions.md",
+    "title": "Guide · 18 Collisions"
+  },
+  {
+    "file": "engine/guide/19-game-module-and-state.md",
+    "title": "Guide · 19 Game module and game state"
+  },
+  {
+    "file": "engine/guide/20-hierarchy-and-identity.md",
+    "title": "Guide · 20 Hierarchy and identity"
+  },
+  {
+    "file": "engine/guide/21-saving.md",
+    "title": "Guide · 21 Saving"
+  },
+  {
+    "file": "engine/guide/22-roles.md",
+    "title": "Guide · 22 Roles: client, server, editor"
+  },
+  {
+    "file": "engine/guide/23-testing.md",
+    "title": "Guide · 23 Testing your game"
+  },
+  {
+    "file": "engine/guide/24-building-and-shipping.md",
+    "title": "Guide · 24 Building and shipping"
+  },
+  {
+    "file": "engine/guide/25-accessibility.md",
+    "title": "Guide · 25 Accessibility checklist"
+  },
+  {
+    "file": "engine/guide/26-best-practices.md",
+    "title": "Guide · 26 Best practices"
+  },
+  {
+    "file": "engine/guide/27-not-yet-in-the-engine.md",
+    "title": "Guide · 27 What is not in the engine yet"
+  },
+  {
+    "file": "engine/guide/28-lobby-parties-rooms.md",
+    "title": "Guide · 28 Lobby, parties and rooms"
+  },
+  {
+    "file": "engine/reference/README.md",
+    "title": "Engine reference — index"
+  },
+  {
+    "file": "engine/reference/01-core.md",
+    "title": "Reference · 01 Engine, Context, core types"
+  },
+  {
+    "file": "engine/reference/02-modules.md",
+    "title": "Reference · 02 Modules and plugins"
+  },
+  {
+    "file": "engine/reference/03-ecs.md",
+    "title": "Reference · 03 ECS"
+  },
+  {
+    "file": "engine/reference/04-reflection.md",
+    "title": "Reference · 04 Reflection and serialization"
+  },
+  {
+    "file": "engine/reference/05-scheduler.md",
+    "title": "Reference · 05 Scheduler"
+  },
+  {
+    "file": "engine/reference/06-events.md",
+    "title": "Reference · 06 Events"
+  },
+  {
+    "file": "engine/reference/07-input.md",
+    "title": "Reference · 07 Input"
+  },
+  {
+    "file": "engine/reference/08-rendering.md",
+    "title": "Reference · 08 Platform and rendering"
+  },
+  {
+    "file": "engine/reference/09-audio.md",
+    "title": "Reference · 09 Audio"
+  },
+  {
+    "file": "engine/reference/10-network.md",
+    "title": "Reference · 10 Network (engine side)"
+  },
+  {
+    "file": "engine/reference/11-scenes-assets.md",
+    "title": "Reference · 11 Scenes, prefabs, assets"
+  },
+  {
+    "file": "engine/reference/12-services.md",
+    "title": "Reference · 12 Services, tools, scripting"
+  },
+  {
+    "file": "engine/reference/13-components-systems.md",
+    "title": "Reference · 13 Built-in components and systems"
+  },
+  {
+    "file": "engine/reference/14-rooms.md",
+    "title": "Reference · 14 Lobby, parties and rooms"
+  },
+  {
+    "file": "engine/classes.md",
+    "title": "Engine classes and interfaces (summary)"
+  },
+  {
+    "file": "engine/to-implement.md",
+    "title": "Engine — everything to implement"
+  },
+  {
+    "file": "engine/game-api.md",
+    "title": "Engine — what a game uses"
+  },
+  {
+    "file": "engine/folder-tree.md",
+    "title": "Engine folder tree"
+  },
+  {
+    "file": "engine/tasks.md",
+    "title": "Engine tasks"
+  },
+  {
+    "file": "server/tasks.md",
+    "title": "Server tasks"
+  },
+  {
+    "file": "network/README.md",
+    "title": "Network part — steps"
+  },
+  {
+    "file": "network/01-scope.md",
+    "title": "Network · 01 Scope"
+  },
+  {
+    "file": "network/02-exchanges.md",
+    "title": "Network · 02 Inventory of exchanges"
+  },
+  {
+    "file": "network/03-layers.md",
+    "title": "Network · 03 Layers"
+  },
+  {
+    "file": "network/04-decisions.md",
+    "title": "Network · 04 Design choices"
+  },
+  {
+    "file": "network/rfc.md",
+    "title": "Network · MSEP v1.0 — the protocol RFC"
+  },
+  {
+    "file": "network/06-scenarios.md",
+    "title": "Network · 06 Validation on scenarios"
+  },
+  {
+    "file": "network/07-prototypes.md",
+    "title": "Network · 07 Prototypes and measurements"
+  },
+  {
+    "file": "tasks/README.md",
+    "title": "Tasks — details (one page per task)"
+  },
+  {
+    "file": "engine/real-engines-study.md",
+    "title": "Study — how real engines attach a game"
+  },
+  {
+    "file": "design-patterns.md",
+    "title": "Design pattern decisions"
+  },
+  {
+    "file": "adr/README.md",
+    "title": "Architecture decision records"
+  },
+  {
+    "file": "adr/0001-hybrid-engine-identity.md",
+    "title": "ADR 0001 — Hybrid engine identity"
+  },
+  {
+    "file": "adr/0002-dynamic-plugins-from-day-one.md",
+    "title": "ADR 0002 — Dynamic plugins from day one"
+  },
+  {
+    "file": "adr/0003-fixed-timestep-loop.md",
+    "title": "ADR 0003 — Fixed timestep loop"
+  },
+  {
+    "file": "adr/0004-plugin-boundaries.md",
+    "title": "ADR 0004 — Plugin boundaries"
+  },
+  {
+    "file": "adr/0005-game-as-a-module.md",
+    "title": "ADR 0005 — Game as a module"
+  },
+  {
+    "file": "adr/0006-command-list-renderer.md",
+    "title": "ADR 0006 — Command list renderer"
+  },
+  {
+    "file": "adr/0007-sfml-and-raylib-backends.md",
+    "title": "ADR 0007 — SFML and raylib backends"
+  },
+  {
+    "file": "adr/0008-shared-audio-plugin.md",
+    "title": "ADR 0008 — Shared audio plugin"
+  },
+  {
+    "file": "adr/0009-dual-linking-mode.md",
+    "title": "ADR 0009 — Dual linking mode"
+  },
+  {
+    "file": "adr/0010-content-layer.md",
+    "title": "ADR 0010 — Content layer"
+  },
+  {
+    "file": "adr/0011-generic-server-role.md",
+    "title": "ADR 0011 — Generic server role"
+  },
+  {
+    "file": "adr/0012-entity-handle.md",
+    "title": "ADR 0012 — Entity handle"
+  },
+  {
+    "file": "adr/0013-sparse-set-storage.md",
+    "title": "ADR 0013 — Sparse set storage"
+  },
+  {
+    "file": "adr/0014-type-erased-storage.md",
+    "title": "ADR 0014 — Type-erased storage"
+  },
+  {
+    "file": "adr/0015-command-buffer.md",
+    "title": "ADR 0015 — Command buffer"
+  },
+  {
+    "file": "adr/0016-identity-as-components.md",
+    "title": "ADR 0016 — Identity as components"
+  },
+  {
+    "file": "adr/0017-cpp23-with-allow-list.md",
+    "title": "ADR 0017 — C++23 with an allow-list"
+  },
+  {
+    "file": "adr/0018-data-in-yaml-behaviour-in-scripts.md",
+    "title": "ADR 0018 — Data in YAML, behaviour in scripts"
+  },
+  {
+    "file": "adr/0019-lua-first-custom-language-optional.md",
+    "title": "ADR 0019 — Lua first, custom language optional"
+  },
+  {
+    "file": "adr/0020-game-module-helpers.md",
+    "title": "ADR 0020 — Game module helpers"
+  },
+  {
+    "file": "adr/0021-engine-composition-root.md",
+    "title": "ADR 0021 — Engine is the composition root and member order is shutdown order"
+  },
+  {
+    "file": "adr/0022-context-facade.md",
+    "title": "ADR 0022 — Game code reaches the engine only through Context"
+  },
+  {
+    "file": "adr/0023-null-object-services.md",
+    "title": "ADR 0023 — Absent services are Null Objects"
+  },
+  {
+    "file": "adr/0024-error-handling-policy.md",
+    "title": "ADR 0024 — Boot errors stop cleanly, system errors never stop the server"
+  },
+  {
+    "file": "adr/0025-module-loading.md",
+    "title": "ADR 0025 — Plugins and games load through one ModuleManager"
+  },
+  {
+    "file": "adr/0026-registry-api.md",
+    "title": "ADR 0026 — Registry API, views, commands and hooks"
+  },
+  {
+    "file": "adr/0027-reflection-by-name.md",
+    "title": "ADR 0027 — Types are identified by name hash and described by registration"
+  },
+  {
+    "file": "adr/0028-named-ordered-systems.md",
+    "title": "ADR 0028 — Systems are named and ordered by constraints inside fixed stages"
+  },
+  {
+    "file": "adr/0029-queued-event-bus.md",
+    "title": "ADR 0029 — Events are typed, queued and unsubscribed by RAII"
+  },
+  {
+    "file": "adr/0030-actions-and-input-map.md",
+    "title": "ADR 0030 — Input is read as named actions with accessibility options"
+  },
+  {
+    "file": "adr/0031-render-api.md",
+    "title": "ADR 0031 — Rendering API: handles, draw commands, camera and accessibility filters"
+  },
+  {
+    "file": "adr/0032-audio-buses-captions.md",
+    "title": "ADR 0032 — Audio has buses, positional sound and captions"
+  },
+  {
+    "file": "adr/0033-engine-networking.md",
+    "title": "ADR 0033 — Engine networking: transport plugin, session, replication"
+  },
+  {
+    "file": "adr/0034-scenes-prefabs-assets.md",
+    "title": "ADR 0034 — One active scene, prefabs with overrides, handle-based assets"
+  },
+  {
+    "file": "adr/0035-services-and-tools.md",
+    "title": "ADR 0035 — Logger, CVars, console, metrics and the scripting interface"
+  },
+  {
+    "file": "adr/0036-one-add-and-type-categories.md",
+    "title": "ADR 0036 — One add<T>(), the type category comes from the macro"
+  },
+  {
+    "file": "adr/0037-game-facing-networking.md",
+    "title": "ADR 0037 — The game sees players and typed messages, never sockets or bytes"
+  },
+  {
+    "file": "adr/0038-rooms-shared-host.md",
+    "title": "ADR 0038 — Several games on one server: rooms, hosted in-process first"
+  },
+  {
+    "file": "adr/0039-room-api.md",
+    "title": "ADR 0039 — Room API: lobby, parties, rooms, contexts"
+  },
+  {
+    "file": "adr/0040-server-client-split.md",
+    "title": "ADR 0040 — One game code, two builds; server and client folders"
+  },
+  {
+    "file": "adr/0041-netcode-means-in-engine-policy-in-game.md",
+    "title": "ADR 0041 — Network optimizations: engine means, game team optimizes"
+  },
+  {
+    "file": "adr/0042-admission-by-the-game.md",
+    "title": "ADR 0042 — Admission: engine checks decoding, game decides who joins"
+  },
+  {
+    "file": "adr/0043-protocol-v1-game-api.md",
+    "title": "ADR 0043 — Protocol v1: what the game sees of it"
+  },
+  {
+    "file": "../benchmark-graphics-rtype.md",
+    "title": "Graphics library benchmark (FR)"
+  },
+  {
+    "file": "CHANGELOG.md",
+    "title": "Changelog"
+  }
+]

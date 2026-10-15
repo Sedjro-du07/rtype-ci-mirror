@@ -1,0 +1,119 @@
+# SRV-14 · Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset
+
+Board: **Server — folder tree & tasks** ([Notion](https://app.notion.com/p/3f9efac8d89981c5ac2cdefe65b6546d)) · Phase **05 Rooms** · **Wave 15** · status and owner live on the board.
+
+## Goal
+
+Make the network follow players between the lobby and the rooms.
+
+## Files
+
+Relative to `engine/`. Each file already exists as a skeleton naming this task.
+
+- `src/server/PlayerRouting.hpp`
+- `src/server/PlayerRouting.cpp`
+- `include/engine/net/RoomNetwork.hpp`
+- `src/net/RoomNetwork.cpp`
+- `include/engine/client/ClientLobby.hpp`
+- `src/client/ClientLobby.cpp`
+
+## Classes and methods
+
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `include/engine/client/ClientLobby.hpp`
+
+```cpp
+class ClientLobby {
+public:
+    const Party& myParty() const;
+    void invite(PlayerId player);                     // server: InviteRequested
+    void answerInvite(PartyId p, bool accept);        // server: InviteAnswered
+    void leaveParty();                                // server: LeavePartyRequested
+    void requestRoomList();                           // server: RoomListRequested → client: RoomListReceived
+    RoomId currentRoom() const;                       // 0 = in the lobby
+    std::span<const PlayerId> onlinePlayers() const;  // if the server shares it (net.shareOnlinePlayers); OnlinePlayersChanged
+    std::string_view name(PlayerId p) const;          // online players and party members
+    bool connected(PlayerId p) const;                 // false while a party member is in their grace period
+};
+
+// Room entry: on EnteredRoom the game switches scene; the engine sends RoomReady by itself once that
+// switch has completed (or at the end of the frame if none), and replication starts (RFC §8.3).
+
+// Private part of ClientLobby (the public part is above)
+class ClientLobby {
+private:
+    void onEnteredRoom(uint16_t roomSession);         // waits for the scene switch, then sends RoomReady
+};
+```
+
+### `include/engine/net/RoomNetwork.hpp`
+
+```cpp
+class RoomNetwork {
+public:
+    std::span<const PlayerId> players() const;                 // the room's players
+    template <class T> void send(PlayerId to, const T& msg);   // to a player of the room
+    template <class T> void send(const T& msg);                // client → server
+    template <class T> void broadcast(const T& msg, std::optional<PlayerId> except = {});   // the room's players
+    template <class T> [[nodiscard]] Subscription on(std::move_only_function<void(Context&, PlayerId, const T&)> fn);
+    double ping(PlayerId p) const;
+    void setRelevance(std::move_only_function<bool(PlayerId, Entity)> fn);   // server: who receives what (RFC §9.6); default: all
+};
+```
+
+### `src/server/PlayerRouting.hpp`
+
+```cpp
+class PlayerRouting {
+public:
+    uint16_t setRoom(PlayerId p, RoomId r);           // 0 = lobby; returns the new roomSession (RFC §8.3.1)
+    RoomId   roomOf(PlayerId p) const;
+    uint16_t roomSession(PlayerId p) const;
+    void     setReady(PlayerId p, uint16_t roomSession);   // RoomReady: replication may start
+    bool     ready(PlayerId p) const;
+    std::span<const PlayerId> playersIn(RoomId r) const;
+};
+```
+
+## Depends on
+
+- [SRV-13](SRV-13.md) — Lobby and RoomHandle: the server game API and the server loop
+- [ENG-39](ENG-39.md) — Replication: NetworkIdMap, net components, snapshot and input systems
+
+## Unlocks
+
+- [SRV-15](SRV-15.md) — Tests: parallel rooms, isolation, crash in a room, party and room flows
+- [SRV-17](SRV-17.md) — Replication v1: send until acknowledged, budget, NetPriority, relevance, quantize
+
+## Read first
+
+- [ADR 0037](../adr/0037-game-facing-networking.md)
+- [ADR 0039](../adr/0039-room-api.md)
+- [reference 14](../engine/reference/14-rooms.md)
+
+## To implement
+
+- [ ] `PlayerRouting`: where each player is (lobby or room)
+- [ ] Route game messages to the room's `on<T>` or the lobby's `on<T>`
+- [ ] `RoomNetwork`: players, send, broadcast, on<T>, ping limited to the room
+- [ ] Replication per room: only the room's entities; reset a player's replication state on enter / leave
+- [ ] `ClientLobby`: myParty, invite, answerInvite, leaveParty, requestRoomList, currentRoom, onlinePlayers, name, connected; client events
+- [ ] Room transitions on the reliable UDP stream (RFC §8.3): EnteredRoom with a new roomSession, RoomReady after the client's scene switch, ReturnedToLobby, RoomInterrupted
+- [ ] Snapshots and inputs of another roomSession dropped on both sides
+
+## Done when
+
+- A player in room 1 never receives an entity or a message of room 2; returning to the lobby stops every snapshot; results sent reliable arrive before ReturnedToLobby
+
+## Watch out
+
+- Messages of a player who just left a room must not reach that room any more
+- No snapshot before RoomReady of the current roomSession
+
+## Workflow
+
+1. Claim the task on the board (Owner, Status = Claimed, Claimed on).
+2. Start when every dependency is at least *In review*, or agree on the interface with its owner.
+3. Implement, with tests; open a pull request and set *In review*.
+4. Merged → *Done* and Completed on.
