@@ -31,7 +31,11 @@ IncludeCategories:
     Priority: 1
   - Regex: '^<engine/'
     Priority: 2
+  - Regex: '^<windows\.h>$'
+    Priority: 3
+    SortPriority: 3
   - Regex: '^<[a-z_]+>$'
-    Priority: 4
+    Priority: 5
   - Regex: '.*'
     Priority: 3
+    SortPriority: 4
