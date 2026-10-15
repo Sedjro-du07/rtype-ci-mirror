@@ -7,10 +7,13 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2026-10-15] — engine ECS: ENG-16
+## [2026-10-15] — engine ECS: ENG-16, ENG-17
 
 ### Added
 
+- `IStorage` (with `ComponentId`) and the paged `SparseSet<T>` (pages of 4096, packed entities and
+  components, swap-and-pop remove, raw access for type-erased callers); `IStorage.hpp` written by Sedjro;
+  9 tests.
 - `Entity` (index + generation, `null()`, `isNull()`, `==`, `std::hash`) and `EntityAllocator` (free list,
   generation bumped on release, `alive`, `aliveCount`), written by Sedjro; 7 tests in `engine_ecs_tests`.
 

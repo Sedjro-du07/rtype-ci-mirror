@@ -5,13 +5,30 @@
 ** IStorage
 */
 
-// engine/include/engine/ecs/IStorage.hpp
-// ENG-17 — IStorage and paged SparseSet<T>
-// Spec: docs/engine/reference/03-ecs.md · ADR 0013, 0014
-// Details: docs/tasks/ENG-17.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/ecs/Entity.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <span>
+
+namespace engine {
+
+using ComponentId = uint32_t;
+
+class IStorage {
+public:
+    virtual ~IStorage() = default;
+    virtual ComponentId id() const = 0;
+    virtual bool has(Entity) const = 0;
+    virtual void remove(Entity) = 0;
+    virtual size_t size() const = 0;
+    virtual void clear() = 0;
+    virtual std::span<const Entity> entities() const = 0;
+    virtual void* getRaw(Entity) = 0;
+    virtual const void* getRaw(Entity) const = 0;
+    virtual void* emplaceRaw(Entity, const void* src) = 0;
+};
+
+}
