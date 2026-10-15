@@ -55,7 +55,7 @@ add_subdirectory(engine)
   linux-gcc-static, windows-msvc-static        (ENGINE_DYNAMIC_MODULES=OFF)
 buildPresets and testPresets with the same names'''),
 ]),
-'ENG-60': dict(extra=[
+'ENG-60': dict(auto=False, extra=[
     ('src/os/Os.hpp', 'cpp', '''// Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
 namespace engine::os {
 void                  secureRandom(std::span<std::byte> out);            // getrandom / BCryptGenRandom; aborts on failure

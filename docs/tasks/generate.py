@@ -22,7 +22,7 @@ from tasks import TASKS          # noqa: E402
 from details import DETAILS      # noqa: E402
 from api import API              # noqa: E402
 
-GITHUB = 'https://github.com/EpitechPGE3-2026/G-ING-500-COT-5-1-rtype-2/blob/architecture-task-distribution'
+GITHUB = 'https://github.com/EpitechPGE3-2026/G-ING-500-COT-5-1-rtype-2/blob/develop'
 BOARDS = {
     'engine': dict(name='Engine — folder tree & tasks', title='Engine tasks',
                    notion='https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7', doc='docs/engine/tasks.md'),

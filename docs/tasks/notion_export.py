@@ -13,7 +13,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import generate as g  # noqa: E402
 
-GITHUB = 'https://github.com/EpitechPGE3-2026/G-ING-500-COT-5-1-rtype-2/blob/architecture-task-distribution/docs/tasks/'
+GITHUB = 'https://github.com/EpitechPGE3-2026/G-ING-500-COT-5-1-rtype-2/blob/develop/docs/tasks/'
 IDS = json.load(open(os.path.join(os.path.dirname(__file__), 'notion_ids.json')))
 
 

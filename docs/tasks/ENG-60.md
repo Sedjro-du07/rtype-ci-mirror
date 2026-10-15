@@ -20,13 +20,6 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ### `src/os/Os.hpp`
 
 ```cpp
-namespace engine::os {
-void                  secureRandom(std::span<std::byte> out);            // getrandom / BCryptGenRandom (MSEP tokens)
-std::filesystem::path userDataDir(std::string_view app);                  // $XDG_DATA_HOME / %APPDATA%; settings, logs
-std::filesystem::path executableDir();                                    // /proc/self/exe / GetModuleFileNameW
-void                  onQuitSignal(std::move_only_function<void()> fn);  // SIGINT, SIGTERM / console control handler
-}
-
 // Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
 namespace engine::os {
 void                  secureRandom(std::span<std::byte> out);            // getrandom / BCryptGenRandom; aborts on failure
