@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## CMakeLists
+##
+
 # R-Type: the engine and, later, the game. Configure with a preset: cmake --preset linux-gcc-debug
 # ENG-01 · ADR 0045
 

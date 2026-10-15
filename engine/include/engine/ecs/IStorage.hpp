@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** IStorage
+*/
+
 // engine/include/engine/ecs/IStorage.hpp
 // ENG-17 — IStorage and paged SparseSet<T>
 // Spec: docs/engine/reference/03-ecs.md · ADR 0013, 0014
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

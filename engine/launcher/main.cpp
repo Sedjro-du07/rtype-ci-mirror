@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** main
+*/
+
 // engine/launcher/main.cpp
 // ENG-10 — Generic launcher main() and signal handling
 // Spec: docs/engine/reference/01-core.md · ADR 0005 · reference 01

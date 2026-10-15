@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** AssetManager
+*/
+
 // engine/include/engine/assets/AssetManager.hpp
 // ENG-40 — AssetManager: handles, cache, refcount, fallback, hot reload
 // Spec: docs/engine/reference/11-scenes-assets.md · ADR 0034, 0044 · reference 11
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

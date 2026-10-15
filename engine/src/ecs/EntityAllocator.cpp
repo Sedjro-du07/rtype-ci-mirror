@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** EntityAllocator
+*/
+
 // engine/src/ecs/EntityAllocator.cpp
 // ENG-16 — Entity and EntityAllocator (generations, free list)
 // Spec: docs/engine/reference/03-ecs.md · ADR 0012 · reference 03
@@ -7,4 +14,4 @@
 
 #include "engine/ecs/EntityAllocator.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

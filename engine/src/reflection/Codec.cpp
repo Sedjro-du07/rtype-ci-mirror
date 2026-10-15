@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Codec
+*/
+
 // engine/src/reflection/Codec.cpp
 // SRV-04 — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits
 // Spec: docs/engine/reference/04-reflection.md · ADR 0036, 0037 · reference 04 · RFC §5
@@ -7,4 +14,4 @@
 
 #include "Codec.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

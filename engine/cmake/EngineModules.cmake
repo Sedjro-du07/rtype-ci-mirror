@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## EngineModules
+##
+
 # One-line CMake functions for plugins, game modules and launchers, in dynamic and static mode.
 # ENG-02 · ADR 0005, 0009, 0020, 0040 · docs/engine/reference/02-modules.md
 #

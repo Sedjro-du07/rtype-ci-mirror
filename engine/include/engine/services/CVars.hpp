@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** CVars
+*/
+
 // engine/include/engine/services/CVars.hpp
 // ENG-45 — CVars: typed variables, flags, ranges, archive
 // Spec: docs/engine/reference/12-services.md · ADR 0035, 0044
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

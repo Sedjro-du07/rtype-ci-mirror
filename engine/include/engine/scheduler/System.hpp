@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** System
+*/
+
 // engine/include/engine/scheduler/System.hpp
 // ENG-26 — Scheduler: stages, names, after/before, roles, stats, failure policy
 // Spec: docs/engine/reference/05-scheduler.md · ADR 0024, 0028, 0039 · reference 05
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

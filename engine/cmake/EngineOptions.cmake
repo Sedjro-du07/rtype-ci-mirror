@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## EngineOptions
+##
+
 # Build options and per-target settings shared by the engine, its plugins and games.
 # ENG-01 · ADR 0009 (linking mode), 0017 (C++23), 0044 (portability), 0045 (tooling)
 
@@ -29,15 +36,20 @@ function(engine_set_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4 $<$<BOOL:${ENGINE_WARNINGS_AS_ERRORS}>:/WX>)
     else()
-        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic
+        # -Wno-missing-field-initializers: aggregates with defaults are filled partially on purpose
+        # (Error{code, message}, createRoom({.name = …, .level = …})).
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Wno-missing-field-initializers
                                $<$<BOOL:${ENGINE_WARNINGS_AS_ERRORS}>:-Werror>)
     endif()
 endfunction()
 
 # MSVC in conformance mode, sources in UTF-8 (ADR 0044). No effect on other compilers.
+# C4251 / C4275 warn about standard-library members and bases of exported classes; harmless because
+# every module uses the same compiler and runtime (/MD, ADR 0002).
 function(engine_set_msvc_options target)
     if(MSVC)
-        target_compile_options(${target} PRIVATE /permissive- /Zc:__cplusplus /Zc:preprocessor /EHsc /utf-8)
+        target_compile_options(${target} PRIVATE /permissive- /Zc:__cplusplus /Zc:preprocessor /EHsc /utf-8
+                               /wd4251 /wd4275)
     endif()
 endfunction()
 

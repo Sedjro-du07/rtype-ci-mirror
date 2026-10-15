@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Commands
+*/
+
 // engine/src/ecs/Commands.cpp
 // ENG-20 — Commands buffer (spawn, prefab spawn, destroy, add, set, remove)
 // Spec: docs/engine/reference/03-ecs.md · ADR 0015
@@ -7,4 +14,4 @@
 
 #include "engine/ecs/Commands.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Handshake
+*/
+
 // engine/src/net/Handshake.hpp
 // SRV-02 — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 // Spec: docs/engine/reference/10-network.md · ADR 0037, 0042, 0043 · RFC §6
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

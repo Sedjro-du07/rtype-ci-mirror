@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** AnimationSystem
+*/
+
 // engine/src/systems/AnimationSystem.cpp
 // ENG-52 — Render systems: sprites (interpolated), text, animation, debug colliders
 // Spec: docs/engine/reference/13-components-systems.md · ADR 0003, 0031
@@ -5,4 +12,4 @@
 // Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
 // Status: not implemented yet. Claim the task on the board before editing this file.
 
-namespace engine {} // namespace engine
+namespace engine {}

@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** EngineConfig
+*/
+
 // engine/include/engine/EngineConfig.hpp
 // ENG-07 — EngineConfig: YAML file and command-line overrides
 // Spec: docs/engine/reference/01-core.md · ADR 0021 · guide 02
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## CMakeLists
+##
+
 # The engine library. Builds alone from engine/ or as part of the root project.
 # ENG-01 · ADR 0009, 0017, 0044, 0045 · docs/engine/reference/02-modules.md
 
@@ -19,7 +26,7 @@ else()
 endif()
 
 file(GLOB_RECURSE ENGINE_SOURCES CONFIGURE_DEPENDS src/*.cpp)
-file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS include/*.hpp src/*.hpp)
+file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS include/*.hpp include/*.inl src/*.hpp)
 
 add_library(engine ${ENGINE_LIBRARY_KIND} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 add_library(rtype_engine::engine ALIAS engine)
@@ -35,6 +42,10 @@ generate_export_header(engine
     EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/include/engine/Export.hpp)
 if(NOT ENGINE_DYNAMIC_MODULES)
     target_compile_definitions(engine PUBLIC ENGINE_STATIC_DEFINE ENGINE_STATIC_MODULES)
+endif()
+
+if(WIN32)
+    target_link_libraries(engine PRIVATE bcrypt)
 endif()
 
 target_include_directories(engine

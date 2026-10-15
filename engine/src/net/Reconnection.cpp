@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Reconnection
+*/
+
 // engine/src/net/Reconnection.cpp
 // SRV-16 — Reconnection: grace period, single-use tokens, client auto-reconnect, UDP relink
 // Spec: docs/engine/reference/10-network.md · ADR 0043 · RFC §6.7
@@ -7,4 +14,4 @@
 
 #include "Reconnection.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

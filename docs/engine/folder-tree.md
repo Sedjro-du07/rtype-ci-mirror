@@ -42,7 +42,9 @@ engine/
 │       │   │   └── Vec2.hpp                              ENG-04
 │       │   ├── Error.hpp                                 ENG-04
 │       │   ├── Hash.hpp                                  ENG-04
+│       │   ├── Hash.inl                                  ENG-04
 │       │   ├── Signal.hpp                                ENG-06
+│       │   ├── Signal.inl                                ENG-06
 │       │   └── Time.hpp                                  ENG-05
 │       ├── ecs/
 │       │   ├── Commands.hpp                              ENG-20
@@ -152,11 +154,16 @@ engine/
 │   ├── client/
 │   │   └── ClientLobby.cpp                               SRV-14
 │   ├── core/
+│   │   ├── math/
+│   │   │   ├── Color.cpp                                 ENG-04
+│   │   │   ├── Rect.cpp                                  ENG-04
+│   │   │   └── Vec2.cpp                                  ENG-04
 │   │   ├── Context.cpp                                   ENG-09
 │   │   ├── Engine.cpp                                    ENG-08
 │   │   ├── EngineConfig.cpp                              ENG-07
 │   │   ├── Error.cpp                                     ENG-04
 │   │   ├── ServiceContext.cpp                            SRV-09
+│   │   ├── Signal.cpp                                    ENG-06
 │   │   └── Time.cpp                                      ENG-05
 │   ├── ecs/
 │   │   ├── Commands.cpp                                  ENG-20
@@ -312,5 +319,25 @@ engine/
   `engine/server/`; game `client/` → also `engine/client/`.
 - A header that only the engine uses is **private**: it lives next to its source in `engine/src/<block>/`, not in
   `include/`, so games cannot include it (example: `src/net/PlayerTable.hpp`).
+- Every file starts with the Epitech header; `File description` is the file name without extension.
+  C++ uses `/* ** … */`, CMake, YAML and Git files `##`, Lua `--`; JSON files cannot hold comments.
+  Skeletons already have it; keep it when you replace a
+  skeleton's task comment with code.
+  ```cpp
+  /*
+  ** EPITECH PROJECT, 2026
+  ** G-ING-500-COT-5-1-rtype-2
+  ** File description:
+  ** Registry
+  */
+  ```
+- No comments in code besides the Epitech header: names carry the meaning; explanations go to the
+  docs and ADRs. A skeleton's task comment is removed when the task is implemented.
+- In a class, `private:` comes before `public:`.
+- A `.hpp` holds declarations only; the code goes to the `.cpp`. Code the compiler must see in every
+  file that uses it (templates, `constexpr` functions) goes to a `.inl` next to the header, included at
+  the end of it (`Signal.inl`, `Hash.inl`). A class with code in a `.cpp` is exported with `ENGINE_API`.
+- Includes start from `engine/include/` (`#include "engine/core/Signal.hpp"`), or name a private header next
+  to the source (`#include "PlayerTable.hpp"`); never `../`.
 - The tree, the task tables, the per-task pages and the folder READMEs are generated from
   `docs/tasks/tasks.py` and `docs/tasks/details.py` by `python3 docs/tasks/generate.py`.

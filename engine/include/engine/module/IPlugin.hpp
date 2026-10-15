@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** IPlugin
+*/
+
 // engine/include/engine/module/IPlugin.hpp
 // ENG-11 — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE
 // Spec: docs/engine/reference/02-modules.md · ADR 0020, 0025 · reference 02
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

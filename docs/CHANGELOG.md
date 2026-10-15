@@ -7,6 +7,39 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-15] — engine core: ENG-04, ENG-05, ENG-06, ENG-60
+
+### Added
+
+- `Time` (fixed step, tick, alpha, simulated and frame time) and `Clock` on `steady_clock` (ENG-05);
+  3 tests.
+- `Signal<void(Args...)>` and RAII `Subscription` (ENG-06): shared state so a Subscription can
+  outlive its Signal; connect, disconnect and emit are safe from inside a listener; 11 tests.
+- OS layer `engine::os` (ENG-60, private `src/os/`): `secureRandom` (getrandom / BCryptGenRandom),
+  `userDataDir` (XDG_DATA_HOME or ~/.local/share / APPDATA), `executableDir` (/proc/self/exe /
+  GetModuleFileNameW), `onQuitSignal` (SIGINT, SIGTERM / console control handler); `bcrypt` linked on
+  Windows; 5 tests (the signal test runs on Linux only).
+- Core types: `fnv1a64` (compile time), `Vec2`, `Rect`, `Color`, `Errc`, `Error`, `Result<T>`
+  (`std::expected` or `tl::expected`), `fail()`, `BootError`.
+- First test setup: `engine_add_test` and Catch2 in `engine/tests/CMakeLists.txt`; 7 tests for ENG-04.
+- Epitech header at the top of every file (rule in `docs/engine/folder-tree.md`): ENG-04 files, and
+  every skeleton through `generate.py` (C++ `/* ** */`, CMake `##`, Lua `--`).
+- The same header on the build files already merged: the CMake files, `FeatureProbe.cpp`, the CI
+  workflow, `.clang-format`, `.clang-tidy`, `.editorconfig`, `.gitattributes`, `.gitignore`. The two
+  JSON files (`CMakePresets.json`, `vcpkg.json`) cannot hold comments and keep none.
+
+### Changed
+
+- Code style: a `.hpp` holds declarations only; bodies go to the `.cpp`, templates and `constexpr`
+  functions to a `.inl` included at the end of the header. `Vec2`, `Rect`, `Color` (now `.cpp`, no longer
+  `constexpr`), `fail()`, `BootError`, `Subscription` and the non-template part of `Signal`
+  (`SignalBase`, `SignalEmission`, `SignalSlot` in `Signal.cpp`) follow it.
+- Code style: no comments in code besides the Epitech header; `private:` before `public:`
+  (`docs/engine/folder-tree.md`). Core files and tests rewritten accordingly; `.clang-format` no longer
+  adds `// namespace` comments (`FixNamespaceComments: false`).
+- GCC/Clang: `-Wno-missing-field-initializers` (aggregates are filled partially on purpose).
+  MSVC: `/wd4251 /wd4275` (standard types in exported classes; same runtime everywhere).
+
 ## [2026-10-15] — engine build (ENG-01, ENG-61)
 
 ### Added

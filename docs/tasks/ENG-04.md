@@ -11,15 +11,19 @@ Write the leaf vocabulary every block uses: hashing, math types, errors and resu
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/core/Hash.hpp`
+- `include/engine/core/Hash.inl`
 - `include/engine/core/math/Vec2.hpp`
 - `include/engine/core/math/Rect.hpp`
 - `include/engine/core/math/Color.hpp`
 - `include/engine/core/Error.hpp`
 - `src/core/Error.cpp`
+- `src/core/math/Vec2.cpp`
+- `src/core/math/Rect.cpp`
+- `src/core/math/Color.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/core/Error.hpp`
 
@@ -38,7 +42,12 @@ struct Error {
     std::string toString() const; // "scenes/level1.yaml:14: unknown component 'Helth' (did you mean 'Health'?)"
 };
 
-template <class T> using Result = std::expected<T, Error>;
+template <class T, class E> using Expected = std::expected<T, E>;   // tl::expected when the probe says so (ENG-03)
+using std::unexpected;                                                // tl::unexpected in that case
+template <class T> using Result = Expected<T, Error>;
+
+// return fail(Errc::FileNotFound, "cannot open 'client.yaml'");   (works with both expected types)
+unexpected<Error> fail(Errc code, std::string message, std::string file = {}, int line = 0);
 
 class BootError : public std::runtime_error {      // thrown only by boot() and load()
 public:
@@ -58,41 +67,41 @@ constexpr uint64_t fnv1a64(std::string_view text) noexcept;   // compile-time ha
 ### `include/engine/core/math/Vec2.hpp`
 
 ```cpp
-struct Vec2 {
+struct ENGINE_API Vec2 {
     float x = 0, y = 0;
-    constexpr Vec2 operator+(Vec2 o) const;   constexpr Vec2 operator-(Vec2 o) const;
-    constexpr Vec2 operator*(float k) const;  constexpr Vec2 operator/(float k) const;
-    constexpr Vec2& operator+=(Vec2 o);       constexpr Vec2& operator-=(Vec2 o);
-    constexpr Vec2& operator*=(float k);
-    constexpr bool operator==(const Vec2&) const = default;
-    constexpr float dot(Vec2 o) const;
+    Vec2 operator+(Vec2 o) const;   Vec2 operator-(Vec2 o) const;
+    Vec2 operator*(float k) const;  Vec2 operator/(float k) const;
+    Vec2& operator+=(Vec2 o);       Vec2& operator-=(Vec2 o);
+    Vec2& operator*=(float k);
+    bool operator==(const Vec2&) const = default;
+    float dot(Vec2 o) const;
     float length() const;
     Vec2  normalized() const;                 // {0, 0} stays {0, 0}
-    static constexpr Vec2 lerp(Vec2 a, Vec2 b, float t);
+    static Vec2 lerp(Vec2 a, Vec2 b, float t);
 };
 ```
 
 ### `include/engine/core/math/Rect.hpp`
 
 ```cpp
-struct Rect {
+struct ENGINE_API Rect {
     float x = 0, y = 0, w = 0, h = 0;
-    constexpr bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
-    constexpr bool intersects(const Rect& o) const;  // touching edges do not intersect
-    constexpr Vec2 center() const;
-    constexpr bool operator==(const Rect&) const = default;
+    bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
+    bool intersects(const Rect& o) const;  // touching edges do not intersect
+    Vec2 center() const;
+    bool operator==(const Rect&) const = default;
 };
 ```
 
 ### `include/engine/core/math/Color.hpp`
 
 ```cpp
-struct Color {
+struct ENGINE_API Color {
     uint8_t r = 255, g = 255, b = 255, a = 255;
-    static constexpr Color white(); static constexpr Color black();
-    static constexpr Color red();   static constexpr Color green(); static constexpr Color blue();
-    static constexpr Color transparent();
-    constexpr bool operator==(const Color&) const = default;
+    static Color white(); static Color black();
+    static Color red();   static Color green(); static Color blue();
+    static Color transparent();
+    bool operator==(const Color&) const = default;
 };
 ```
 
@@ -124,7 +133,8 @@ struct Color {
 - [ ] `fnv1a64` as `constexpr` (usable in templates and macros)
 - [ ] `Vec2` (operators, `dot`, `length`, `normalized`, `lerp`), `Rect` (`contains`, `intersects`), `Color` (named constants)
 - [ ] `Errc` (15 codes), `Error` with `toString()` → `file:line: message`
-- [ ] `Result<T>` alias, `BootError` with exit code
+- [ ] `Result<T>` alias (`std::expected`, or `tl::expected` with `ENGINE_USE_TL_EXPECTED`), `fail()` helper, `BootError` with exit code
+- [ ] First test setup in `tests/CMakeLists.txt` (`engine_add_test`, Catch2), completed later by ENG-53
 
 ## Done when
 

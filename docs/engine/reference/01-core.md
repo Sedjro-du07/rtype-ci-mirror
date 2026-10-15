@@ -84,7 +84,12 @@ struct Error {
     std::string toString() const; // "scenes/level1.yaml:14: unknown component 'Helth' (did you mean 'Health'?)"
 };
 
-template <class T> using Result = std::expected<T, Error>;
+template <class T, class E> using Expected = std::expected<T, E>;   // tl::expected when the probe says so (ENG-03)
+using std::unexpected;                                                // tl::unexpected in that case
+template <class T> using Result = Expected<T, Error>;
+
+// return fail(Errc::FileNotFound, "cannot open 'client.yaml'");   (works with both expected types)
+unexpected<Error> fail(Errc code, std::string message, std::string file = {}, int line = 0);
 
 class BootError : public std::runtime_error {      // thrown only by boot() and load()
 public:
@@ -100,8 +105,8 @@ public:
 ```cpp
 struct Vec2  { float x = 0, y = 0; /* +, -, * scalar, dot, length, normalized, lerp */ };
 struct Rect  { float x = 0, y = 0, w = 0, h = 0; bool contains(Vec2) const; bool intersects(const Rect&) const; };
-struct Color { uint8_t r = 255, g = 255, b = 255, a = 255; static constexpr Color white(); /* black, red… */ };
-constexpr uint64_t fnv1a64(std::string_view) noexcept;   // core/Hash.hpp: compile-time hash for type, event and action keys
+struct Color { uint8_t r = 255, g = 255, b = 255, a = 255; static Color white(); /* black, red… */ };
+constexpr uint64_t fnv1a64(std::string_view) noexcept;   // core/Hash.hpp, body in Hash.inl: compile-time hash for type, event and action keys
 ```
 
 `Signal<void(Args...)>` and `Subscription` also live in `core/` (`core/Signal.hpp`); they are

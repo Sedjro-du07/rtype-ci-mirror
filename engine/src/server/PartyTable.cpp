@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** PartyTable
+*/
+
 // engine/src/server/PartyTable.cpp
 // SRV-10 — PartyTable and RoomDirectory: parties, leaders, room records, maxRooms
 // Spec: docs/engine/reference/14-rooms.md · ADR 0038, 0039 · reference 14
@@ -7,4 +14,4 @@
 
 #include "PartyTable.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

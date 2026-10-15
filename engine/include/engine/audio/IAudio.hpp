@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** IAudio
+*/
+
 // engine/include/engine/audio/IAudio.hpp
 // ENG-34 — IAudio, PlayParams, buses, captions
 // Spec: docs/engine/reference/09-audio.md · ADR 0032 · reference 09
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** View
+*/
+
 // engine/include/engine/ecs/View.hpp
 // ENG-19 — View<Ts...> and exclude<Xs...>
 // Spec: docs/engine/reference/03-ecs.md · ADR 0026
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** DynamicLibrary
+*/
+
 // engine/src/module/DynamicLibrary.cpp
 // ENG-12 — DynamicLibrary for Linux and Windows
 // Spec: docs/engine/reference/02-modules.md · ADR 0002, 0025
@@ -7,4 +14,4 @@
 
 #include "engine/module/DynamicLibrary.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {}

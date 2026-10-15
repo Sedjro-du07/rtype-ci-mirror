@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** AudioCaptions
+*/
+
 // engine/src/audio/AudioCaptions.cpp
 // ENG-34 — IAudio, PlayParams, buses, captions
 // Spec: docs/engine/reference/09-audio.md · ADR 0032 · reference 09
@@ -5,4 +12,4 @@
 // Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
 // Status: not implemented yet. Claim the task on the board before editing this file.
 
-namespace engine {} // namespace engine
+namespace engine {}

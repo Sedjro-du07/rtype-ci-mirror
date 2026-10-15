@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## EngineInstall
+##
+
 # Install the engine so another project can use find_package(rtype_engine), and package a game.
 # ENG-62 · ADR 0045 · guide 24
 #
@@ -22,7 +29,7 @@ function(engine_install_engine)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            FILES_MATCHING PATTERN "*.hpp")
+            FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl")
     install(FILES ${PROJECT_BINARY_DIR}/include/engine/Export.hpp
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/engine)
 

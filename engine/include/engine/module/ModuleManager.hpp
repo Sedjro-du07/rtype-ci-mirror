@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** ModuleManager
+*/
+
 // engine/include/engine/module/ModuleManager.hpp
 // ENG-14 — ModuleManager: load by kind and name, version check, reverse unload
 // Spec: docs/engine/reference/02-modules.md · ADR 0025 · reference 02
@@ -7,4 +14,4 @@
 
 #pragma once
 
-namespace engine {} // namespace engine
+namespace engine {}

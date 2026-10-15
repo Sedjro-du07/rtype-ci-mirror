@@ -1,10 +1,35 @@
-// engine/include/engine/core/Time.hpp
-// ENG-05 — Time and Clock
-// Spec: docs/engine/reference/01-core.md · ADR 0003 · reference 01
-// Details: docs/tasks/ENG-05.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Time
+*/
 
 #pragma once
 
-namespace engine {} // namespace engine
+#include "engine/Export.hpp"
+
+#include <chrono>
+#include <cstdint>
+
+namespace engine {
+
+struct Time {
+    double fixedDelta = 1.0 / 60.0;
+    uint64_t tick = 0;
+    double alpha = 0.0;
+    double total = 0.0;
+    double frameDelta = 0.0;
+};
+
+class ENGINE_API Clock {
+private:
+    std::chrono::steady_clock::time_point start_;
+
+public:
+    Clock();
+    double restart();
+    double elapsed() const;
+};
+
+}
