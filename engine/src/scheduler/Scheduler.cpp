@@ -7,6 +7,4 @@
 
 #include "engine/scheduler/Scheduler.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

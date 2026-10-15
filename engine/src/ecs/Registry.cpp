@@ -7,6 +7,4 @@
 
 #include "engine/ecs/Registry.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

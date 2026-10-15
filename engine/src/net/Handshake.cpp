@@ -7,6 +7,4 @@
 
 #include "Handshake.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

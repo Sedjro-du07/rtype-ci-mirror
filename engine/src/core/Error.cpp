@@ -7,6 +7,4 @@
 
 #include "engine/core/Error.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

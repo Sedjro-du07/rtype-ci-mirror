@@ -3,7 +3,9 @@
 
 #if defined(PROBE_EXPECTED)
 #include <expected>
-std::expected<int, int> probeExpected() { return std::unexpected(1); }
+std::expected<int, int> probeExpected() {
+    return std::unexpected(1);
+}
 #endif
 
 #if defined(PROBE_MOVE_ONLY_FUNCTION)
@@ -16,7 +18,9 @@ std::move_only_function<int()> probeMoveOnlyFunction() {
 
 #if defined(PROBE_PRINT)
 #include <print>
-void probePrint() { std::print("{}", 1); }
+void probePrint() {
+    std::print("{}", 1);
+}
 #endif
 
 #if defined(PROBE_DEDUCING_THIS)
@@ -36,16 +40,19 @@ int probeDeducingThis() {
 #if defined(PROBE_TO_UNDERLYING)
 #include <utility>
 enum class ProbeEnum : unsigned char { A = 1 };
-int probeToUnderlying() { return std::to_underlying(ProbeEnum::A); }
+int probeToUnderlying() {
+    return std::to_underlying(ProbeEnum::A);
+}
 #endif
 
 #if defined(PROBE_UNREACHABLE)
 #include <utility>
 int probeUnreachable(int x) {
-    if (x == 0)
-        return 1;
+    if (x == 0) return 1;
     std::unreachable();
 }
 #endif
 
-int main() { return 0; }
+int main() {
+    return 0;
+}

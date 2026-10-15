@@ -7,6 +7,4 @@
 
 #include "engine/ecs/Commands.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

@@ -7,6 +7,4 @@
 
 #include "engine/client/ClientLobby.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine

@@ -355,8 +355,8 @@ def header(path, tid, comment, spec=None):
 
 def skeleton_body(path):
     name = os.path.basename(path)
-    if name.endswith('.hpp'):
-        return '\n#pragma once\n\nnamespace engine {\n\n} // namespace engine\n'
+    if name.endswith('.hpp'):                                  # already clang-formatted (ENG-61)
+        return '\n#pragma once\n\nnamespace engine {} // namespace engine\n'
     if name.endswith('.cpp'):
         hpp = name[:-4] + '.hpp'
         if path.startswith('src/') and os.path.exists(os.path.join(ROOT, 'engine', os.path.dirname(path), hpp)):
@@ -364,7 +364,7 @@ def skeleton_body(path):
         else:
             rel = os.path.dirname(path).removeprefix('src/')
             inc = f'"engine/{rel}/{hpp}"'
-        return f'\n#include {inc}\n\nnamespace engine {{\n\n}} // namespace engine\n'
+        return f'\n#include {inc}\n\nnamespace engine {{}} // namespace engine\n'
     return '\n'
 
 

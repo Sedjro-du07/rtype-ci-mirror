@@ -7,6 +7,4 @@
 
 #include "engine/net/RoomNetwork.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {} // namespace engine
