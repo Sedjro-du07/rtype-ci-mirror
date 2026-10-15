@@ -5,8 +5,10 @@ cmake_minimum_required(VERSION 3.25)
 project(rtype_engine VERSION 0.1.0 LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(ENGINE_BUILDING_ENGINE ON)  # plugins declared below join the engine's install export set (ENG-62)
 include(EngineOptions)
 include(EngineModules)          # engine_add_plugin, engine_add_game_module, engine_add_launcher (ENG-02)
+include(EngineFeatures)         # C++23 probe and fallbacks (ENG-03)
 
 # Dynamic mode: one shared engine used by the executable, every plugin and the game (ADR 0044).
 # Static mode: linked into one executable (ADR 0009).
@@ -22,6 +24,7 @@ file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS include/*.hpp src/*.hpp)
 add_library(engine ${ENGINE_LIBRARY_KIND} ${ENGINE_SOURCES} ${ENGINE_HEADERS})
 add_library(rtype_engine::engine ALIAS engine)
 engine_configure_target(engine)
+engine_probe_cxx23(engine)
 
 # ENGINE_API: dllexport while building the engine, dllimport for its users, default visibility on
 # Linux, empty in static mode. Written to the build tree as engine/Export.hpp (ADR 0044).
@@ -58,3 +61,7 @@ endif()
 if(ENGINE_BUILD_BENCHMARKS AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/CMakeLists.txt)
     add_subdirectory(benchmarks)
 endif()
+
+# find_package(rtype_engine) support and CPack helpers (ENG-62).
+include(EngineInstall)
+engine_install_engine()

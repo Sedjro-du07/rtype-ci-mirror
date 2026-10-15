@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   organisation has no Actions budget.
 - Guide 29 · Every command: installing the tools, presets and options, running, console, shipping,
   style, documentation scripts, Git workflow.
+- ENG-02: `engine_add_plugin`, `engine_add_game_module`, `engine_add_launcher` (new `ROLE` argument to
+  pick the game build linked in static mode). Game targets are `game_<name>_<role>`, so launchers may
+  be called `<name>_client`; files keep `lib<name>_<role>`. Tested in both modes: modules land in
+  `bin/plugins` and `bin/games`, static registrars run.
+- ENG-03: `cmake/EngineFeatures.cmake` probes the six allowed C++23 features. GCC 13 lacks deducing
+  this, so GCC 14 is now the confirmed minimum and the GCC presets call `g++-14`; Clang 18 uses the
+  `tl::expected` fallback. C++20 module scanning is turned off (it needs `clang-scan-deps`).
+- ENG-62: `cmake --install` gives a usable engine (`find_package(rtype_engine)` tested from an outside
+  project), a game installed against it ships the engine library, and `engine_enable_packaging`
+  makes `cpack --preset linux-gcc-release` produce `r-type-0.1.0-Linux.tar.gz`. Package presets added.
 
 ### Fixed
 

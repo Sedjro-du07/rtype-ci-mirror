@@ -4,7 +4,7 @@
 
 | Platform | Compiler (C++23, ADR 0017) | Tools |
 |---|---|---|
-| Linux | GCC 14+ or Clang 18+ | CMake 3.25+, Ninja, [vcpkg](https://vcpkg.io) with `VCPKG_ROOT` set |
+| Linux | GCC 14+ (`g++-14`), or Clang 18+ with `libstdc++-14-dev` | CMake 3.25+, Ninja, [vcpkg](https://vcpkg.io) with `VCPKG_ROOT` set |
 | Windows | Visual Studio 2022 (MSVC 17.10+) | same (CMake and Ninja ship with Visual Studio) |
 
 Third-party libraries (SFML 3, raylib, miniaudio, standalone Asio, yaml-cpp, Lua 5.4, sol2,

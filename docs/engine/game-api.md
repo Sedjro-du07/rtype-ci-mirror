@@ -17,7 +17,7 @@ All types are in namespace `engine`. Headers are under `engine/include/engine/`.
 | Function | Use |
 |---|---|
 | `engine_add_game_module(<name> SOURCES … [DEPENDS …])` | builds the game as `games/lib<name>.so` (or static) |
-| `engine_add_launcher(<exe> CONFIG <file.yaml> [GAME <name>])` | builds the executable (`r-type_client`, `r-type_server`); the engine's `main()` |
+| `engine_add_launcher(<exe> CONFIG <file.yaml> [GAME <name>] [ROLE client\|server\|editor])` | builds the executable (`r-type_client`, `r-type_server`); the engine's `main()` |
 | `ENGINE_DYNAMIC_MODULES` | option: `ON` (default) or `OFF` for one static executable |
 
 ### Macros

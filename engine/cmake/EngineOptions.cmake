@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)       # C++20 modules are not on the allow-list (ADR 0017)
 
 # Executables, shared libraries and DLLs land in one folder, so Windows finds every DLL next to the
 # executable (guide 24). Plugins and games go to bin/plugins and bin/games (ENG-02).

@@ -14,14 +14,15 @@ engine_add_game_module(mygame                       # one code, two builds (ADR 
 # → games/libmygame_server.so (shared + server) and games/libmygame_client.so (shared + client)
 # A simple game can write SOURCES … instead: one games/libmygame.so for every role.
 
-engine_add_launcher(mygame_client CONFIG client.yaml GAME mygame)
-engine_add_launcher(mygame_server CONFIG server.yaml GAME mygame)
+engine_add_launcher(mygame_client CONFIG client.yaml GAME mygame ROLE client)
+engine_add_launcher(mygame_server CONFIG server.yaml GAME mygame ROLE server)
 ```
 
 | Function | Does |
 |---|---|
 | `engine_add_game_module(name SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES … [DEPENDS …])` | builds `lib<name>_server` and `lib<name>_client` (or one `lib<name>` with `SOURCES`), shared or static per `ENGINE_DYNAMIC_MODULES`, output in `games/`; the engine loads the one of its role |
-| `engine_add_launcher(exe CONFIG file [GAME name])` | builds the engine's `main()` under that name, copies the config next to it |
+| `engine_add_launcher(exe CONFIG file [GAME name] [ROLE client\|server\|editor])` | builds the engine's `main()` under that name, copies the config next to it; `ROLE` picks the game build linked in static mode |
+| `engine_enable_packaging(NAME n [VENDOR v])` | once, in the top-level project: `cpack` builds `n-<version>-<System>.tar.gz` (Linux) or `.zip` (Windows) |
 | `engine_add_plugin(kind_name SOURCES …)` | builds a plugin (see 14) |
 
 ## The module class

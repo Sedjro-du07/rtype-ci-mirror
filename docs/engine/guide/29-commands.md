@@ -105,7 +105,7 @@ Every command and every engine CVar: [13 · Console, CVars and metrics](13-conso
 
 ```bash
 cmake --install build/linux-gcc-release --prefix ~/rtype-engine    # headers, libraries, find_package files
-cpack --preset linux-gcc-release                                   # r-type-<version>-linux.tar.gz
+cpack --preset linux-gcc-release                                   # build/linux-gcc-release/r-type-0.1.0-Linux.tar.gz
 ```
 
 Another project then uses `find_package(rtype_engine REQUIRED)`: [24 · Building and shipping](24-building-and-shipping.md).

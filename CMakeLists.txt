@@ -7,3 +7,6 @@ project(rtype VERSION 0.1.0 LANGUAGES CXX)
 enable_testing()
 add_subdirectory(engine)
 # add_subdirectory(rtype)      # the game (Game part)
+
+# cpack --preset <preset>: an archive of what `cmake --install` puts in place (ENG-62, guide 24).
+engine_enable_packaging(NAME r-type VENDOR "R-Type team")
