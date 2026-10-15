@@ -26,4 +26,5 @@ function(engine_add_test name)
 endfunction()
 
 engine_add_test(engine_core_tests SOURCES
-    core/CoreTypesTest.cpp)
+    core/CoreTypesTest.cpp
+    core/TimeTest.cpp)

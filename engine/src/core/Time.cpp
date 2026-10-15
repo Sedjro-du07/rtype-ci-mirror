@@ -5,13 +5,23 @@
 ** Time
 */
 
-// engine/src/core/Time.cpp
-// ENG-05 — Time and Clock
-// Spec: docs/engine/reference/01-core.md · ADR 0003 · reference 01
-// Details: docs/tasks/ENG-05.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #include "engine/core/Time.hpp"
 
-namespace engine {} // namespace engine
+namespace engine {
+
+using Seconds = std::chrono::duration<double>;
+
+Clock::Clock() : start_(std::chrono::steady_clock::now()) {}
+
+double Clock::restart() {
+    const auto now = std::chrono::steady_clock::now();
+    const double seconds = Seconds(now - start_).count();
+    start_ = now; // the same instant ends this measure and starts the next: no time is lost between frames
+    return seconds;
+}
+
+double Clock::elapsed() const {
+    return Seconds(std::chrono::steady_clock::now() - start_).count();
+}
+
+} // namespace engine
