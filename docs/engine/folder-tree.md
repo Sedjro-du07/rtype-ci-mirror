@@ -49,6 +49,7 @@ engine/
 │       ├── ecs/
 │       │   ├── Commands.hpp                              ENG-20
 │       │   ├── Entity.hpp                                ENG-16
+│       │   ├── Entity.inl                                ENG-16
 │       │   ├── EntityAllocator.hpp                       ENG-16
 │       │   ├── IStorage.hpp                              ENG-17
 │       │   ├── Registry.hpp                              ENG-18, ENG-21
@@ -167,6 +168,7 @@ engine/
 │   │   └── Time.cpp                                      ENG-05
 │   ├── ecs/
 │   │   ├── Commands.cpp                                  ENG-20
+│   │   ├── Entity.cpp                                    ENG-16
 │   │   ├── EntityAllocator.cpp                           ENG-16
 │   │   └── Registry.cpp                                  ENG-18
 │   ├── events/

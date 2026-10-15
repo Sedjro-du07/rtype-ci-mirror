@@ -7,6 +7,18 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-15] — engine ECS: ENG-16
+
+### Added
+
+- `Entity` (index + generation, `null()`, `isNull()`, `==`, `std::hash`) and `EntityAllocator` (free list,
+  generation bumped on release, `alive`, `aliveCount`), written by Sedjro; 7 tests in `engine_ecs_tests`.
+
+### Changed
+
+- Every `.inl` starts with `#pragma once`, includes its own header and the standard headers it uses, so an
+  editor can open it alone (`Hash.inl`, `Signal.inl`, `Entity.inl`).
+
 ## [2026-10-15] — engine core: ENG-04, ENG-05, ENG-06, ENG-60
 
 ### Added
