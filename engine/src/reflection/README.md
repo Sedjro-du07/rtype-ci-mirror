@@ -9,6 +9,7 @@ Placeholder created from the architecture. Replace this file's list as files are
 | `ByteStream.cpp` | ENG-24 — ByteWriter / ByteReader: bounds-checked, bit packing | `docs/tasks/ENG-24.md` |
 | `Codec.cpp` | SRV-04 — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits | `docs/tasks/SRV-04.md` |
 | `Codec.hpp` | SRV-04 — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits | `docs/tasks/SRV-04.md` |
+| `TypeBuilder.cpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) | `docs/tasks/ENG-22.md` |
 | `TypeRegistry.cpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) | `docs/tasks/ENG-22.md` |
 | `Yaml.cpp` | ENG-23 — YAML wrappers and field codecs | `docs/tasks/ENG-23.md` |
 

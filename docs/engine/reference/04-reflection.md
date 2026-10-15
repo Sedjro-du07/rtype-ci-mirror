@@ -46,6 +46,10 @@ Rules:
 
 - The macro accepts a qualified name (`ENGINE_COMPONENT(rtype::Health)`); the registered name is the
   last part (`Health`), so files stay readable.
+- `ENGINE_ENUM(rtype::EnemyKind, Grunt, Boss)` lists the enumerators by name only (the macro reads
+  them with `using enum`).
+- Integer fields are `int32_t`, `uint32_t` or `int64_t`: other widths are a compile error until a
+  `FieldKind` exists for them.
 - A second registration with the same name, or two names with the same hash, is a boot error
   (`DuplicateName`, exit code 3).
 
@@ -128,13 +132,18 @@ class FieldsBuilder {
 public:
     // Deduces FieldKind from the member type (bool, ints, float, double, std::string, Vec2, Rect, Color,
     // Entity, asset handles, ENGINE_ENUM, ENGINE_STRUCT, std::vector of those). Unsupported → compile error.
+    // Self&& so the chain also works on the temporary returned by add<T>().
     template <class Self, class M>
-    Self& field(this Self& self, std::string_view name, M T::*member, std::string_view tooltip = {});
+    Self&& field(this Self&& self, std::string_view name, M T::*member, std::string_view tooltip = {});
     template <class Self>
-    Self& maxLength(this Self& self, uint32_t n);   // limit of the last String or List field declared
+    Self&& maxLength(this Self&& self, uint32_t n);   // limit of the last String or List field declared
     template <class Self>
-    Self& quantize(this Self& self, float min, float max);   // last Float or Vec2 field travels as u16 (RFC §5, §9.6)
+    Self&& quantize(this Self&& self, float min, float max);   // last Float or Vec2 field travels as u16 (RFC §5, §9.6)
 };
+
+template <class M> struct FieldKindOf;              // FieldKind of a member type; other blocks specialise it
+                                                    // for their types (asset handles: block 8)
+template <class E> const EnumInfo& enumInfoOf();    // built once from ENGINE_ENUM's value names
 
 template <class T> class ComponentBuilder : public FieldsBuilder<T> {
 public:
@@ -186,7 +195,9 @@ public:
     uint64_t formatFingerprint() const;                     // hash of every message and Replicated component
                                                             // (names, fields, kinds, order): compared at handshake
     std::string closestName(std::string_view unknown) const;// "Helth" → "Health"
-    void clearGameTypes();                                  // before unloading a game module (ADR 0014)
+    void beginGameTypes();                                  // called once the engine types are registered
+    void clearGameTypes();                                  // before unloading a game module (ADR 0014):
+                                                            // removes every type added after beginGameTypes()
 };
 ```
 

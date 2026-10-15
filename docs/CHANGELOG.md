@@ -7,6 +7,23 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-15] — engine reflection: ENG-22
+
+### Added
+
+- `TypeKey` (`TypeCategory`, `TypeName<T>`, `HasTypeName`, `typeKey<T>()`, the five type macros; qualified
+  names keep their last part), `TypeInfo` (`FieldKind`, `FieldInfo`, `EnumInfo`, `TypeFlags`, `Transport`,
+  `WireContext`), the builders (`FieldsBuilder<T>` with deducing this, component, event, message, struct and
+  enum builders, `FieldKindOf<M>` for field kinds) and `TypeRegistry` (`add<T>()` by category, lookups,
+  `formatFingerprint`, `closestName`, `beginGameTypes` / `clearGameTypes`, `DuplicateName` boot error).
+- 7 tests and 3 compile-fail tests (type without macro, option of another category, unsupported field type).
+
+### Changed
+
+- `field()`, `maxLength()`, `quantize()` take `this Self&& self`: with `Self&` the chain did not compile on
+  the temporary returned by `add<T>()`. Reference 04 updated, with `beginGameTypes()` (needed by
+  `clearGameTypes`) and the `FieldKindOf` / `enumInfoOf` helpers.
+
 ## [2026-10-15] — engine ECS: ENG-16, ENG-17, ENG-56
 
 ### Added

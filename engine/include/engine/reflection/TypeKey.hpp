@@ -5,13 +5,59 @@
 ** TypeKey
 */
 
-// engine/include/engine/reflection/TypeKey.hpp
-// ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)
-// Spec: docs/engine/reference/04-reflection.md · ADR 0027, 0036 · reference 04
-// Details: docs/tasks/ENG-22.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/core/Hash.hpp"
+
+#include <array>
+#include <cstdint>
+#include <string_view>
+
+namespace engine {
+
+enum class TypeCategory : uint8_t { Component, Event, Message, Struct, Enum };
+
+template <class T>
+struct TypeName;
+
+template <class T>
+concept HasTypeName = requires { TypeName<T>::key; };
+
+template <class T>
+constexpr uint64_t typeKey() noexcept;
+
+namespace detail {
+
+constexpr std::string_view lastNamePart(std::string_view qualified) noexcept;
+
+}
+
+}
+
+#define ENGINE_DETAIL_TYPE_NAME(Type, Category)                                                                        \
+    template <>                                                                                                        \
+    struct engine::TypeName<Type> {                                                                                    \
+        static constexpr std::string_view value = engine::detail::lastNamePart(#Type);                                 \
+        static constexpr uint64_t key = engine::fnv1a64(value);                                                        \
+        static constexpr engine::TypeCategory category = engine::TypeCategory::Category;                               \
+    };
+
+#define ENGINE_COMPONENT(Type) ENGINE_DETAIL_TYPE_NAME(Type, Component)
+#define ENGINE_EVENT(Type) ENGINE_DETAIL_TYPE_NAME(Type, Event)
+#define ENGINE_MESSAGE(Type) ENGINE_DETAIL_TYPE_NAME(Type, Message)
+#define ENGINE_STRUCT(Type) ENGINE_DETAIL_TYPE_NAME(Type, Struct)
+
+#define ENGINE_ENUM(Type, ...)                                                                                         \
+    template <>                                                                                                        \
+    struct engine::TypeName<Type> {                                                                                    \
+        static constexpr std::string_view value = engine::detail::lastNamePart(#Type);                                 \
+        static constexpr uint64_t key = engine::fnv1a64(value);                                                        \
+        static constexpr engine::TypeCategory category = engine::TypeCategory::Enum;                                   \
+        static constexpr std::string_view valueNames = #__VA_ARGS__;                                                   \
+        static constexpr auto values = [] {                                                                            \
+            using enum Type;                                                                                           \
+            return std::array{__VA_ARGS__};                                                                            \
+        }();                                                                                                           \
+    };
+
+#include "engine/reflection/TypeKey.inl"
