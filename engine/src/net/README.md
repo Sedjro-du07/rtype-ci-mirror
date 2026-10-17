@@ -10,6 +10,7 @@ Placeholder created from the architecture. Replace this file's list as files are
 | `Handshake.hpp` | SRV-02 — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits | `docs/tasks/SRV-02.md` |
 | `MessageDispatcher.cpp` | SRV-03 — Typed messages: MessageDispatcher, send / broadcast / on<T> | `docs/tasks/SRV-03.md` |
 | `MessageDispatcher.hpp` | SRV-03 — Typed messages: MessageDispatcher, send / broadcast / on<T> | `docs/tasks/SRV-03.md` |
+| `NetTypes.cpp` | ENG-36 — INetwork and network types | `docs/tasks/ENG-36.md` |
 | `NetworkIdMap.cpp` | ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems | `docs/tasks/ENG-39.md` |
 | `NetworkSession.cpp` | ENG-38, SRV-01 — NetworkSession core: connections, bounded inbox, validation, heartbeat, timeouts | `docs/tasks/ENG-38.md` |
 | `PlayerTable.cpp` | SRV-01 — Players: PlayerTable, startServer / connectTo, player events, names, kick, ping | `docs/tasks/SRV-01.md` |

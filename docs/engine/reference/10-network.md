@@ -54,6 +54,10 @@ struct ConnectionStats { double rttMs; double lossPercent; uint64_t bytesIn, byt
                          uint64_t packetsIn, packetsOut, dropped; };
 ```
 
+Also: `Endpoint::ipv4(a, b, c, d, port)`, `operator==` and `std::hash<Endpoint>`; `toString` prints
+`1.2.3.4:5` and `[2001:db8::1]:80` (longest zero run compressed); `resolve` returns the first address of
+`os::resolveHost`. `DisconnectReason` is registered with `ENGINE_ENUM`.
+
 ## `class INetwork` — `net/INetwork.hpp` (transport plugin, engine only)
 
 Runs its own I/O thread. Only moves bytes; knows nothing about connections or messages.
@@ -166,6 +170,42 @@ public:
 Every datagram is checked against `maxDatagramBytes`, the protocol magic/version and the header
 bounds before any handler runs; every stream message against `maxStreamMessageBytes`. A malformed
 input is dropped and counted; it never throws, allocates beyond the limit, or reaches game code.
+
+### What ENG-38 provides (the core)
+
+```cpp
+struct NetCounters { uint64_t droppedSize, droppedMagic, droppedKind, droppedSession, droppedSequence,
+                              droppedMessage, droppedRate, droppedInbox, closedProtocol; };   // RFC §11
+struct InboundMessage { ConnectionId from; uint16_t id; std::optional<uint16_t> messageSeq;
+                        std::span<const std::byte> payload; };            // valid during the callback
+
+    void attach(INetwork& transport);                      // installs the bounded inbox as receiver
+    Result<void> open(bool server, uint16_t port);         // openUdp(port) or openUdp(0)
+    void close();                                          // closes every connection, then UDP
+    ConnectionId openConnection(const Endpoint& udp, uint32_t sessionKey, PlayerId player, uint32_t stream = 0);
+    void closeConnection(ConnectionId, DisconnectReason, std::string message = {}); // PlayerLeft / LeftServer
+    void onMessage(fn(const InboundMessage&));             // SRV-03 plugs the dispatcher here
+    void onUdpLink(fn(const Endpoint&, uint64_t token));   // SRV-02 binds the address
+    void poll(double now);                                 // inbox → RFC §4.6 checks 1–6 → acks → messages;
+                                                           // then timeouts
+    void sendRaw(ConnectionId, Transport, uint16_t id, std::span<const std::byte> payload);
+                                                           // Stream: one TCP frame now; UDP: queued
+    void flush(double now);                                // packs the queued UDP messages into Data packets
+                                                           // (≤ maxDatagramBytes), or a heartbeat after 0.5 s
+    std::vector<ConnectionId> connections() const; ConnectionStats stats(ConnectionId) const;
+    const NetCounters& counters() const;
+```
+
+Transport of an id: game ids `0x0100 + i` → `TypeRegistry::messages()[i]->transport`; engine ids from
+the table of RFC §8.5; anything else is invalid. RTT `= 0.9 × rtt + 0.1 × sample` from acknowledged
+packets; loss = share of the last 64 sent packets not acknowledged after 1 s. More than 50 invalid
+packets in 10 s close the connection (`ProtocolError`); more than 300 packets in a second are dropped.
+
+Until the server tasks build on it: `poll` takes the time instead of `Context` (messages reach
+`onMessage`, not `on<T>`, SRV-03); a timeout publishes `PlayerLeft{Timeout}` / `LeftServer{Timeout}`
+(the grace period with `PlayerDisconnected` comes with SRV-16); reliable messages get their
+`messageSeq` but are sent once (resends with SRV-05); `attach` has no `NetworkIdMap` yet (ENG-39);
+`startServer`, `connectTo`, players and typed messages are SRV-01 to SRV-03.
 
 ## Internal structure (engine only) — `engine/src/net/`
 
