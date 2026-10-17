@@ -191,3 +191,6 @@ else()
 endif()
 engine_add_test(engine_input_tests SOURCES
     input/InputTest.cpp)
+engine_add_test(engine_config_tests SOURCES
+    core/EngineConfigTest.cpp
+    module/NullPluginsTest.cpp)

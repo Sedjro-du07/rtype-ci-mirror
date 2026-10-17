@@ -5,10 +5,13 @@
 ** LoadingTest
 */
 
+#include "engine/EngineConfig.hpp"
+#include "engine/audio/IAudio.hpp"
 #include "engine/events/EventBus.hpp"
 #include "engine/module/DynamicLibrary.hpp"
 #include "engine/module/Export.hpp"
 #include "engine/module/ModuleManager.hpp"
+#include "engine/render/IPlatform.hpp"
 #include "os/Os.hpp"
 
 #include <catch2/catch_test_macros.hpp>
@@ -20,7 +23,6 @@
 namespace engine {
 
 class CVars {};
-struct EngineConfig {};
 
 }
 
@@ -71,7 +73,7 @@ TEST_CASE("a plugin is loaded by kind and name, checked and initialised", "[modu
 #endif
 }
 
-TEST_CASE("unknown, mislabeled and null plugins are refused", "[module][loading]") {
+TEST_CASE("unknown and mislabeled plugins are refused", "[module][loading]") {
     Loader l;
     const auto missing = l.modules.loadPlugin<IPlugin>(PluginKind::Platform, "nothing", l.context());
     REQUIRE_FALSE(missing);
@@ -80,11 +82,22 @@ TEST_CASE("unknown, mislabeled and null plugins are refused", "[module][loading]
     const auto mislabeled = l.modules.loadPlugin<IPlugin>(PluginKind::Audio, "mislabeled", l.context());
     REQUIRE_FALSE(mislabeled);
     CHECK(mislabeled.error().message == "plugin 'audio_mislabeled' is a network plugin, expected audio");
-
-    const auto null = l.modules.loadPlugin<IPlugin>(PluginKind::Audio, "null", l.context());
-    REQUIRE_FALSE(null);
-    CHECK(null.error().code == Errc::PluginNotFound);
     CHECK(l.modules.loaded().empty());
+}
+
+TEST_CASE("the null name loads the built-in Null Object of the kind", "[module][loading]") {
+    Loader l;
+    const auto audio = l.modules.loadPlugin<IAudio>(PluginKind::Audio, "null", l.context());
+    REQUIRE(audio);
+    CHECK((*audio)->name() == "null");
+    CHECK((*audio)->kind() == PluginKind::Audio);
+    const auto platform = l.modules.loadPlugin<IPlatform>(PluginKind::Platform, "null", l.context());
+    REQUIRE(platform);
+    CHECK((*platform)->kind() == PluginKind::Platform);
+    REQUIRE(l.modules.loaded().size() == 2);
+    CHECK(l.modules.loaded()[0].stem == "audio_null");
+    CHECK(l.modules.loaded()[0].file.empty());
+    CHECK(l.sink->lines.back() == "loaded plugin platform_null (null)");
 }
 
 TEST_CASE("one game module at a time, unloaded in reverse order", "[module][loading]") {

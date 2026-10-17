@@ -48,6 +48,17 @@ struct EngineConfig {
 
 `YAML::Node` appears only in `EngineConfig.hpp`, which game code never includes.
 
+**Implemented for Part 1 (ENG-07, minimal):** every field above except `cvars` and `rooms`, plus
+`std::string host = "127.0.0.1"` (the server a client connects to). YAML keys: `role`, `game`, `platform`,
+`audio`, `network`, `scripting`, `tickRate`, `root` (relative to the file's folder), `host`, `scene`,
+`ticks`, `window: {title, width, height, virtualWidth, virtualHeight, fullscreen, vsync, uiScale}`,
+`net: {…every NetConfig field…}`, `log: {level, file, color}`; ranges are checked; an unknown key is an
+error with `file:line` and the closest name. Options: `--config`, `--role`, `--platform`, `--audio`,
+`--network`, `--scripting`, `--host`, `--port`, `--scene`, `--ticks`, `--log`, as `--opt value` or
+`--opt=value`; an unknown option is an error. `--set`, `cvars` and `rooms` come with the CVars (ENG-45)
+and the rooms (SRV tasks). Also `load(file, std::span<const std::string_view> args)` (without the program
+name) and `roleName` / `roleFromName`.
+
 ## `struct Time` and `class Clock` — `core/Time.hpp`
 
 ```cpp

@@ -7,6 +7,21 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — configuration and Null Objects: ENG-07, ENG-15
+
+### Added
+
+- `EngineConfig` (ENG-07, minimal for Part 1): the YAML file (role, game, plugins, tick rate, root, host,
+  scene, ticks, window, net, log) with range checks and `file:line` errors, then the command-line options
+  `--config`, `--role`, `--platform`, `--audio`, `--network`, `--scripting`, `--host`, `--port`, `--scene`,
+  `--ticks`, `--log`. `roleName` / `roleFromName`. 4 tests.
+- `NullPlatform`, `NullRenderer`, `NullAudio`, `NullNetwork`, `NullScripting` and `makeNullPlugin`
+  (ENG-15); `ModuleManager` loads them for the plugin name `null`. 2 tests, and the loading test checks it.
+
+### Deviations
+
+- `cvars`, `rooms` and `--set` are left for the CVars (ENG-45) and the room tasks.
+
 ## [2026-10-17] — input: ENG-28, ENG-29
 
 ### Added
