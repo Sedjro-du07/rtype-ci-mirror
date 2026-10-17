@@ -77,7 +77,7 @@ Dispatch points: after each `FixedUpdate` step (after `Commands::apply`) and aft
 | `Collision` | `Entity a, b` | `engine.collision` | two colliders overlap this tick (once per pair) |
 | `SceneLoaded` | `std::string name` | `SceneManager` | after a scene finished loading |
 | `SceneUnloading` | `std::string name` | `SceneManager` | before a scene is cleared |
-| *Network events below: declared with the network types (ENG-36), published by `NetworkSession`* | | | |
+| *Network events below: declared in `EngineEvents.hpp` with the other engine events (ENG-36), published by `NetworkSession`* | | | |
 | `PlayerJoined` | `PlayerId player` | `NetworkSession` | server: a player completed the handshake (ADR 0037) |
 | `PlayerLeft` | `PlayerId player; DisconnectReason reason; std::string message` | `NetworkSession` | server: quit, kick, error, or end of the grace period |
 | `PlayerDisconnected` | `PlayerId player; DisconnectReason reason` | `NetworkSession` | server: connection lost, grace period starts (ADR 0043); also in the player's room |

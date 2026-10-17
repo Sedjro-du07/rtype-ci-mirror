@@ -12,6 +12,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/net/NetTypes.hpp`
 - `include/engine/net/INetwork.hpp`
+- `src/net/NetTypes.cpp`
 
 ## Classes and methods
 

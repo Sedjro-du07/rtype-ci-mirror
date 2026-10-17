@@ -22,6 +22,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `null` plugins return `PluginNotFound` until the Null Objects exist (ENG-15).
 
+## [2026-10-17] — network core: ENG-36, ENG-38
+
+### Added
+
+- Network types (ENG-36): `Endpoint` (`toString` for IPv4 and IPv6, `resolve`, `ipv4`, hash), `Datagram`,
+  `NetConfig`, `ConnectionStats`, `DisconnectReason` (registered enum), `INetwork`, and the network events
+  `PlayerJoined`, `PlayerLeft`, `PlayerDisconnected`, `PlayerReconnected`, `JoinedServer`, `LeftServer`,
+  `ConnectionInterrupted`, `Reconnected` in `EngineEvents.hpp`, registered with the engine types.
+  `os::resolveHost` (getaddrinfo); the engine links `ws2_32` on Windows.
+- `NetworkSession` core (ENG-38): bounded mutex-protected inbox fed by the I/O thread, RFC §4.6
+  validation in order with the counters of RFC §11, the 16-byte header, Data packets carrying several
+  messages packed once per flush, heartbeats, acknowledgements, RTT and loss, timeouts, the invalid-packet
+  and rate limits, `sendRaw` (TCP frames and UDP), `onMessage` / `onUdpLink` hooks for the server tasks.
+  12 tests, one with two threads (ThreadSanitizer clean).
+
+### Deviations
+
+- `poll(double now)` and `flush(double now)` until `Context` exists; messages go to `onMessage` until
+  SRV-03; timeouts publish `PlayerLeft{Timeout}` until the grace period (SRV-16); reliable messages are
+  sent once until `ReliableChannel` (SRV-05); `attach` takes no `NetworkIdMap` until ENG-39.
+
 ## [2026-10-17] — engine systems: ENG-50, ENG-51, ENG-52
 
 ### Added

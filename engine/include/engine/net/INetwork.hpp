@@ -5,13 +5,31 @@
 ** INetwork
 */
 
-// engine/include/engine/net/INetwork.hpp
-// ENG-36 — INetwork and network types
-// Spec: docs/engine/reference/10-network.md · ADR 0033 · reference 10
-// Details: docs/tasks/ENG-36.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/core/Error.hpp"
+#include "engine/module/IPlugin.hpp"
+#include "engine/net/NetTypes.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <span>
+
+namespace engine {
+
+class INetwork : public IPlugin {
+public:
+    virtual Result<void> openUdp(uint16_t port) = 0;
+    virtual void closeUdp() = 0;
+    virtual void sendUdp(const Endpoint& to, std::span<const std::byte> bytes) = 0;
+    virtual void setReceiver(std::move_only_function<void(Datagram&&)> onDatagram) = 0;
+
+    virtual Result<void> listenTcp(uint16_t port) = 0;
+    virtual Result<uint32_t> connectTcp(const Endpoint& to) = 0;
+    virtual void sendTcp(uint32_t stream, std::span<const std::byte> bytes) = 0;
+    virtual void setTcpReceiver(std::move_only_function<void(uint32_t stream, std::span<const std::byte>)> fn) = 0;
+    virtual void closeTcp(uint32_t stream) = 0;
+};
+
+}
