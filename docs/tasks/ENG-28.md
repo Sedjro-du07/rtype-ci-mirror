@@ -13,6 +13,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/input/Keys.hpp`
 - `include/engine/input/RawInputEvent.hpp`
 - `include/engine/input/Action.hpp`
+- `include/engine/input/Action.inl`
 - `src/input/Keys.cpp`
 
 ## Classes and methods

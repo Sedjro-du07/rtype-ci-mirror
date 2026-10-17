@@ -22,6 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `cvars`, `rooms` and `--set` are left for the CVars (ENG-45) and the room tasks.
 
+## [2026-10-17] — input: ENG-28, ENG-29
+
+### Added
+
+- `Key`, `MouseButton`, `GamepadButton`, `GamepadAxis` with name tables, `RawInputEvent` (touch reserved),
+  `ActionId` and `action()` (constexpr, fnv1a64) (ENG-28).
+- `InputMap` and `ActionState` (ENG-29): `input.yaml` load and save, bindings for keys, mouse, gamepad
+  buttons and stick directions, rebinding (`captureNextBinding`, `boundTo`), edges latched between ticks,
+  hold-to-toggle, auto-repeat, deadzone, one-handed set, `toMask` / `fromMask` for the network. 9 tests.
+
+### Deviations
+
+- `beginTick` takes the tick length (`double dt`) for auto-repeat; `InputMap::name` records action names
+  for `save`.
+
 ## [2026-10-17] — module loading: ENG-12, ENG-14
 
 ### Added

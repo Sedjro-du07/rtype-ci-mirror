@@ -114,3 +114,21 @@ public:
 ```
 
 `input.yaml` format is documented in the guide (07-input).
+
+Details of the implementation:
+
+- `Key` holds A–Z, `Num0`–`Num9`, the arrows, `Space`, `Enter`, `Escape`, `LShift`, `RShift`, `LCtrl`,
+  `RCtrl`, `LAlt`, `RAlt`, `Tab`, `Backspace`, `F1`–`F12`, `Unknown`. `keyName` / `keyFromName` and the same
+  pair for `MouseButton`, `GamepadButton`, `GamepadAxis` use the enumerator names; the layout label of a key
+  for display is the platform plugin's (ENG-31).
+- `bindingName` / `parseBinding` read and write the binding strings of `input.yaml`: `W`, `Mouse:Left`,
+  `Gamepad:South`, `Axis:LeftY-` (an `AxisBinding` with direction −1 and threshold 0.5).
+- `beginTick(double dt)` takes the tick length for auto-repeat. `name(ActionId, label)` records the name used
+  when saving (names read from `input.yaml` are kept).
+- `axis(a)` of an axis binding is the stick value in the binding's direction, `[0, 1]`, after the deadzone;
+  1 or 0 for buttons; an action is held when a binding reaches its threshold (0.5 for buttons).
+- Edges are latched by `feed`, so a press and release between two ticks give `pressed` and `released` once.
+  With `holdToToggle`, each press flips `held`. With `autoRepeat`, a held action is `pressed` again every
+  `1 / autoRepeatHz` seconds. `oneHanded` replaces the bindings of the actions listed under `one_handed`.
+- `captureNextBinding` takes the next key, mouse button, gamepad button or stick pushed past 0.5, without
+  triggering any action. Errors in `input.yaml` carry the file and line.

@@ -73,6 +73,7 @@ engine/
 │       │   └── EventBus.inl                              ENG-27
 │       ├── input/
 │       │   ├── Action.hpp                                ENG-28
+│       │   ├── Action.inl                                ENG-28
 │       │   ├── ActionState.hpp                           ENG-29
 │       │   ├── InputMap.hpp                              ENG-29
 │       │   ├── Keys.hpp                                  ENG-28
