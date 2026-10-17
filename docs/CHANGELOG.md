@@ -7,6 +7,20 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-18] — network_asio plugin: ENG-37
+
+### Added
+
+- `AsioNetwork` (ENG-37): standalone Asio on its own I/O thread, dual-stack UDP (open, send from any
+  thread, receiver) and TCP (listen, connect, ordered sends, receiver, close, an empty span on close).
+  6 loopback tests: datagrams, stream bytes in order, refused connection, shutdown during traffic, use
+  before `init`, and two `NetworkSession`s exchanging a message over real UDP (repeated 20 times and
+  under ThreadSanitizer, clean).
+
+### Changed
+
+- `AsioNetwork.hpp` moves to `engine/plugins/network_asio/include/`, like the other plugins.
+
 ## [2026-10-18] — the engine runs: ENG-08, ENG-09, ENG-10, ENG-57
 
 ### Added

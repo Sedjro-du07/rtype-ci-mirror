@@ -5,9 +5,10 @@
 ## CMakeLists
 ##
 
-# engine/plugins/network_asio/CMakeLists.txt
-# ENG-37 — network_asio plugin: UDP and TCP on an I/O thread
-# Spec: docs/engine/reference/10-network.md · ADR 0033, 0037
-# Details: docs/tasks/ENG-37.md
-# Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-# Status: not implemented yet. Claim the task on the board before editing this file.
+find_package(asio CONFIG REQUIRED)
+
+engine_add_plugin(network_asio SOURCES AsioNetwork.cpp DEPENDS asio::asio)
+if(WIN32)
+    target_compile_definitions(network_asio PRIVATE _WIN32_WINNT=0x0A00)
+    target_link_libraries(network_asio PRIVATE ws2_32 mswsock)
+endif()

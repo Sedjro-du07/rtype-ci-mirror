@@ -322,3 +322,18 @@ reconciliation and tunes rates and precision. Settings (ADR 0043, RFC §9.6): `n
 | Plugin | Implements | Notes |
 |---|---|---|
 | `network_asio` | `AsioNetwork : INetwork` | standalone Asio, one `io_context` on its own thread, UDP socket + optional TCP acceptor |
+
+`AsioNetwork` (ENG-37), `engine/plugins/network_asio/`:
+
+- `init` starts the I/O thread (a work guard keeps `io_context::run` alive); `shutdown` closes every socket
+  on that thread, then joins it. Opening a port before `init` is an error.
+- UDP and the TCP acceptor are dual-stack IPv6 sockets (`v6_only(false)`): IPv4 peers appear as plain
+  IPv4 `Endpoint`s. `openUdp(0)` / `listenTcp(0)` pick a free port, read back with `udpPort()` / `tcpPort()`
+  (used by tests).
+- Every call from the loop thread is posted to the I/O thread; `sendUdp` / `sendTcp` copy the bytes.
+  Writes on a stream are queued and sent in order, once the stream is connected.
+- `connectTcp` returns the stream id at once and connects asynchronously. The TCP receiver gets the bytes
+  as they arrive (not framed: `StreamFramer` cuts them), and an **empty span when a stream closes**
+  (peer closed, error, or refused connection); `closeTcp` closes without calling it.
+- Receivers run on the I/O thread: they must only push into the session inbox (as `NetworkSession` does).
+- Windows: `_WIN32_WINNT=0x0A00`, linked with `ws2_32` and `mswsock`.
