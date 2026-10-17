@@ -40,6 +40,8 @@ public:
 ## `class IStorage` — `ecs/IStorage.hpp`
 
 ```cpp
+using ComponentId = uint32_t;        // dense index assigned by the TypeRegistry at registration (ENG-22)
+
 class IStorage {
 public:
     virtual ~IStorage() = default;
@@ -85,7 +87,11 @@ destroy): the dense array moves. Keep the `Entity` and look it up again.
 ## `class Registry` — `ecs/Registry.hpp`
 
 One per scene. All template methods resolve `T` through the `TypeRegistry` (block 4); using a type
-that was not registered is a programming error reported at the first use.
+that was not registered is a programming error reported at the first use: the process prints
+`component 'Foo' is not registered: call types.add<Foo>() in registerTypes()` and exits with code 3.
+A `Registry` is neither copyable nor movable (its uuid index listens to its own hooks). Identity and
+hierarchy (`Name`, `Uuid`, `Tags`, `Parent`, `Children`) are written with it (ENG-18); `find`, `withTag`
+and the hierarchy return empty results while those components are not registered.
 
 ```cpp
 class Registry {
@@ -115,9 +121,11 @@ public:
     // Type-erased access (scene loader, editor, scripts, replication)
     IStorage*       storage(ComponentId id);          // nullptr if no entity ever had it
     void*           getRaw(Entity e, ComponentId id);
+    const void*     getRaw(Entity e, ComponentId id) const;
     void*           emplaceRaw(Entity e, ComponentId id, const void* src);
     void            removeRaw(Entity e, ComponentId id);
     std::vector<ComponentId> componentsOf(Entity e) const;   // for the inspector and save()
+    std::vector<Entity> entities() const;                    // alive entities with a component, by index
 
     // Identity and hierarchy (ADR 0016)
     Entity find(std::string_view name) const;         // first entity whose Name matches, or null
@@ -168,20 +176,26 @@ inside the loop is safe; structural changes must go through `Commands`.
 ## `class Commands` — `ecs/Commands.hpp`
 
 Command buffer (ADR 0015). Recorded during a stage, applied by the engine at the end of the stage.
+One per world, built with that world's `Registry` (so `spawn()` can create the entity at once).
 
 ```cpp
 class Commands {
 public:
+    explicit Commands(Registry& registry, PrefabLibrary* prefabs = nullptr); // one per world (scene, or room)
     Entity spawn();                                         // entity created now, components added at apply()
-    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply() (block 11)
+    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply() (ENG-41); null if
+                                                            // the prefab fails to load or no library was given
     void   destroy(Entity e);                               // destroyed (with children) at apply()
-    template <class T> void add(Entity e, T value);
+    template <class T> void add(Entity e, T value);         // nothing if the entity already has a T
     template <class T> void set(Entity e, T value);         // add or replace
     template <class T> void remove(Entity e);
     void   setParent(Entity child, Entity parent, Vec2 localOffset = {}); // Entity::null() detaches
-    void   addRaw(Entity e, ComponentId id, std::vector<std::byte> value); // scripts, replication
+    void   addRaw(Entity e, ComponentId id, std::vector<std::byte> value); // scripts, replication: value holds an
+                                                            // object built with TypeInfo::construct; copied at
+                                                            // apply(), then destroyed with TypeInfo::destroy
     bool   empty() const;
-    void   apply(Registry& registry, SceneManager& scenes); // engine only; in recording order; skips dead entities
+    void   apply();                                         // engine only; in recording order; skips dead entities;
+                                                            // commands recorded during apply() wait for the next one
 };
 ```
 

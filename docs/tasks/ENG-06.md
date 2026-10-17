@@ -11,10 +11,12 @@ Synchronous observer list with RAII unsubscription, used by component hooks, CVa
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/core/Signal.hpp`
+- `include/engine/core/Signal.inl`
+- `src/core/Signal.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/core/Signal.hpp`
 
@@ -31,6 +33,7 @@ public:
 template <class... Args>
 class Signal<void(Args...)> {
 public:
+    Signal() = default;              // move-only; allocates nothing until the first connect()
     [[nodiscard]] Subscription connect(std::move_only_function<void(Args...)> fn);
     void emit(Args... args);         // calls every listener now, in connection order
     size_t size() const;

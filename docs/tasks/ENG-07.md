@@ -15,7 +15,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/EngineConfig.hpp`
 
@@ -24,7 +24,7 @@ enum class Role : uint8_t { Client, Server, Editor };
 
 struct EngineConfig {
     Role                  role = Role::Client;
-    std::string           game;             // game module name: "rtype" → games/librtype.so
+    std::string           game;             // game module name: "rtype" → games/librtype_<role>.so (ADR 0040)
     std::string           platform = "sfml";// platform plugin (client, editor)
     std::string           audio = "miniaudio";
     std::string           network = "asio";

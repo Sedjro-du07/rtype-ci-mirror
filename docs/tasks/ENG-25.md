@@ -18,14 +18,13 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/components/Collider.hpp`
 - `include/engine/components/Lifetime.hpp`
 - `include/engine/components/Parallax.hpp`
-- `include/engine/components/Identity.hpp`
-- `include/engine/components/Hierarchy.hpp`
 - `include/engine/components/Script.hpp`
+- `src/include/systems/RegisterEngineTypes.hpp`
 - `src/systems/RegisterEngineTypes.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/components/*.hpp`
 
@@ -44,15 +43,6 @@ struct Collider         { Vec2 size; Vec2 offset; uint32_t layer = 1; uint32_t m
                                                                           ENGINE_COMPONENT(Collider)
 struct Lifetime         { float seconds = 0; };                           ENGINE_COMPONENT(Lifetime)
 struct Parallax         { float factor = 1; float wrapWidth = 0; };       ENGINE_COMPONENT(Parallax)
-// Identity.hpp
-struct Name             { std::string value; };                           ENGINE_COMPONENT(Name)
-struct Uuid             { uint64_t hi = 0, lo = 0; static Uuid generate(); bool operator==(const Uuid&) const = default; };
-                                                                          ENGINE_COMPONENT(Uuid)
-struct Tags             { std::vector<uint64_t> ids; bool has(std::string_view tag) const; };
-                                                                          ENGINE_COMPONENT(Tags)
-// Hierarchy.hpp
-struct Parent           { Entity value; Vec2 offset; };                   ENGINE_COMPONENT(Parent)
-struct Children         { std::vector<Entity> list; };                    ENGINE_COMPONENT(Children)
 // Script.hpp
 struct Script           { ScriptHandle handle; std::string file; };       ENGINE_COMPONENT(Script)
 ```
@@ -82,7 +72,7 @@ void registerEngineTypes(TypeRegistry& types);   // every component above with f
 
 ## To implement
 
-- [ ] Headers of reference 13 with `ENGINE_COMPONENT`
+- [ ] Headers of reference 13 with `ENGINE_COMPONENT` (identity and hierarchy are written by ENG-18)
 - [ ] `registerEngineTypes`: fields and flags (Position/Velocity/Sprite Replicated, PreviousPosition Transient…) and engine events
 
 ## Done when

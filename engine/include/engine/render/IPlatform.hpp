@@ -1,12 +1,37 @@
-// engine/include/engine/render/IPlatform.hpp
-// ENG-30 — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform
-// Spec: docs/engine/reference/08-rendering.md · ADR 0006, 0031 · reference 08
-// Details: docs/tasks/ENG-30.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** IPlatform
+*/
 
 #pragma once
 
+#include "engine/core/Error.hpp"
+#include "engine/module/IPlugin.hpp"
+#include "engine/render/IRenderer.hpp"
+#include "engine/render/WindowDesc.hpp"
+
+#include <string>
+#include <string_view>
+
 namespace engine {
 
-} // namespace engine
+class InputMap;
+class EventBus;
+
+class IPlatform : public IPlugin {
+public:
+    virtual Result<void> openWindow(const WindowDesc& desc) = 0;
+    virtual void closeWindow() = 0;
+    virtual bool windowOpen() const = 0;
+    virtual void pollEvents(InputMap& input, EventBus& events) = 0;
+    virtual IRenderer& renderer() = 0;
+    virtual void setWindow(const WindowDesc& desc) = 0;
+    virtual void beginDebugUi() = 0;
+    virtual void endDebugUi() = 0;
+    virtual void setClipboard(std::string_view text) = 0;
+    virtual std::string clipboard() const = 0;
+};
+
+}

@@ -47,43 +47,38 @@ namespace codec {
 // Forward declarations
 // ---------------------------------------------------------------------------
 
-static void         encodeValue(FieldKind kind, const FieldInfo& field,
-                                const std::byte* ptr, ByteWriter& out, const WireContext& wire);
-static Result<void> decodeValue(FieldKind kind, const FieldInfo& field,
-                                std::byte* ptr, ByteReader& in, const WireContext& wire);
+static void encodeValue(FieldKind kind, const FieldInfo& field, const std::byte* ptr, ByteWriter& out,
+                        const WireContext& wire);
+static Result<void> decodeValue(FieldKind kind, const FieldInfo& field, std::byte* ptr, ByteReader& in,
+                                const WireContext& wire);
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
 static constexpr uint32_t DEFAULT_STRING_LIMIT = 256;
-static constexpr uint32_t DEFAULT_LIST_LIMIT   = 64;
+static constexpr uint32_t DEFAULT_LIST_LIMIT = 64;
 
-static uint32_t stringLimit(const FieldInfo& f) noexcept
-{
+static uint32_t stringLimit(const FieldInfo& f) noexcept {
     return f.maxLength ? f.maxLength : DEFAULT_STRING_LIMIT;
 }
 
-static uint32_t listLimit(const FieldInfo& f) noexcept
-{
+static uint32_t listLimit(const FieldInfo& f) noexcept {
     return f.maxLength ? f.maxLength : DEFAULT_LIST_LIMIT;
 }
 
-static bool isQuantized(const FieldInfo& f) noexcept
-{
+static bool isQuantized(const FieldInfo& f) noexcept {
     return f.quantMin < f.quantMax;
 }
 
 // Encode a float as u16 quantized value: round((v - min) / (max - min) * 65535)
-static uint16_t quantizeFloat(float v, float mn, float mx) noexcept
-{
+static uint16_t quantizeFloat(float v, float mn, float mx) noexcept {
     const float clamped = std::fmax(mn, std::fmin(mx, v));
     return static_cast<uint16_t>(std::lround((clamped - mn) / (mx - mn) * 65535.0f));
 }
 
 // Decode a u16 quantized value back to float
-static float dequantizeFloat(uint16_t raw, float mn, float mx) noexcept
-{
+static float dequantizeFloat(uint16_t raw, float mn, float mx) noexcept {
     return mn + (static_cast<float>(raw) / 65535.0f) * (mx - mn);
 }
 
@@ -91,14 +86,27 @@ static float dequantizeFloat(uint16_t raw, float mn, float mx) noexcept
 // encodeValue — one FieldKind at ptr
 // ---------------------------------------------------------------------------
 
-static void encodeValue(FieldKind kind, const FieldInfo& field,
-                        const std::byte* ptr, ByteWriter& out, const WireContext& wire)
-{
+static void encodeValue(FieldKind kind, const FieldInfo& field, const std::byte* ptr, ByteWriter& out,
+                        const WireContext& wire) {
     switch (kind) {
     case FieldKind::Bool: {
         bool v;
         std::memcpy(&v, ptr, sizeof(bool));
         out.write(static_cast<uint8_t>(v ? 1 : 0));
+        break;
+    }
+    case FieldKind::Int8:
+    case FieldKind::UInt8: {
+        uint8_t v;
+        std::memcpy(&v, ptr, 1);
+        out.write(v);
+        break;
+    }
+    case FieldKind::Int16:
+    case FieldKind::UInt16: {
+        uint16_t v;
+        std::memcpy(&v, ptr, 2);
+        out.write(v);
         break;
     }
     case FieldKind::Int32: {
@@ -159,13 +167,19 @@ static void encodeValue(FieldKind kind, const FieldInfo& field,
     case FieldKind::Rect: {
         Rect v;
         std::memcpy(&v, ptr, sizeof(Rect));
-        out.write(v.x); out.write(v.y); out.write(v.w); out.write(v.h);
+        out.write(v.x);
+        out.write(v.y);
+        out.write(v.w);
+        out.write(v.h);
         break;
     }
     case FieldKind::Color: {
         Color v;
         std::memcpy(&v, ptr, sizeof(Color));
-        out.write(v.r); out.write(v.g); out.write(v.b); out.write(v.a);
+        out.write(v.r);
+        out.write(v.g);
+        out.write(v.b);
+        out.write(v.a);
         break;
     }
     case FieldKind::Entity: {
@@ -211,52 +225,73 @@ static void encodeValue(FieldKind kind, const FieldInfo& field,
 // encodeField
 // ---------------------------------------------------------------------------
 
-void encodeField(const FieldInfo& field, const std::byte* base, ByteWriter& out,
-                 const WireContext& wire)
-{
+void encodeField(const FieldInfo& field, const std::byte* base, ByteWriter& out, const WireContext& wire) {
     const std::byte* ptr = base + field.offset;
 
     if (field.kind == FieldKind::List) {
         // std::vector<T> — all vectors share the same ABI: {ptr*, size_t, size_t}
         // We use size() to get count, then iterate over elements.
         // Element size for primitives is derived from field.element.
-        struct VecABI { void* data; size_t size; size_t cap; };
+        struct VecABI {
+            void* data;
+            size_t size;
+            size_t cap;
+        };
         VecABI vabi;
         std::memcpy(&vabi, ptr, sizeof(VecABI));
         const uint32_t limit = listLimit(field);
-        const uint16_t count = static_cast<uint16_t>(
-            vabi.size < limit ? vabi.size : limit);
+        const uint16_t count = static_cast<uint16_t>(vabi.size < limit ? vabi.size : limit);
         out.write(count);
 
         // Build a synthetic FieldInfo for the element type
         FieldInfo elemField{};
-        elemField.kind       = field.element;
-        elemField.enumInfo   = field.enumInfo;
-        elemField.elementType= field.elementType;
-        elemField.maxLength  = field.maxLength;
-        elemField.quantMin   = field.quantMin;
-        elemField.quantMax   = field.quantMax;
+        elemField.kind = field.element;
+        elemField.enumInfo = field.enumInfo;
+        elemField.elementType = field.elementType;
+        elemField.maxLength = field.maxLength;
+        elemField.quantMin = field.quantMin;
+        elemField.quantMax = field.quantMax;
 
         // Element stride: same as sizeof(T) for the element kind
         auto elemStride = [&]() -> size_t {
             switch (field.element) {
-            case FieldKind::Bool:   return sizeof(bool);
-            case FieldKind::Int32:  case FieldKind::UInt32:
-            case FieldKind::Float:  case FieldKind::Enum:   return 4;
-            case FieldKind::Int64:  case FieldKind::Double: return 8;
-            case FieldKind::Vec2:   return sizeof(Vec2);
-            case FieldKind::Rect:   return sizeof(Rect);
-            case FieldKind::Color:  return sizeof(Color);
-            case FieldKind::Entity: return sizeof(Entity);
-            case FieldKind::String: case FieldKind::Texture:
-            case FieldKind::Sound:  case FieldKind::Music:
-            case FieldKind::Font:   case FieldKind::Script:
+            case FieldKind::Bool:
+                return sizeof(bool);
+            case FieldKind::Int8:
+            case FieldKind::UInt8:
+                return 1;
+            case FieldKind::Int16:
+            case FieldKind::UInt16:
+                return 2;
+            case FieldKind::Int32:
+            case FieldKind::UInt32:
+            case FieldKind::Float:
+            case FieldKind::Enum:
+                return 4;
+            case FieldKind::Int64:
+            case FieldKind::Double:
+                return 8;
+            case FieldKind::Vec2:
+                return sizeof(Vec2);
+            case FieldKind::Rect:
+                return sizeof(Rect);
+            case FieldKind::Color:
+                return sizeof(Color);
+            case FieldKind::Entity:
+                return sizeof(Entity);
+            case FieldKind::String:
+            case FieldKind::Texture:
+            case FieldKind::Sound:
+            case FieldKind::Music:
+            case FieldKind::Font:
+            case FieldKind::Script:
                 return sizeof(std::string);
-            default: return 0;
+            default:
+                return 0;
             }
         }();
 
-        if (elemStride == 0) break; // Struct/List-of-List not supported without TypeRegistry
+        if (elemStride == 0) return; // Struct/List-of-List not supported without TypeRegistry
 
         const auto* elemPtr = static_cast<const std::byte*>(vabi.data);
         for (uint16_t i = 0; i < count; ++i) {
@@ -280,9 +315,8 @@ void encodeField(const FieldInfo& field, const std::byte* base, ByteWriter& out,
 // decodeValue — one FieldKind at ptr
 // ---------------------------------------------------------------------------
 
-static Result<void> decodeValue(FieldKind kind, const FieldInfo& field,
-                                std::byte* ptr, ByteReader& in, const WireContext& wire)
-{
+static Result<void> decodeValue(FieldKind kind, const FieldInfo& field, std::byte* ptr, ByteReader& in,
+                                const WireContext& wire) {
     switch (kind) {
     case FieldKind::Bool: {
         auto raw = in.u8();
@@ -290,6 +324,20 @@ static Result<void> decodeValue(FieldKind kind, const FieldInfo& field,
         if (*raw > 1) return fail(Errc::NetworkError, "Bool: value must be 0 or 1");
         bool v = (*raw != 0);
         std::memcpy(ptr, &v, sizeof(bool));
+        break;
+    }
+    case FieldKind::Int8:
+    case FieldKind::UInt8: {
+        auto v = in.u8();
+        if (!v) return fail(Errc::NetworkError, "Int8: missing byte");
+        std::memcpy(ptr, &*v, 1);
+        break;
+    }
+    case FieldKind::Int16:
+    case FieldKind::UInt16: {
+        auto v = in.u16();
+        if (!v) return fail(Errc::NetworkError, "Int16: missing bytes");
+        std::memcpy(ptr, &*v, 2);
         break;
     }
     case FieldKind::Int32: {
@@ -362,16 +410,20 @@ static Result<void> decodeValue(FieldKind kind, const FieldInfo& field,
         break;
     }
     case FieldKind::Rect: {
-        auto x = in.f32(); auto y = in.f32();
-        auto w = in.f32(); auto h = in.f32();
+        auto x = in.f32();
+        auto y = in.f32();
+        auto w = in.f32();
+        auto h = in.f32();
         if (!x || !y || !w || !h) return fail(Errc::NetworkError, "Rect: missing bytes");
         Rect r{*x, *y, *w, *h};
         std::memcpy(ptr, &r, sizeof(Rect));
         break;
     }
     case FieldKind::Color: {
-        auto r = in.u8(); auto g = in.u8();
-        auto b = in.u8(); auto a = in.u8();
+        auto r = in.u8();
+        auto g = in.u8();
+        auto b = in.u8();
+        auto a = in.u8();
         if (!r || !g || !b || !a) return fail(Errc::NetworkError, "Color: missing bytes");
         Color c{*r, *g, *b, *a};
         std::memcpy(ptr, &c, sizeof(Color));
@@ -380,9 +432,7 @@ static Result<void> decodeValue(FieldKind kind, const FieldInfo& field,
     case FieldKind::Entity: {
         auto netId = in.u32();
         if (!netId) return fail(Errc::NetworkError, "Entity: missing bytes");
-        Entity e = (*netId == 0 || !wire.entityOf)
-            ? Entity::null()
-            : wire.entityOf(*netId);
+        Entity e = (*netId == 0 || !wire.entityOf) ? Entity::null() : wire.entityOf(*netId);
         std::memcpy(ptr, &e, sizeof(Entity));
         break;
     }
@@ -392,10 +442,12 @@ static Result<void> decodeValue(FieldKind kind, const FieldInfo& field,
         if (field.enumInfo) {
             bool found = false;
             for (const auto& [name, val] : field.enumInfo->values) {
-                if (val == *v) { found = true; break; }
+                if (val == *v) {
+                    found = true;
+                    break;
+                }
             }
-            if (!found) return fail(Errc::NetworkError,
-                "Enum: unknown value " + std::to_string(*v));
+            if (!found) return fail(Errc::NetworkError, "Enum: unknown value " + std::to_string(*v));
         }
         std::memcpy(ptr, &*v, 4);
         break;
@@ -413,9 +465,7 @@ static Result<void> decodeValue(FieldKind kind, const FieldInfo& field,
 // decodeField
 // ---------------------------------------------------------------------------
 
-Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in,
-                         const WireContext& wire)
-{
+Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in, const WireContext& wire) {
     std::byte* ptr = base + field.offset;
 
     if (field.kind == FieldKind::List) {
@@ -424,43 +474,65 @@ Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in
         const uint32_t limit = listLimit(field);
         if (*countOpt > limit)
             return fail(Errc::NetworkError,
-                "List: count " + std::to_string(*countOpt) +
-                " exceeds limit " + std::to_string(limit));
+                        "List: count " + std::to_string(*countOpt) + " exceeds limit " + std::to_string(limit));
 
         auto elemStride = [&]() -> size_t {
             switch (field.element) {
-            case FieldKind::Bool:   return sizeof(bool);
-            case FieldKind::Int32:  case FieldKind::UInt32:
-            case FieldKind::Float:  case FieldKind::Enum:   return 4;
-            case FieldKind::Int64:  case FieldKind::Double: return 8;
-            case FieldKind::Vec2:   return sizeof(Vec2);
-            case FieldKind::Rect:   return sizeof(Rect);
-            case FieldKind::Color:  return sizeof(Color);
-            case FieldKind::Entity: return sizeof(Entity);
-            case FieldKind::String: case FieldKind::Texture:
-            case FieldKind::Sound:  case FieldKind::Music:
-            case FieldKind::Font:   case FieldKind::Script:
+            case FieldKind::Bool:
+                return sizeof(bool);
+            case FieldKind::Int8:
+            case FieldKind::UInt8:
+                return 1;
+            case FieldKind::Int16:
+            case FieldKind::UInt16:
+                return 2;
+            case FieldKind::Int32:
+            case FieldKind::UInt32:
+            case FieldKind::Float:
+            case FieldKind::Enum:
+                return 4;
+            case FieldKind::Int64:
+            case FieldKind::Double:
+                return 8;
+            case FieldKind::Vec2:
+                return sizeof(Vec2);
+            case FieldKind::Rect:
+                return sizeof(Rect);
+            case FieldKind::Color:
+                return sizeof(Color);
+            case FieldKind::Entity:
+                return sizeof(Entity);
+            case FieldKind::String:
+            case FieldKind::Texture:
+            case FieldKind::Sound:
+            case FieldKind::Music:
+            case FieldKind::Font:
+            case FieldKind::Script:
                 return sizeof(std::string);
-            default: return 0;
+            default:
+                return 0;
             }
         }();
 
-        if (elemStride == 0)
-            return fail(Errc::NetworkError, "List: unsupported element type for generic decode");
+        if (elemStride == 0) return fail(Errc::NetworkError, "List: unsupported element type for generic decode");
 
         // Resize the vector: we need raw access. Cast to vector<std::byte> is UB unless T is byte.
         // The safe path: allocate a buffer and placement-new each element.
-        struct VecABI { void* data; size_t size; size_t cap; };
+        struct VecABI {
+            void* data;
+            size_t size;
+            size_t cap;
+        };
         std::vector<std::byte> staging(*countOpt * elemStride);
 
         FieldInfo ef{};
-        ef.kind       = field.element;
-        ef.enumInfo   = field.enumInfo;
-        ef.elementType= field.elementType;
-        ef.maxLength  = field.maxLength;
-        ef.quantMin   = field.quantMin;
-        ef.quantMax   = field.quantMax;
-        ef.offset     = 0;
+        ef.kind = field.element;
+        ef.enumInfo = field.enumInfo;
+        ef.elementType = field.elementType;
+        ef.maxLength = field.maxLength;
+        ef.quantMin = field.quantMin;
+        ef.quantMax = field.quantMax;
+        ef.offset = 0;
 
         for (uint16_t i = 0; i < *countOpt; ++i) {
             auto res = decodeValue(field.element, ef, staging.data() + i * elemStride, in, wire);
@@ -470,7 +542,7 @@ Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in
         // Write count and raw data pointer back via VecABI (only works for trivial elements).
         // For non-trivial (std::string), the staging holds constructed objects; we memcpy the
         // vector internals. This is safe because the vector's destructor will still fire.
-        VecABI vabi{ staging.data(), *countOpt, *countOpt };
+        VecABI vabi{staging.data(), *countOpt, *countOpt};
         std::memcpy(ptr, &vabi, sizeof(VecABI));
         // Transfer ownership: staging must not destruct the moved-from data.
         staging.clear();
@@ -479,7 +551,7 @@ Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in
 
     if (field.kind == FieldKind::Struct || field.kind == FieldKind::Custom) {
         return fail(Errc::NetworkError,
-            "Struct/Custom field '" + field.name + "': must be handled via TypeInfo::decode");
+                    "Struct/Custom field '" + field.name + "': must be handled via TypeInfo::decode");
     }
 
     return decodeValue(field.kind, field, ptr, in, wire);
@@ -489,8 +561,7 @@ Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in
 // encode / decode (public API)
 // ---------------------------------------------------------------------------
 
-void encode(const TypeInfo& type, const void* obj, ByteWriter& out, const WireContext& wire)
-{
+void encode(const TypeInfo& type, const void* obj, ByteWriter& out, const WireContext& wire) {
     if (type.encode) {
         type.encode(obj, out, wire);
         return;
@@ -500,15 +571,13 @@ void encode(const TypeInfo& type, const void* obj, ByteWriter& out, const WireCo
         encodeField(field, base, out, wire);
 }
 
-Result<void> decode(const TypeInfo& type, void* obj, ByteReader& in, const WireContext& wire)
-{
+Result<void> decode(const TypeInfo& type, void* obj, ByteReader& in, const WireContext& wire) {
     if (type.decode) {
         return type.decode(obj, in, wire);
     }
     auto* base = static_cast<std::byte*>(obj);
     for (const auto& field : type.fields) {
-        if (auto res = decodeField(field, base, in, wire); !res)
-            return res;
+        if (auto res = decodeField(field, base, in, wire); !res) return res;
     }
     return {};
 }
@@ -517,10 +586,9 @@ Result<void> decode(const TypeInfo& type, void* obj, ByteReader& in, const WireC
 // fingerprint
 // ---------------------------------------------------------------------------
 
-uint64_t fingerprint(std::span<const TypeInfo* const> types)
-{
+uint64_t fingerprint(std::span<const TypeInfo* const> types) {
     // fnv1a64 over: for each type in order, its name, then for each field its name and kind.
-    constexpr uint64_t FNV_PRIME  = 0x00000100000001B3ull;
+    constexpr uint64_t FNV_PRIME = 0x00000100000001B3ull;
     constexpr uint64_t FNV_OFFSET = 0xcbf29ce484222325ull;
 
     uint64_t hash = FNV_OFFSET;

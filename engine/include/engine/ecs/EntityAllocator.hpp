@@ -1,12 +1,32 @@
-// engine/include/engine/ecs/EntityAllocator.hpp
-// ENG-16 — Entity and EntityAllocator (generations, free list)
-// Spec: docs/engine/reference/03-ecs.md · ADR 0012 · reference 03
-// Details: docs/tasks/ENG-16.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** EntityAllocator
+*/
 
 #pragma once
 
-namespace engine {
+#include "engine/Export.hpp"
+#include "engine/ecs/Entity.hpp"
 
-} // namespace engine
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+
+namespace engine {
+class ENGINE_API EntityAllocator {
+private:
+    std::vector<uint32_t> _generations;
+    std::vector<uint32_t> _freeNumbers;
+    std::size_t _aliveEntities;
+
+public:
+    EntityAllocator();
+    ~EntityAllocator() = default;
+    Entity create();
+    void release(Entity e);
+    bool alive(Entity e) const;
+    size_t aliveCount() const;
+};
+}

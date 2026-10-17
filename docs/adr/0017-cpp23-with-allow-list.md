@@ -12,6 +12,10 @@ Our designs already rely on C++20 (`std::span`, `std::format`, concepts, designa
 ## Decision
 
 `CMAKE_CXX_STANDARD 23`, with an allow-list documented in the coding conventions. Allowed: all of C++20 except modules; from C++23 `std::expected`, `std::move_only_function`, `std::print`, deducing this, `std::to_underlying`, `std::unreachable`. Anything else in C++23 (for example `std::flat_map`, `std::generator`) is forbidden until CI proves it on the three compilers. Minimum compiler versions are fixed after a feature-probe file compiles on GCC, Clang and MSVC; that file stays in CI. Fallback: `tl::expected` (same interface, from the package manager) if a target lacks `std::expected`.
+The probe (ENG-03, `cmake/EngineFeatures.cmake`) settled the minimums on 2026-10-15: GCC 13 lacks
+deducing this, so GCC 14 is required; Clang 18 with libstdc++ 14 lacks `std::expected` (its
+`<expected>` needs newer concepts support) and uses `tl::expected`; `std::print` missing defines
+`ENGINE_NO_STD_PRINT`.
 
 ## Alternatives considered
 

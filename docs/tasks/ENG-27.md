@@ -11,12 +11,13 @@ Typed queued events with RAII subscriptions, plus the engine's own events.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/events/EventBus.hpp`
+- `include/engine/events/EventBus.inl`
 - `include/engine/events/EngineEvents.hpp`
 - `src/events/EventBus.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/events/EventBus.hpp`
 
@@ -31,7 +32,9 @@ public:
                                                          // merged into the queue at dispatch()
     void dispatch();                             // engine only; delivers queued events in publish order;
                                                  // events published during dispatch wait for the next one
-    void clearGameSubscriptions();               // before unloading a game module
+    void beginGameSubscriptions();               // engine only: later subscriptions belong to the game
+    void clearGameSubscriptions();               // before unloading a game module: drops the game's listeners
+                                                 // and every pending event (their code may be the game's)
 };
 ```
 
@@ -41,13 +44,11 @@ public:
 struct QuitRequested      {};                                           ENGINE_EVENT(QuitRequested)
 struct WindowResized      { uint32_t width, height; };                    ENGINE_EVENT(WindowResized)
 struct WindowFocusChanged { bool focused; };                              ENGINE_EVENT(WindowFocusChanged)
+struct AppSuspended       {};                                           ENGINE_EVENT(AppSuspended)   // reserved for mobile
+struct AppResumed         {};                                           ENGINE_EVENT(AppResumed)
 struct Collision          { Entity a, b; };                               ENGINE_EVENT(Collision)
 struct SceneLoaded        { std::string name; };                          ENGINE_EVENT(SceneLoaded)
 struct SceneUnloading     { std::string name; };                          ENGINE_EVENT(SceneUnloading)
-struct PlayerJoined       { PlayerId player; };                           ENGINE_EVENT(PlayerJoined)
-struct PlayerLeft         { PlayerId player; DisconnectReason reason; };  ENGINE_EVENT(PlayerLeft)
-struct JoinedServer       { PlayerId me; };                               ENGINE_EVENT(JoinedServer)
-struct LeftServer         { DisconnectReason reason; };                   ENGINE_EVENT(LeftServer)
 struct Caption            { std::string text; float seconds; };           ENGINE_EVENT(Caption)
 struct ConsoleCommand     { std::string line; };                          ENGINE_EVENT(ConsoleCommand)
 ```
@@ -80,7 +81,8 @@ struct ConsoleCommand     { std::string line; };                          ENGINE
 
 - [ ] `subscribe`, `publish` (queued), `emit` (immediate), `publishFromAnyThread` (mutex inbox)
 - [ ] `dispatch`: deliver in publish order; events published during dispatch wait
-- [ ] Engine events of reference 06 (player events included), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)
+- [ ] Engine events of reference 06 except the network ones (written with ENG-36), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)
+- [ ] `beginGameSubscriptions` / `clearGameSubscriptions` (game listeners dropped before the module is unloaded)
 
 ## Done when
 

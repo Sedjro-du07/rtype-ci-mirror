@@ -1,12 +1,30 @@
-// engine/include/engine/components/Hierarchy.hpp
-// ENG-25 — Engine components and their registration
-// Spec: docs/engine/reference/13-components-systems.md · ADR 0016 · reference 13
-// Details: docs/tasks/ENG-25.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Hierarchy
+*/
 
 #pragma once
 
+#include "engine/core/math/Vec2.hpp"
+#include "engine/ecs/Entity.hpp"
+#include "engine/reflection/TypeKey.hpp"
+
+#include <vector>
+
 namespace engine {
 
-} // namespace engine
+struct Parent {
+    Entity value;
+    Vec2 offset;
+};
+
+struct Children {
+    std::vector<Entity> list;
+};
+
+}
+
+ENGINE_COMPONENT(engine::Parent)
+ENGINE_COMPONENT(engine::Children)

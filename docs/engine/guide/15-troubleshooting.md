@@ -42,5 +42,8 @@
 | a message callback never runs | type not registered, `on<T>` subscription not kept, or server not started | `types.add<T>()`, keep the `Subscription` in a member, call `startServer` |
 | `Entity` field of a message is null | entity not replicated, or the message arrived before its spawn snapshot | give it a `NetPrefab`; check `isNull()` and ignore |
 | `add<T>()` fails with "needs ENGINE_COMPONENT, ENGINE_EVENT…" | the type macro is missing | add the macro after the type, outside any namespace |
+| configure stops: `… lacks DEDUCING_THIS, required by ADR 0017` | compiler too old (GCC 13 lacks deducing this) | install GCC 14 (`sudo apt install g++-14`) and use the `linux-gcc-*` presets, which call `g++-14` |
+| Clang: `cannot find -lstdc++` | Clang picked a GCC installation without its C++ library | `sudo apt install libstdc++-14-dev` |
+| `CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-NOTFOUND` | C++20 module scanning was turned on in a custom target | modules are not used (ADR 0017): keep `CMAKE_CXX_SCAN_FOR_MODULES OFF` (set by `EngineOptions.cmake`) |
 | static build: `unknown plugin 'platform_sfml'` | plugin not linked into the executable | `engine_add_launcher(... GAME ...)` links plugins only in static mode; rebuild with the option set |
 

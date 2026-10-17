@@ -14,6 +14,7 @@ call, on one page: [`../game-api.md`](../game-api.md).
 | [Tutorial: make a Pong](../making-a-game.md) | the whole path, from an empty folder to a running game |
 | [01 · Getting started](01-getting-started.md) | prerequisites, building, running, who edits what |
 | [02 · Project and configuration](02-project-and-config.md) | CMake functions, every config key, command line, exit codes |
+| [29 · Every command](29-commands.md) | installing the tools, presets and build options, running, console, shipping, style, docs, Git |
 | [19 · Game module and game state](19-game-module-and-state.md) | the module class in full, where game state lives, code layout |
 | [17 · The Context](17-context.md) | everything game code can reach, and the rules |
 | [16 · Time and the game loop](16-time-and-loop.md) | fixed steps, `fixedDelta`, timers, interpolation, pausing |

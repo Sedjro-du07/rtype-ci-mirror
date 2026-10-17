@@ -10,14 +10,14 @@ Keep every operating-system call in one private place, so the rest of the engine
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `src/os/Os.hpp`
+- `src/include/os/Os.hpp`
 - `src/os/Os.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `src/os/Os.hpp`
+### `src/include/os/Os.hpp`
 
 ```cpp
 // Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
@@ -36,6 +36,7 @@ void                  onQuitSignal(std::move_only_function<void()> fn);  // SIGI
 ## Unlocks
 
 - [ENG-10](ENG-10.md) — Generic launcher main() and signal handling
+- [ENG-18](ENG-18.md) — Registry: typed and type-erased access, identity, hierarchy
 - [ENG-45](ENG-45.md) — CVars: typed variables, flags, ranges, archive
 - [SRV-02](SRV-02.md) — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 

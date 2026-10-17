@@ -19,8 +19,7 @@ using namespace engine;
 // PartyTable tests
 // ---------------------------------------------------------------------------
 
-TEST_CASE("PartyTable: createSolo creates a party of 1", "[party]")
-{
+TEST_CASE("PartyTable: createSolo creates a party of 1", "[party]") {
     PartyTable pt;
     const PartyId pid = pt.createSolo(42);
     const Party& p = pt.get(pid);
@@ -31,8 +30,7 @@ TEST_CASE("PartyTable: createSolo creates a party of 1", "[party]")
     CHECK(pt.of(42) == pid);
 }
 
-TEST_CASE("PartyTable: two solos, then move one into the other", "[party]")
-{
+TEST_CASE("PartyTable: two solos, then move one into the other", "[party]") {
     PartyTable pt;
     const PartyId p1 = pt.createSolo(1);
     const PartyId p2 = pt.createSolo(2);
@@ -48,8 +46,7 @@ TEST_CASE("PartyTable: two solos, then move one into the other", "[party]")
     CHECK(pt.all().size() == 1);
 }
 
-TEST_CASE("PartyTable: removing the leader promotes next member", "[party]")
-{
+TEST_CASE("PartyTable: removing the leader promotes next member", "[party]") {
     PartyTable pt;
     const PartyId pid = pt.createSolo(10);
     pt.createSolo(20);
@@ -63,8 +60,7 @@ TEST_CASE("PartyTable: removing the leader promotes next member", "[party]")
     CHECK(party.size() == 1);
 }
 
-TEST_CASE("PartyTable: removing last member dissolves the party", "[party]")
-{
+TEST_CASE("PartyTable: removing last member dissolves the party", "[party]") {
     PartyTable pt;
     const PartyId pid = pt.createSolo(7);
     pt.remove(7);
@@ -73,8 +69,7 @@ TEST_CASE("PartyTable: removing last member dissolves the party", "[party]")
     CHECK_THROWS(pt.get(pid));
 }
 
-TEST_CASE("PartyTable: setLeader changes leader", "[party]")
-{
+TEST_CASE("PartyTable: setLeader changes leader", "[party]") {
     PartyTable pt;
     const PartyId pid = pt.createSolo(1);
     pt.createSolo(2);
@@ -84,15 +79,13 @@ TEST_CASE("PartyTable: setLeader changes leader", "[party]")
     CHECK(pt.get(pid).leader == 2);
 }
 
-TEST_CASE("PartyTable: setLeader with non-member throws", "[party]")
-{
+TEST_CASE("PartyTable: setLeader with non-member throws", "[party]") {
     PartyTable pt;
     const PartyId pid = pt.createSolo(1);
     CHECK_THROWS(pt.setLeader(pid, 99));
 }
 
-TEST_CASE("PartyTable: all() lists all live parties", "[party]")
-{
+TEST_CASE("PartyTable: all() lists all live parties", "[party]") {
     PartyTable pt;
     pt.createSolo(1);
     pt.createSolo(2);
@@ -100,8 +93,7 @@ TEST_CASE("PartyTable: all() lists all live parties", "[party]")
     CHECK(pt.all().size() == 3);
 }
 
-TEST_CASE("PartyTable: move within same party is a no-op", "[party]")
-{
+TEST_CASE("PartyTable: move within same party is a no-op", "[party]") {
     PartyTable pt;
     const PartyId pid = pt.createSolo(5);
     pt.move(5, pid);
@@ -112,21 +104,19 @@ TEST_CASE("PartyTable: move within same party is a no-op", "[party]")
 // RoomDirectory tests
 // ---------------------------------------------------------------------------
 
-static Party makeParty(PartyId id, PlayerId leader, std::vector<PlayerId> members)
-{
+static Party makeParty(PartyId id, PlayerId leader, std::vector<PlayerId> members) {
     Party p;
-    p.id      = id;
-    p.leader  = leader;
+    p.id = id;
+    p.leader = leader;
     p.members = std::move(members);
-    p.room    = 0;
+    p.room = 0;
     return p;
 }
 
-TEST_CASE("RoomDirectory: add creates a room in Starting state", "[room]")
-{
+TEST_CASE("RoomDirectory: add creates a room in Starting state", "[room]") {
     RoomDirectory rd(8);
     RoomSettings s;
-    s.name  = "Battle";
+    s.name = "Battle";
     s.level = "levels/01.yaml";
 
     const auto id = rd.add(s);
@@ -136,8 +126,7 @@ TEST_CASE("RoomDirectory: add creates a room in Starting state", "[room]")
     CHECK(rd.all().size() == 1);
 }
 
-TEST_CASE("RoomDirectory: add returns nullopt when maxRooms is reached", "[room]")
-{
+TEST_CASE("RoomDirectory: add returns nullopt when maxRooms is reached", "[room]") {
     RoomDirectory rd(2);
     RoomSettings s;
     REQUIRE(rd.add(s).has_value());
@@ -145,8 +134,7 @@ TEST_CASE("RoomDirectory: add returns nullopt when maxRooms is reached", "[room]
     CHECK_FALSE(rd.add(s).has_value());
 }
 
-TEST_CASE("RoomDirectory: remove erases the room", "[room]")
-{
+TEST_CASE("RoomDirectory: remove erases the room", "[room]") {
     RoomDirectory rd(8);
     RoomSettings s;
     const RoomId id = *rd.add(s);
@@ -155,16 +143,14 @@ TEST_CASE("RoomDirectory: remove erases the room", "[room]")
     CHECK_THROWS(rd.get(id));
 }
 
-TEST_CASE("RoomDirectory: setState changes the room's state", "[room]")
-{
+TEST_CASE("RoomDirectory: setState changes the room's state", "[room]") {
     RoomDirectory rd(8);
     const RoomId id = *rd.add({});
     rd.setState(id, RoomState::Running);
     CHECK(rd.get(id).state == RoomState::Running);
 }
 
-TEST_CASE("RoomDirectory: enter adds party and players", "[room]")
-{
+TEST_CASE("RoomDirectory: enter adds party and players", "[room]") {
     RoomDirectory rd(8);
     const RoomId rid = *rd.add({});
     const Party p = makeParty(1, 10, {10, 20});
@@ -178,8 +164,7 @@ TEST_CASE("RoomDirectory: enter adds party and players", "[room]")
     CHECK(rd.roomOf(20) == rid);
 }
 
-TEST_CASE("RoomDirectory: leave removes party and players", "[room]")
-{
+TEST_CASE("RoomDirectory: leave removes party and players", "[room]") {
     RoomDirectory rd(8);
     const RoomId rid = *rd.add({});
     const Party p = makeParty(1, 10, {10, 20});
@@ -194,14 +179,12 @@ TEST_CASE("RoomDirectory: leave removes party and players", "[room]")
     CHECK(rd.roomOf(20) == 0);
 }
 
-TEST_CASE("RoomDirectory: roomOf returns 0 for players in the lobby", "[room]")
-{
+TEST_CASE("RoomDirectory: roomOf returns 0 for players in the lobby", "[room]") {
     RoomDirectory rd(8);
     CHECK(rd.roomOf(999) == 0);
 }
 
-TEST_CASE("RoomDirectory: two parties in same room, leave one, keep the other", "[room]")
-{
+TEST_CASE("RoomDirectory: two parties in same room, leave one, keep the other", "[room]") {
     RoomDirectory rd(8);
     const RoomId rid = *rd.add({});
     const Party p1 = makeParty(1, 10, {10});
@@ -219,8 +202,7 @@ TEST_CASE("RoomDirectory: two parties in same room, leave one, keep the other", 
     CHECK(rd.roomOf(30) == rid);
 }
 
-TEST_CASE("RoomDirectory: after remove, a new room can be added", "[room]")
-{
+TEST_CASE("RoomDirectory: after remove, a new room can be added", "[room]") {
     RoomDirectory rd(1);
     const RoomId id = *rd.add({});
     rd.remove(id);

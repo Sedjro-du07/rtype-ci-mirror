@@ -6,9 +6,18 @@ task: `ENG-xx` on the engine board, `SRV-xx` on the server board (see [`tasks.md
 ```
 engine/
 ├── benchmarks/
-│   ├── ecs_storage/                                      ENG-56
-│   └── net/                                              SRV-20
+│   ├── ecs_storage/
+│   │   ├── ArchetypeStore.cpp                            ENG-56
+│   │   ├── ArchetypeStore.hpp                            ENG-56
+│   │   ├── BenchComponents.hpp                           ENG-56
+│   │   ├── CMakeLists.txt                                ENG-56
+│   │   ├── EcsStorageBench.cpp                           ENG-56
+│   │   ├── SparseArray.hpp                               ENG-56
+│   │   └── SparseArray.inl                               ENG-56
+│   ├── net/                                              SRV-20
+│   └── CMakeLists.txt                                    ENG-56
 ├── cmake/
+│   ├── EngineFeatures.cmake                              ENG-03
 │   ├── EngineInstall.cmake                               ENG-62
 │   ├── EngineModules.cmake                               ENG-02
 │   ├── EngineOptions.cmake                               ENG-01
@@ -25,8 +34,8 @@ engine/
 │       ├── components/
 │       │   ├── Animation.hpp                             ENG-25
 │       │   ├── Collider.hpp                              ENG-25
-│       │   ├── Hierarchy.hpp                             ENG-25
-│       │   ├── Identity.hpp                              ENG-25
+│       │   ├── Hierarchy.hpp                             ENG-18
+│       │   ├── Identity.hpp                              ENG-18
 │       │   ├── Lifetime.hpp                              ENG-25
 │       │   ├── Parallax.hpp                              ENG-25
 │       │   ├── Position.hpp                              ENG-25
@@ -41,19 +50,27 @@ engine/
 │       │   │   └── Vec2.hpp                              ENG-04
 │       │   ├── Error.hpp                                 ENG-04
 │       │   ├── Hash.hpp                                  ENG-04
+│       │   ├── Hash.inl                                  ENG-04
 │       │   ├── Signal.hpp                                ENG-06
+│       │   ├── Signal.inl                                ENG-06
 │       │   └── Time.hpp                                  ENG-05
 │       ├── ecs/
 │       │   ├── Commands.hpp                              ENG-20
+│       │   ├── Commands.inl                              ENG-20
 │       │   ├── Entity.hpp                                ENG-16
+│       │   ├── Entity.inl                                ENG-16
 │       │   ├── EntityAllocator.hpp                       ENG-16
 │       │   ├── IStorage.hpp                              ENG-17
 │       │   ├── Registry.hpp                              ENG-18, ENG-21
+│       │   ├── Registry.inl                              ENG-18
 │       │   ├── SparseSet.hpp                             ENG-17
-│       │   └── View.hpp                                  ENG-19
+│       │   ├── SparseSet.inl                             ENG-17
+│       │   ├── View.hpp                                  ENG-19
+│       │   └── View.inl                                  ENG-19
 │       ├── events/
 │       │   ├── EngineEvents.hpp                          ENG-27
-│       │   └── EventBus.hpp                              ENG-27
+│       │   ├── EventBus.hpp                              ENG-27
+│       │   └── EventBus.inl                              ENG-27
 │       ├── input/
 │       │   ├── Action.hpp                                ENG-28
 │       │   ├── ActionState.hpp                           ENG-29
@@ -80,25 +97,31 @@ engine/
 │       ├── reflection/
 │       │   ├── ByteStream.hpp                            ENG-24
 │       │   ├── TypeBuilder.hpp                           ENG-22
+│       │   ├── TypeBuilder.inl                           ENG-22
 │       │   ├── TypeInfo.hpp                              ENG-22
 │       │   ├── TypeKey.hpp                               ENG-22
+│       │   ├── TypeKey.inl                               ENG-22
 │       │   ├── TypeRegistry.hpp                          ENG-22
+│       │   ├── TypeRegistry.inl                          ENG-22
 │       │   └── Yaml.hpp                                  ENG-23
 │       ├── render/
 │       │   ├── Camera2D.hpp                              ENG-30
 │       │   ├── DrawCmd.hpp                               ENG-30
 │       │   ├── Handles.hpp                               ENG-30
+│       │   ├── Handles.inl                               ENG-30
 │       │   ├── IPlatform.hpp                             ENG-30
 │       │   ├── IRenderer.hpp                             ENG-30
 │       │   ├── RenderQueue.hpp                           ENG-30
 │       │   └── WindowDesc.hpp                            ENG-30
 │       ├── scene/
 │       │   ├── Prefab.hpp                                ENG-41
+│       │   ├── Prefab.inl                                ENG-41
 │       │   ├── Scene.hpp                                 ENG-43
 │       │   ├── SceneLoader.hpp                           ENG-42
 │       │   └── SceneManager.hpp                          ENG-43
 │       ├── scheduler/
 │       │   ├── Scheduler.hpp                             ENG-26
+│       │   ├── Scheduler.inl                             ENG-26
 │       │   ├── Stage.hpp                                 ENG-26
 │       │   └── System.hpp                                ENG-26
 │       ├── script/
@@ -111,6 +134,7 @@ engine/
 │       │   ├── Console.hpp                               ENG-46
 │       │   ├── CVars.hpp                                 ENG-45
 │       │   ├── Logger.hpp                                ENG-44
+│       │   ├── Logger.inl                                ENG-44
 │       │   └── Metrics.hpp                               ENG-47
 │       ├── Context.hpp                                   ENG-09, SRV-09
 │       ├── Engine.hpp                                    ENG-08
@@ -120,28 +144,31 @@ engine/
 │   └── main.cpp                                          ENG-10
 ├── plugins/
 │   ├── audio_miniaudio/
+│   │   ├── include/
+│   │   │   └── MiniaudioAudio.hpp                        ENG-35
 │   │   ├── CMakeLists.txt                                ENG-35
-│   │   ├── MiniaudioAudio.cpp                            ENG-35
-│   │   └── MiniaudioAudio.hpp                            ENG-35
+│   │   └── MiniaudioAudio.cpp                            ENG-35
 │   ├── network_asio/
 │   │   ├── AsioNetwork.cpp                               ENG-37
 │   │   ├── AsioNetwork.hpp                               ENG-37
 │   │   └── CMakeLists.txt                                ENG-37
 │   ├── platform_raylib/                                  ENG-58
 │   ├── platform_sfml/
+│   │   ├── include/
+│   │   │   ├── SfmlPlatform.hpp                          ENG-31
+│   │   │   └── SfmlRenderer.hpp                          ENG-31
 │   │   ├── CMakeLists.txt                                ENG-31
 │   │   ├── ColorFilter.frag                              ENG-33
 │   │   ├── SfmlImGui.cpp                                 ENG-32
 │   │   ├── SfmlKeys.cpp                                  ENG-31
 │   │   ├── SfmlPlatform.cpp                              ENG-31
-│   │   ├── SfmlPlatform.hpp                              ENG-31
-│   │   ├── SfmlRenderer.cpp                              ENG-31
-│   │   └── SfmlRenderer.hpp                              ENG-31
+│   │   └── SfmlRenderer.cpp                              ENG-31
 │   └── scripting_lua/
+│       ├── include/
+│       │   └── LuaScripting.hpp                          ENG-49
 │       ├── CMakeLists.txt                                ENG-49
 │       ├── LuaApi.cpp                                    ENG-49
 │       ├── LuaScripting.cpp                              ENG-49
-│       ├── LuaScripting.hpp                              ENG-49
 │       └── Sandbox.cpp                                   ENG-49
 ├── src/
 │   ├── assets/
@@ -150,25 +177,43 @@ engine/
 │   │   └── AudioCaptions.cpp                             ENG-34
 │   ├── client/
 │   │   └── ClientLobby.cpp                               SRV-14
+│   ├── components/
+│   │   └── Identity.cpp                                  ENG-18
 │   ├── core/
+│   │   ├── math/
+│   │   │   ├── Color.cpp                                 ENG-04
+│   │   │   ├── Rect.cpp                                  ENG-04
+│   │   │   └── Vec2.cpp                                  ENG-04
 │   │   ├── Context.cpp                                   ENG-09
 │   │   ├── Engine.cpp                                    ENG-08
 │   │   ├── EngineConfig.cpp                              ENG-07
 │   │   ├── Error.cpp                                     ENG-04
 │   │   ├── ServiceContext.cpp                            SRV-09
+│   │   ├── Signal.cpp                                    ENG-06
 │   │   └── Time.cpp                                      ENG-05
 │   ├── ecs/
 │   │   ├── Commands.cpp                                  ENG-20
+│   │   ├── Entity.cpp                                    ENG-16
 │   │   ├── EntityAllocator.cpp                           ENG-16
 │   │   └── Registry.cpp                                  ENG-18
 │   ├── events/
 │   │   └── EventBus.cpp                                  ENG-27
+│   ├── include/
+│   │   ├── audio/
+│   │   │   └── AudioCaptions.hpp                         ENG-34
+│   │   ├── os/
+│   │   │   └── Os.hpp                                    ENG-60
+│   │   ├── services/
+│   │   │   └── LogSinks.hpp                              ENG-44
+│   │   └── systems/
+│   │       └── RegisterEngineTypes.hpp                   ENG-25
 │   ├── input/
 │   │   ├── ActionState.cpp                               ENG-29
 │   │   ├── InputMap.cpp                                  ENG-29
 │   │   └── Keys.cpp                                      ENG-28
 │   ├── module/
 │   │   ├── DynamicLibrary.cpp                            ENG-12
+│   │   ├── IGameModule.cpp                               ENG-11
 │   │   ├── ModuleManager.cpp                             ENG-14
 │   │   ├── NullPlugins.cpp                               ENG-15
 │   │   └── StaticModuleTable.cpp                         ENG-13
@@ -191,25 +236,28 @@ engine/
 │   │   ├── StreamFramer.cpp                              SRV-06
 │   │   └── StreamFramer.hpp                              SRV-06
 │   ├── os/
-│   │   ├── Os.cpp                                        ENG-60
-│   │   └── Os.hpp                                        ENG-60
+│   │   └── Os.cpp                                        ENG-60
 │   ├── reflection/
 │   │   ├── ByteStream.cpp                                ENG-24
 │   │   ├── Codec.cpp                                     SRV-04
 │   │   ├── Codec.hpp                                     SRV-04
+│   │   ├── TypeBuilder.cpp                               ENG-22
 │   │   ├── TypeRegistry.cpp                              ENG-22
-│   │   └── Yaml.cpp                                      ENG-23
+│   │   ├── Yaml.cpp                                      ENG-23
+│   │   └── YamlCodec.cpp                                 ENG-23
 │   ├── render/
 │   │   ├── Camera2D.cpp                                  ENG-30
 │   │   └── RenderQueue.cpp                               ENG-30
 │   ├── scene/
+│   │   ├── ComponentData.cpp                             ENG-41
 │   │   ├── PrefabLibrary.cpp                             ENG-41
+│   │   ├── Scene.cpp                                     ENG-43
 │   │   ├── SceneLoader.cpp                               ENG-42
 │   │   └── SceneManager.cpp                              ENG-43
 │   ├── scheduler/
 │   │   └── Scheduler.cpp                                 ENG-26
 │   ├── script/
-│   │   └── ScriptSystems.cpp                             ENG-48
+│   │   └── ScriptSystems.cpp                             ENG-49
 │   ├── server/
 │   │   ├── IRoomHost.hpp                                 SRV-12
 │   │   ├── Lobby.cpp                                     SRV-13
@@ -233,6 +281,7 @@ engine/
 │   │   └── WorkerPool.hpp                                SRV-12
 │   ├── services/
 │   │   ├── Console.cpp                                   ENG-46
+│   │   ├── ConsoleUiSink.cpp                             ENG-46
 │   │   ├── CVars.cpp                                     ENG-45
 │   │   ├── Logger.cpp                                    ENG-44
 │   │   └── Metrics.cpp                                   ENG-47
@@ -311,5 +360,28 @@ engine/
   `engine/server/`; game `client/` → also `engine/client/`.
 - A header that only the engine uses is **private**: it lives next to its source in `engine/src/<block>/`, not in
   `include/`, so games cannot include it (example: `src/net/PlayerTable.hpp`).
+- Every file starts with the Epitech header; `File description` is the file name without extension.
+  C++ uses `/* ** … */`, CMake, YAML and Git files `##`, Lua `--`; JSON files cannot hold comments.
+  Skeletons already have it; keep it when you replace a
+  skeleton's task comment with code.
+  ```cpp
+  /*
+  ** EPITECH PROJECT, 2026
+  ** G-ING-500-COT-5-1-rtype-2
+  ** File description:
+  ** Registry
+  */
+  ```
+- No comments in code besides the Epitech header: names carry the meaning; explanations go to the
+  docs and ADRs. A skeleton's task comment is removed when the task is implemented.
+- In a class, `private:` comes before `public:`.
+- A `.hpp` holds declarations only; the code goes to the `.cpp`. Code the compiler must see in every
+  file that uses it (templates, `constexpr` functions) goes to a `.inl` next to the header, included at
+  the end of it (`Signal.inl`, `Hash.inl`). A class with code in a `.cpp` is exported with `ENGINE_API`.
+- Every header lives in an `include/` folder. Public headers: `engine/include/engine/…`, included as
+  `#include "engine/core/Signal.hpp"`. Private headers of the engine: `engine/src/include/<module>/…`,
+  included as `#include "os/Os.hpp"`; private headers of a plugin: `engine/plugins/<plugin>/include/`,
+  included by name. Private folders are never installed. Never `../`. (The `net/` and `server/` headers
+  of the server tasks still sit next to their sources until their owner moves them.)
 - The tree, the task tables, the per-task pages and the folder READMEs are generated from
   `docs/tasks/tasks.py` and `docs/tasks/details.py` by `python3 docs/tasks/generate.py`.

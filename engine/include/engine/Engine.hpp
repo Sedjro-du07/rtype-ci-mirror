@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Engine
+*/
+
 // engine/include/engine/Engine.hpp
 // ENG-08 — Engine: lifecycle, member order, fixed-step loop, error policy
 // Spec: docs/engine/reference/01-core.md · ADR 0003, 0021, 0024 · reference 01
@@ -7,6 +14,4 @@
 
 #pragma once
 
-namespace engine {
-
-} // namespace engine
+namespace engine {}

@@ -11,11 +11,15 @@ The per-scene world: entities, typed and raw component access, identity and hier
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/ecs/Registry.hpp` (shared with [ENG-21](ENG-21.md))
+- `include/engine/ecs/Registry.inl`
 - `src/ecs/Registry.cpp`
+- `include/engine/components/Identity.hpp`
+- `include/engine/components/Hierarchy.hpp`
+- `src/components/Identity.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/ecs/Registry.hpp`
 
@@ -47,9 +51,11 @@ public:
     // Type-erased access (scene loader, editor, scripts, replication)
     IStorage*       storage(ComponentId id);          // nullptr if no entity ever had it
     void*           getRaw(Entity e, ComponentId id);
+    const void*     getRaw(Entity e, ComponentId id) const;
     void*           emplaceRaw(Entity e, ComponentId id, const void* src);
     void            removeRaw(Entity e, ComponentId id);
     std::vector<ComponentId> componentsOf(Entity e) const;   // for the inspector and save()
+    std::vector<Entity> entities() const;                    // alive entities with a component, by index
 
     // Identity and hierarchy (ADR 0016)
     Entity find(std::string_view name) const;         // first entity whose Name matches, or null
@@ -75,11 +81,30 @@ struct ComponentHooks {
 };
 ```
 
+### `include/engine/components/Identity.hpp`
+
+```cpp
+struct Name             { std::string value; };                           ENGINE_COMPONENT(Name)
+struct Uuid             { uint64_t hi = 0, lo = 0; static Uuid generate(); bool operator==(const Uuid&) const = default; };
+                                                                          ENGINE_COMPONENT(Uuid)
+struct Tags             { std::vector<uint64_t> ids; bool has(std::string_view tag) const; };
+                                                                          ENGINE_COMPONENT(Tags)
+template <> struct std::hash<engine::Uuid>;      // for the uuid index
+```
+
+### `include/engine/components/Hierarchy.hpp`
+
+```cpp
+struct Parent           { Entity value; Vec2 offset; };                   ENGINE_COMPONENT(Parent)
+struct Children         { std::vector<Entity> list; };                    ENGINE_COMPONENT(Children)
+```
+
 ## Depends on
 
 - [ENG-17](ENG-17.md) — IStorage and paged SparseSet<T>
 - [ENG-22](ENG-22.md) — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum)
 - [ENG-06](ENG-06.md) — Signal and RAII Subscription
+- [ENG-60](ENG-60.md) — OS layer: secure random, user data folder, executable folder, quit signals
 
 ## Unlocks
 
@@ -106,6 +131,7 @@ struct ComponentHooks {
 - [ ] Identity: find(name), find(Uuid) indexed, withTag
 - [ ] Hierarchy: setParent, parent, children
 - [ ] World singletons: `singleton<T>()`, `trySingleton<T>()` on a hidden entity (ADR 0039)
+- [ ] Identity and hierarchy components `Name`, `Uuid` (`generate()` with `os::secureRandom`), `Tags`, `Parent`, `Children` (moved here from ENG-25: they need no rendering)
 
 ## Done when
 

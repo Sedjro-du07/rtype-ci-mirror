@@ -1,7 +1,34 @@
-// engine/cmake/rtype_engineConfig.cmake.in
-// ENG-62 — Installable engine: install, export, find_package(rtype_engine), CPack packages
-// Spec: docs/engine/reference/01-core.md · ADR 0045 · guide 24
-// Details: docs/tasks/ENG-62.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## rtype_engineConfig
+##
 
+# find_package(rtype_engine) for projects that use an installed engine (ENG-62 · ADR 0045).
+# Gives the target rtype_engine::engine, its plugins, and the CMake functions of reference 02.
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+if(@ENGINE_NEEDS_TL_EXPECTED@)
+    find_dependency(tl-expected CONFIG)
+endif()
+if(NOT @ENGINE_DYNAMIC_MODULES@)
+    find_dependency(yaml-cpp CONFIG)
+endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/rtype_engineTargets.cmake)
+
+# The consumer builds in the engine's mode: a dynamic engine needs dynamic plugins and games.
+set(ENGINE_DYNAMIC_MODULES @ENGINE_DYNAMIC_MODULES@)
+set(ENGINE_LAUNCHER_SOURCE ${CMAKE_CURRENT_LIST_DIR}/launcher/main.cpp CACHE FILEPATH
+    "Source of the generic launcher main()")
+set_property(GLOBAL PROPERTY ENGINE_PLUGIN_TARGETS "@ENGINE_INSTALLED_PLUGINS@")
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+include(EngineOptions)
+include(EngineModules)
+include(EngineInstall)          # engine_enable_packaging() for the game's archives
+
+check_required_components(rtype_engine)

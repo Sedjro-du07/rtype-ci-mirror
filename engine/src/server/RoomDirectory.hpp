@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "engine/Export.hpp"
 #include "engine/net/RoomTypes.hpp"
 
 #include <cstdint>
@@ -27,7 +28,7 @@ namespace engine {
 ///  - enter() records the party members in the room; leave() removes them.
 ///  - roomOf(player) returns 0 when the player is in the lobby.
 ///  - Lobby thread only — no locks.
-class RoomDirectory {
+class ENGINE_API RoomDirectory {
 public:
     explicit RoomDirectory(uint32_t maxRooms);
 
@@ -56,18 +57,15 @@ public:
     std::span<const RoomId> all() const;
 
 private:
-    uint32_t                                         maxRooms_;
-    std::unordered_map<RoomId, RoomInfo>             rooms_;
-    std::unordered_map<PlayerId, RoomId>             playerRoom_;
+    uint32_t maxRooms_;
+    std::unordered_map<RoomId, RoomInfo> rooms_;
+    std::unordered_map<PlayerId, RoomId> playerRoom_;
     /// Maps (roomId, partyId) → list of players that entered with that party.
     std::unordered_map<uint64_t, std::vector<PlayerId>> partyPlayers_;
-    std::vector<RoomId>                              allIds_;
-    RoomId                                           nextId_ = 1;
+    std::vector<RoomId> allIds_;
+    RoomId nextId_ = 1;
 
-    static uint64_t partyKey(RoomId r, PartyId p) noexcept
-    {
-        return (static_cast<uint64_t>(r) << 32) | p;
-    }
+    static uint64_t partyKey(RoomId r, PartyId p) noexcept { return (static_cast<uint64_t>(r) << 32) | p; }
 };
 
 } // namespace engine

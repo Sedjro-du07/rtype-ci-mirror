@@ -1,12 +1,36 @@
-// engine/include/engine/scene/SceneLoader.hpp
-// ENG-42 — SceneLoader: two passes, errors with file:line, save
-// Spec: docs/engine/reference/11-scenes-assets.md · ADR 0034 · guide 10
-// Details: docs/tasks/ENG-42.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** SceneLoader
+*/
 
 #pragma once
 
+#include "engine/Export.hpp"
+#include "engine/core/Error.hpp"
+#include "engine/scene/Prefab.hpp"
+#include "engine/scene/Scene.hpp"
+
+#include <filesystem>
+#include <memory>
+
 namespace engine {
 
-} // namespace engine
+class AssetManager;
+class TypeRegistry;
+
+class ENGINE_API SceneLoader {
+private:
+    const TypeRegistry* _types;
+    AssetManager* _assets;
+    PrefabLibrary* _prefabs;
+
+public:
+    SceneLoader(const TypeRegistry& types, AssetManager& assets, PrefabLibrary& prefabs);
+
+    Result<std::unique_ptr<Scene>> load(const std::filesystem::path& file);
+    Result<void> save(const Scene& scene, const std::filesystem::path& file) const;
+};
+
+}

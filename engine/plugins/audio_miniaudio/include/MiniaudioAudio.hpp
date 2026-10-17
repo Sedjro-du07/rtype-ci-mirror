@@ -1,4 +1,11 @@
-// engine/plugins/audio_miniaudio/MiniaudioAudio.hpp
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** MiniaudioAudio
+*/
+
+// engine/plugins/audio_miniaudio/include/MiniaudioAudio.hpp
 // ENG-35 — audio_miniaudio plugin
 // Spec: docs/engine/reference/09-audio.md · ADR 0008, 0032
 // Details: docs/tasks/ENG-35.md
@@ -7,6 +14,4 @@
 
 #pragma once
 
-namespace engine {
-
-} // namespace engine
+namespace engine {}

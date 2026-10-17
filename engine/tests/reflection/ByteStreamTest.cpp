@@ -20,8 +20,7 @@ using namespace engine;
 // Helpers
 // ---------------------------------------------------------------------------
 
-static ByteReader makeReader(const std::vector<std::byte>& buf)
-{
+static ByteReader makeReader(const std::vector<std::byte>& buf) {
     return ByteReader({buf.data(), buf.size()});
 }
 
@@ -29,8 +28,7 @@ static ByteReader makeReader(const std::vector<std::byte>& buf)
 // ByteWriter — primitive round-trips
 // ---------------------------------------------------------------------------
 
-TEST_CASE("ByteWriter / ByteReader: u8 round-trip", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: u8 round-trip", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 64);
     REQUIRE(w.write(uint8_t{0xAB}));
@@ -42,8 +40,7 @@ TEST_CASE("ByteWriter / ByteReader: u8 round-trip", "[reflection][bytestream]")
     CHECK(r.remaining() == 0);
 }
 
-TEST_CASE("ByteWriter / ByteReader: u16 big-endian", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: u16 big-endian", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 64);
     REQUIRE(w.write(uint16_t{0x1234}));
@@ -56,8 +53,7 @@ TEST_CASE("ByteWriter / ByteReader: u16 big-endian", "[reflection][bytestream]")
     CHECK(r.u16() == uint16_t{0x1234});
 }
 
-TEST_CASE("ByteWriter / ByteReader: u32 big-endian", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: u32 big-endian", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 64);
     REQUIRE(w.write(uint32_t{0xDEADBEEF}));
@@ -70,8 +66,7 @@ TEST_CASE("ByteWriter / ByteReader: u32 big-endian", "[reflection][bytestream]")
     CHECK(r.u32() == 0xDEADBEEFu);
 }
 
-TEST_CASE("ByteWriter / ByteReader: u64 round-trip", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: u64 round-trip", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 16);
     REQUIRE(w.write(uint64_t{0x0102030405060708ull}));
@@ -80,8 +75,7 @@ TEST_CASE("ByteWriter / ByteReader: u64 round-trip", "[reflection][bytestream]")
     CHECK(r.u64() == 0x0102030405060708ull);
 }
 
-TEST_CASE("ByteWriter / ByteReader: i32 negative", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: i32 negative", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 8);
     REQUIRE(w.write(int32_t{-1}));
@@ -90,8 +84,7 @@ TEST_CASE("ByteWriter / ByteReader: i32 negative", "[reflection][bytestream]")
     CHECK(r.i32() == -1);
 }
 
-TEST_CASE("ByteWriter / ByteReader: float round-trip (IEEE 754)", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: float round-trip (IEEE 754)", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 8);
     REQUIRE(w.write(3.14f));
@@ -102,8 +95,7 @@ TEST_CASE("ByteWriter / ByteReader: float round-trip (IEEE 754)", "[reflection][
     CHECK(*v == Catch::Approx(3.14f));
 }
 
-TEST_CASE("ByteWriter / ByteReader: string round-trip", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: string round-trip", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 64);
     REQUIRE(w.write(std::string_view("Sedjro")));
@@ -114,20 +106,18 @@ TEST_CASE("ByteWriter / ByteReader: string round-trip", "[reflection][bytestream
     CHECK(*s == "Sedjro");
 }
 
-TEST_CASE("ByteReader::string fails when length exceeds maxLength", "[reflection][bytestream]")
-{
+TEST_CASE("ByteReader::string fails when length exceeds maxLength", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 64);
     REQUIRE(w.write(std::string_view("hello")));
 
     auto r = makeReader(buf);
-    auto s = r.string(3);  // "hello" is 5 bytes — exceeds limit
+    auto s = r.string(3); // "hello" is 5 bytes — exceeds limit
     CHECK_FALSE(s.has_value());
     CHECK(r.failed());
 }
 
-TEST_CASE("ByteWriter overflows when limit exceeded", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter overflows when limit exceeded", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 2);
     REQUIRE(w.write(uint8_t{0xAA}));
@@ -137,16 +127,14 @@ TEST_CASE("ByteWriter overflows when limit exceeded", "[reflection][bytestream]"
     CHECK(buf.size() == 2);
 }
 
-TEST_CASE("ByteReader returns nullopt on underrun", "[reflection][bytestream]")
-{
+TEST_CASE("ByteReader returns nullopt on underrun", "[reflection][bytestream]") {
     std::vector<std::byte> buf = {std::byte{0x01}};
     auto r = makeReader(buf);
     CHECK_FALSE(r.u16().has_value());
     CHECK(r.failed());
 }
 
-TEST_CASE("ByteWriter / ByteReader: multiple values in sequence", "[reflection][bytestream]")
-{
+TEST_CASE("ByteWriter / ByteReader: multiple values in sequence", "[reflection][bytestream]") {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 128);
     w.write(uint8_t{1});
@@ -156,7 +144,7 @@ TEST_CASE("ByteWriter / ByteReader: multiple values in sequence", "[reflection][
     CHECK_FALSE(w.overflowed());
 
     auto r = makeReader(buf);
-    CHECK(r.u8()  == uint8_t{1});
+    CHECK(r.u8() == uint8_t{1});
     CHECK(r.u16() == uint16_t{1000});
     CHECK(r.u32() == 0xCAFEBABEu);
     CHECK(r.string(32) == "rtype");

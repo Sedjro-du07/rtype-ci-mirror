@@ -1,1 +1,13 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## gitignore
+##
+
 __pycache__/
+
+# Build trees (CMake presets) and vcpkg
+build/
+vcpkg_installed/
+CMakeUserPresets.json

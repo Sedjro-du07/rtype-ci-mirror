@@ -13,11 +13,12 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/scheduler/Stage.hpp`
 - `include/engine/scheduler/System.hpp`
 - `include/engine/scheduler/Scheduler.hpp`
+- `include/engine/scheduler/Scheduler.inl`
 - `src/scheduler/Scheduler.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/scheduler/Stage.hpp`
 
@@ -73,8 +74,12 @@ public:
                                           // catches exceptions (policy below)
     void setEnabled(std::string_view name, bool enabled);   // console "system enable/disable <name>"
     bool enabled(std::string_view name) const;
-    std::span<const SystemStats> stats() const;             // metrics overlay, console "systems"
-    void clearGameSystems();                                 // before unloading a game module
+    std::span<const SystemStats> stats() const;             // metrics overlay, console "systems"; valid after
+                                                             // build(), in run order, stage by stage
+    void beginGameSystems();                                 // engine only: after the engine systems
+    void clearGameSystems();                                 // before unloading a game module (build() again)
+    bool quitRequested() const;                              // the failure policy asked to stop
+    int  exitCode() const;                                   // 5 when a system fault ends the client or session
 };
 ```
 

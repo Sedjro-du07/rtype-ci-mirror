@@ -11,10 +11,11 @@ Prove early that every C++23 feature on our allow-list compiles on GCC, Clang an
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `cmake/FeatureProbe.cpp`
+- `cmake/EngineFeatures.cmake`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `cmake/FeatureProbe.cpp`
 
@@ -28,11 +29,12 @@ int                                probeToUnderlying();          // std::to_unde
 [[noreturn]] void                  probeUnreachable();           // std::unreachable
 ```
 
-### `cmake/EngineOptions.cmake`
+### `cmake/EngineFeatures.cmake`
 
 ```cmake
-try_compile(ENGINE_HAS_STD_EXPECTED ... SOURCES cmake/FeatureProbe.cpp ...)
-# if FALSE: target_compile_definitions(engine PUBLIC ENGINE_USE_TL_EXPECTED)
+engine_probe_cxx23(<target>)   # try_compile FeatureProbe.cpp with -DPROBE_<FEATURE> for each feature
+# EXPECTED missing → ENGINE_USE_TL_EXPECTED + tl::expected; PRINT missing → ENGINE_NO_STD_PRINT;
+# MOVE_ONLY_FUNCTION, DEDUCING_THIS, TO_UNDERLYING, UNREACHABLE missing → configure error
 ```
 
 ## Depends on
@@ -51,7 +53,8 @@ try_compile(ENGINE_HAS_STD_EXPECTED ... SOURCES cmake/FeatureProbe.cpp ...)
 ## To implement
 
 - [ ] `cmake/FeatureProbe.cpp` using each allowed feature: `std::expected`, `std::move_only_function`, `std::print`, deducing this, `std::to_underlying`, `std::unreachable`
-- [ ] `try_compile` in CMake; on `std::expected` failure, switch `Result` to `tl::expected` with a define
+- [ ] `cmake/EngineFeatures.cmake`: `engine_probe_cxx23(target)`, one `try_compile` per feature (module scanning off); summary line at configure
+- [ ] `std::expected` missing → `ENGINE_USE_TL_EXPECTED` + `tl::expected`; `std::print` missing → `ENGINE_NO_STD_PRINT`; the other four missing → configure error naming the supported compilers
 
 ## Done when
 

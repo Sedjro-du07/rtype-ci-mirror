@@ -1,12 +1,21 @@
-// engine/include/engine/scheduler/System.hpp
-// ENG-26 — Scheduler: stages, names, after/before, roles, stats, failure policy
-// Spec: docs/engine/reference/05-scheduler.md · ADR 0024, 0028, 0039 · reference 05
-// Details: docs/tasks/ENG-26.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** System
+*/
 
 #pragma once
 
+#include <cstdint>
+#include <functional>
+
 namespace engine {
 
-} // namespace engine
+class Context;
+
+using SystemFn = std::move_only_function<void(Context&)>;
+
+enum RoleMask : uint8_t { ClientRole = 1, ServerRole = 2, EditorRole = 4, AllRoles = 7 };
+
+}

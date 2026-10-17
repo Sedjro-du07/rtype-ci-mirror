@@ -11,10 +11,11 @@ Queries over entities that have a set of components.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/ecs/View.hpp`
+- `include/engine/ecs/View.inl`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/ecs/View.hpp`
 

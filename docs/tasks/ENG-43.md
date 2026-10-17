@@ -12,20 +12,25 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/scene/Scene.hpp`
 - `include/engine/scene/SceneManager.hpp`
+- `src/scene/Scene.cpp`
 - `src/scene/SceneManager.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/scene/Scene.hpp`
 
 ```cpp
-class Scene {
+class Scene {                                      // not copyable: owned through std::unique_ptr
 public:
+    Scene(const TypeRegistry& types, std::string name, std::filesystem::path path);
     const std::string& name() const;
     const std::filesystem::path& path() const;
-    Registry& registry();
+    Registry& registry(); const Registry& registry() const;
+    void setUuid(Entity, const Uuid&);  std::optional<Uuid> uuidOf(Entity) const;     // filled by the loader
+    void setPrefab(Entity, std::string); std::string_view prefabOf(Entity) const;     // "" if none
+    void markGenerated(Entity);         bool generated(Entity) const;   // created as a prefab's child
 };
 ```
 
@@ -36,14 +41,17 @@ class SceneManager {
 public:
     SceneManager(const TypeRegistry&, AssetManager&, EventBus&, Logger&);
     Result<void> load(const std::filesystem::path& file);   // engine only (first scene): immediate
-    void switchTo(const std::filesystem::path& file);      // deferred to the end of the frame
-    void markPersistent(Entity e);                         // copied into the next scene on switch (the player)
+    void switchTo(const std::filesystem::path& file);      // deferred to applyPending (end of the frame)
+    void markPersistent(Entity e);                         // copied with its children into the next scene
     Result<void> save(const std::filesystem::path& file) const;
     Registry& world();                                     // active scene's registry
+    const Scene& active() const;
     std::string_view activeName() const;
     PrefabLibrary& prefabs();
-    void applyPending(Context& ctx);                       // engine only: SceneUnloading → clear → load → SceneLoaded
-    void clear();                                          // engine only: shutdown, before the game module unloads
+    bool hasPending() const;
+    void applyPending();     // engine only: load the next scene; on success emit SceneUnloading (old world
+                             // still readable), copy the persistent entities, swap, emit SceneLoaded
+    void clear();            // engine only: shutdown, before the game module unloads
 };
 ```
 

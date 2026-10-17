@@ -34,6 +34,7 @@ Synchronous observer list, used by `ComponentHooks` (block 3) and internally.
 template <class... Args>
 class Signal<void(Args...)> {
 public:
+    Signal() = default;              // move-only; allocates nothing until the first connect()
     [[nodiscard]] Subscription connect(std::move_only_function<void(Args...)> fn);
     void emit(Args... args);         // calls every listener now, in connection order
     size_t size() const;
@@ -56,7 +57,9 @@ public:
                                                          // merged into the queue at dispatch()
     void dispatch();                             // engine only; delivers queued events in publish order;
                                                  // events published during dispatch wait for the next one
-    void clearGameSubscriptions();               // before unloading a game module
+    void beginGameSubscriptions();               // engine only: later subscriptions belong to the game
+    void clearGameSubscriptions();               // before unloading a game module: drops the game's listeners
+                                                 // and every pending event (their code may be the game's)
 };
 ```
 
@@ -74,6 +77,7 @@ Dispatch points: after each `FixedUpdate` step (after `Commands::apply`) and aft
 | `Collision` | `Entity a, b` | `engine.collision` | two colliders overlap this tick (once per pair) |
 | `SceneLoaded` | `std::string name` | `SceneManager` | after a scene finished loading |
 | `SceneUnloading` | `std::string name` | `SceneManager` | before a scene is cleared |
+| *Network events below: declared with the network types (ENG-36), published by `NetworkSession`* | | | |
 | `PlayerJoined` | `PlayerId player` | `NetworkSession` | server: a player completed the handshake (ADR 0037) |
 | `PlayerLeft` | `PlayerId player; DisconnectReason reason; std::string message` | `NetworkSession` | server: quit, kick, error, or end of the grace period |
 | `PlayerDisconnected` | `PlayerId player; DisconnectReason reason` | `NetworkSession` | server: connection lost, grace period starts (ADR 0043); also in the player's room |

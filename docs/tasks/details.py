@@ -11,7 +11,7 @@ DETAILS = {
 'ENG-01': dict(
     goal="Create the `engine` CMake project every other task builds into, with vcpkg, presets, exports, the C++23 setup and the build options.",
     todo=["Root `CMakeLists.txt`: `project(rtype)`, `add_subdirectory(engine)` (the game is added later); the engine still configures alone from `engine/`",
-          "Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua, sol2, miniaudio, imgui[sfml-binding], implot, catch2, tl-expected (ADR 0045)",
+          "Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua (override 5.4), sol2, miniaudio, imgui, imgui-sfml, implot, catch2, tl-expected (ADR 0045)",
           "Root `CMakePresets.json`: `linux-gcc`, `linux-clang`, `windows-msvc` × `debug` / `release`, plus `-static` variants; toolchain `$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake`; binary dir `build/<preset>`",
           "`engine/CMakeLists.txt`: `engine` library (SHARED when `ENGINE_DYNAMIC_MODULES`, else STATIC), `include/` public, `src/` private",
           "`generate_export_header` → `engine/Export.hpp` with `ENGINE_API`; hidden visibility everywhere (`CXX_VISIBILITY_PRESET hidden`, `VISIBILITY_INLINES_HIDDEN`) (ADR 0044)",
@@ -27,7 +27,8 @@ DETAILS = {
     goal="Give games and plugins one-line CMake functions so nobody copies build boilerplate.",
     todo=["`engine_add_plugin(<kind>_<name> SOURCES … [DEPENDS …])`: SHARED or STATIC per option, output to `<bin>/plugins`, hidden visibility, `ENGINE_BUILDING_PLUGIN`",
           "`engine_add_game_module(<name> SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES …)`: builds `lib<name>_server` and `lib<name>_client` in `<bin>/games` (or one `lib<name>` with `SOURCES`), defines `ENGINE_GAME_SERVER` / `ENGINE_GAME_CLIENT` (ADR 0040)",
-          "`engine_add_launcher(<exe> CONFIG <file> [GAME <name>])`: builds `launcher/main.cpp` with `ENGINE_DEFAULT_CONFIG`, copies the config, links plugins and the game in static mode"],
+          "`engine_add_launcher(<exe> CONFIG <file> [GAME <name>] [ROLE client|server|editor])`: builds `launcher/main.cpp` (`ENGINE_LAUNCHER_SOURCE`) with `ENGINE_DEFAULT_CONFIG` into `bin/`, copies the config, links plugins and the role's game build whole in static mode",
+          "Game targets named `game_<name>_server` / `game_<name>_client` (files keep `lib<name>_<role>`), so launchers may be called `<name>_client`"],
     done=["A test plugin and a test game (ENG-53 fixtures) build in both modes",
           "`ENGINE_DYNAMIC_MODULES=OFF` produces one executable with no `.so` / `.dll` next to it"],
     watch=["Windows: `.dll` must land next to the executable or in `plugins/` with the search path set",
@@ -35,7 +36,8 @@ DETAILS = {
 'ENG-03': dict(
     goal="Prove early that every C++23 feature on our allow-list compiles on GCC, Clang and MSVC.",
     todo=["`cmake/FeatureProbe.cpp` using each allowed feature: `std::expected`, `std::move_only_function`, `std::print`, deducing this, `std::to_underlying`, `std::unreachable`",
-          "`try_compile` in CMake; on `std::expected` failure, switch `Result` to `tl::expected` with a define"],
+          "`cmake/EngineFeatures.cmake`: `engine_probe_cxx23(target)`, one `try_compile` per feature (module scanning off); summary line at configure",
+          "`std::expected` missing → `ENGINE_USE_TL_EXPECTED` + `tl::expected`; `std::print` missing → `ENGINE_NO_STD_PRINT`; the other four missing → configure error naming the supported compilers"],
     done=["CI job compiles the probe on the three compilers and prints which fallbacks are active"],
     watch=["Features outside the allow-list (ADR 0017) must not be added here silently: they need an ADR change"]),
 # ---------------------------------------------------------------- 01 Core
@@ -44,7 +46,8 @@ DETAILS = {
     todo=["`fnv1a64` as `constexpr` (usable in templates and macros)",
           "`Vec2` (operators, `dot`, `length`, `normalized`, `lerp`), `Rect` (`contains`, `intersects`), `Color` (named constants)",
           "`Errc` (15 codes), `Error` with `toString()` → `file:line: message`",
-          "`Result<T>` alias, `BootError` with exit code"],
+          "`Result<T>` alias (`std::expected`, or `tl::expected` with `ENGINE_USE_TL_EXPECTED`), `fail()` helper, `BootError` with exit code",
+          "First test setup in `tests/CMakeLists.txt` (`engine_add_test`, Catch2), completed later by ENG-53"],
     done=["Unit tests: hash known values at compile time (`static_assert`), rect intersection edges, `Error::toString` with and without file"],
     watch=["No engine include in `core/`: it is the bottom layer",
            "`Error::message` is a full sentence; suggestions (\"did you mean\") are added by callers"]),
@@ -159,7 +162,8 @@ DETAILS = {
     goal="The per-scene world: entities, typed and raw component access, identity and hierarchy.",
     todo=["Entities: create, destroy (recursive over Children), alive, clear",
           "Typed: emplace, get, tryGet, has, replace, remove via TypeRegistry ids", "Raw: storage, getRaw, emplaceRaw, removeRaw, componentsOf",
-          "Identity: find(name), find(Uuid) indexed, withTag", "Hierarchy: setParent, parent, children", "World singletons: `singleton<T>()`, `trySingleton<T>()` on a hidden entity (ADR 0039)"],
+          "Identity: find(name), find(Uuid) indexed, withTag", "Hierarchy: setParent, parent, children", "World singletons: `singleton<T>()`, `trySingleton<T>()` on a hidden entity (ADR 0039)",
+          "Identity and hierarchy components `Name`, `Uuid` (`generate()` with `os::secureRandom`), `Tags`, `Parent`, `Children` (moved here from ENG-25: they need no rendering)"],
     done=["Tests: every method, unregistered type error message, recursive destroy"],
     watch=["Hooks fire on every path, including raw and Commands"]),
 'ENG-19': dict(
@@ -169,7 +173,7 @@ DETAILS = {
     watch=["Writing component values during iteration is fine; structural changes are not"]),
 'ENG-20': dict(
     goal="Deferred structural changes so systems can spawn and destroy while iterating (ADR 0015).",
-    todo=["spawn (empty, prefab), destroy, add, set, remove, setParent, addRaw", "`apply` in recording order, skipping dead entities"],
+    todo=["spawn (empty), destroy, add, set, remove, setParent, addRaw; prefab spawn comes with ENG-41", "`apply` in recording order, skipping dead entities"],
     done=["Tests: spawn inside a view loop, destroy then add on the same entity, prefab spawn"],
     watch=["The Entity returned by spawn is valid immediately but has components only after apply"]),
 'ENG-21': dict(
@@ -199,7 +203,7 @@ DETAILS = {
     watch=["Big-endian on the wire, floats via `std::bit_cast<uint32_t>` (network D1): keep it in one place"]),
 'ENG-25': dict(
     goal="The engine's built-in components and their registration.",
-    todo=["Headers of reference 13 with `ENGINE_COMPONENT`", "`registerEngineTypes`: fields and flags (Position/Velocity/Sprite Replicated, PreviousPosition Transient…) and engine events"],
+    todo=["Headers of reference 13 with `ENGINE_COMPONENT` (identity and hierarchy are written by ENG-18)", "`registerEngineTypes`: fields and flags (Position/Velocity/Sprite Replicated, PreviousPosition Transient…) and engine events"],
     done=["Inspector-style dump (`types` console command) lists every engine component with its fields"],
     watch=["Names are reserved: a game type with the same name is a boot error"]),
 # ---------------------------------------------------------------- 05 Scheduler
@@ -213,7 +217,7 @@ DETAILS = {
 'ENG-27': dict(
     goal="Typed queued events with RAII subscriptions, plus the engine's own events.",
     todo=["`subscribe`, `publish` (queued), `emit` (immediate), `publishFromAnyThread` (mutex inbox)", "`dispatch`: deliver in publish order; events published during dispatch wait",
-          "Engine events of reference 06 (player events included), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)"],
+          "Engine events of reference 06 except the network ones (written with ENG-36), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)", "`beginGameSubscriptions` / `clearGameSubscriptions` (game listeners dropped before the module is unloaded)"],
     done=["Tests: order, publish during dispatch, unsubscribe during dispatch, thread inbox"],
     watch=["Events never leave the process"]),
 # ---------------------------------------------------------------- 07 Input
@@ -263,7 +267,7 @@ DETAILS = {
 # ---------------------------------------------------------------- 10 Network
 'ENG-36': dict(
     goal="Network vocabulary and the byte transport interface.",
-    todo=["`PlayerId`, `ConnectionId`, `Endpoint` (`resolve`, `toString`), `Datagram`, `DisconnectReason`, `NetConfig`, `ConnectionStats`", "`INetwork` (UDP and TCP)"],
+    todo=["`PlayerId`, `ConnectionId`, `Endpoint` (`resolve`, `toString`), `Datagram`, `DisconnectReason`, `NetConfig`, `ConnectionStats`", "`INetwork` (UDP and TCP)", "Network events `PlayerJoined`, `PlayerLeft`, `JoinedServer`, `LeftServer` in `EngineEvents.hpp` (moved from ENG-27)"],
     done=["Endpoint resolves IPv4 and IPv6 hosts"],
     watch=["`ConnectionId` is engine-internal; games use `PlayerId`"]),
 'ENG-37': dict(
@@ -296,7 +300,7 @@ DETAILS = {
            "A path must match the file's case exactly, checked on Windows too; never write under the game root (ADR 0044)"]),
 'ENG-41': dict(
     goal="Prefabs: parsed once, instantiated with overrides and children.",
-    todo=["`PrefabLibrary::get` (cached), `findByKey`, `instantiate`, `clear`"],
+    todo=["`PrefabLibrary::get` (cached), `findByKey`, `instantiate`, `clear`", "`Commands::spawn(prefab, position)`: instantiate at `apply()` (left out of ENG-20)"],
     done=["Tests: overrides, nested children with offsets"],
     watch=["`Prefab::key` is used by replication: same hash on every machine"]),
 'ENG-42': dict(
@@ -312,7 +316,7 @@ DETAILS = {
 # ---------------------------------------------------------------- 12 Services
 'ENG-44': dict(
     goal="Thread-safe logging with tags and several sinks.",
-    todo=["Levels, `std::format` API, `tagged`", "ConsoleSink (colours), FileSink (rotating), ConsoleUiSink"],
+    todo=["Levels, `std::format` API, `tagged`", "ConsoleSink (colours), FileSink (rotating) in the private `LogSinks.hpp`; ConsoleUiSink moves to ENG-46 (needs the Console)"],
     done=["Logs from the network thread and the game thread never interleave mid-line"],
     watch=["Never a singleton"]),
 'ENG-45': dict(
@@ -322,7 +326,7 @@ DETAILS = {
     watch=["`sim_tick_rate` is read-only"]),
 'ENG-46': dict(
     goal="The developer console and its built-in commands.",
-    todo=["registerCommand, execute, print, history, complete, toggle", "Built-ins: help, set, get, cvars, quit, systems, system enable/disable, scene, entities, inspect, modules, net, bind, assets"],
+    todo=["registerCommand, execute, print, history, complete, toggle", "ConsoleUiSink: the logger sink that feeds the console (moved from ENG-44)", "Built-ins: help, set, get, cvars, quit, systems, system enable/disable, scene, entities, inspect, modules, net, bind, assets"],
     done=["Every built-in works headless through `execute`"],
     watch=["Cheat commands refused on a server unless `sv_cheats 1`"]),
 'ENG-47': dict(
@@ -331,13 +335,13 @@ DETAILS = {
     done=["Overlay shows per-system times matching `systems`"],
     watch=["Recording must stay cheap: no allocation per sample"]),
 'ENG-48': dict(
-    goal="The scripting interface, the Script component and the script systems.",
-    todo=["`ScriptHost`, `IScripting` declarations", "Script systems: lifecycle, update, collision; error → script disabled"],
-    done=["With NullScripting, a Script component logs one clear error"],
+    goal="The scripting interface that plugins implement and the AssetManager loads scripts through.",
+    todo=["`ScriptHost`, `IScripting` declarations (the script systems move to ENG-49: they need Context and the Scheduler)"],
+    done=["A fake IScripting loads, answers `has` and unloads scripts"],
     watch=["Script errors never stop the game"]),
 'ENG-49': dict(
     goal="Lua 5.4 + sol2 implementation of IScripting.",
-    todo=["API of guide 11 by reflection (components by name)", "Sandbox (no io, os, package, debug, load)", "Instruction limit hook", "Reload keeping the handle"],
+    todo=["API of guide 11 by reflection (components by name)", "Sandbox (no io, os, package, debug, load)", "Instruction limit hook", "Reload keeping the handle", "Script systems (moved from ENG-48): lifecycle, update, collision; a script error disables that script"],
     done=["The guide 11 boss script runs; an infinite loop is stopped"],
     watch=["No binding code per component type"]),
 # ---------------------------------------------------------------- 13 Engine systems

@@ -78,10 +78,21 @@ public:
                                           // catches exceptions (policy below)
     void setEnabled(std::string_view name, bool enabled);   // console "system enable/disable <name>"
     bool enabled(std::string_view name) const;
-    std::span<const SystemStats> stats() const;             // metrics overlay, console "systems"
-    void clearGameSystems();                                 // before unloading a game module
+    std::span<const SystemStats> stats() const;             // metrics overlay, console "systems"; valid after
+                                                             // build(), in run order, stage by stage
+    void beginGameSystems();                                 // engine only: after the engine systems
+    void clearGameSystems();                                 // before unloading a game module (build() again)
+    bool quitRequested() const;                              // the failure policy asked to stop
+    int  exitCode() const;                                   // 5 when a system fault ends the client or session
 };
 ```
+
+`Role` (`Client`, `Server`, `Editor`) is declared in `EngineConfig.hpp`; ENG-07 adds the rest of that file.
+`run` stops the stage as soon as the policy asks to quit; the engine reads `quitRequested()` after each
+stage until `Context` (ENG-09) offers `requestQuit()`. `setEnabled(name, true)` also clears `faulted`
+(console "system enable"). Error texts: `system 'game.ai' is ordered after 'engine.movment', which is not
+registered`, `systems of FixedUpdate form a cycle: a -> b -> c -> a`. A constraint naming a system that
+exists but is filtered out by the role is ignored.
 
 ## Ordering rules
 

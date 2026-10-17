@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "engine/Export.hpp"
 #include "engine/net/RoomTypes.hpp"
 
 #include <span>
@@ -25,7 +26,7 @@ namespace engine {
 ///  - Removing a player promotes the next member as leader; if the party
 ///    becomes empty it is dissolved automatically.
 ///  - Lobby thread only — no locks.
-class PartyTable {
+class ENGINE_API PartyTable {
 public:
     /// Create a party of 1 for `p` (called when a player joins).
     PartyId createSolo(PlayerId p);
@@ -52,13 +53,13 @@ public:
     std::span<const PartyId> all() const;
 
 private:
-    std::unordered_map<PartyId,  Party>   parties_;
+    std::unordered_map<PartyId, Party> parties_;
     std::unordered_map<PlayerId, PartyId> playerParty_;
-    std::vector<PartyId>                  allIds_;
-    PartyId                               nextId_ = 1;
+    std::vector<PartyId> allIds_;
+    PartyId nextId_ = 1;
 
     PartyId allocId();
-    void    dissolve(PartyId id);
+    void dissolve(PartyId id);
 };
 
 } // namespace engine

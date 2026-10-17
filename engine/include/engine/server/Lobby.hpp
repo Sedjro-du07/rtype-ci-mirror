@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Lobby
+*/
+
 // engine/include/engine/server/Lobby.hpp
 // SRV-13 — Lobby and RoomHandle: the server game API and the server loop
 // Spec: docs/engine/reference/14-rooms.md · ADR 0038, 0039 · reference 14
@@ -7,6 +14,4 @@
 
 #pragma once
 
-namespace engine {
-
-} // namespace engine
+namespace engine {}

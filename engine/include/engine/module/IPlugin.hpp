@@ -1,12 +1,41 @@
-// engine/include/engine/module/IPlugin.hpp
-// ENG-11 — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE
-// Spec: docs/engine/reference/02-modules.md · ADR 0020, 0025 · reference 02
-// Details: docs/tasks/ENG-11.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** IPlugin
+*/
 
 #pragma once
 
+#include "engine/core/Error.hpp"
+
+#include <cstdint>
+#include <string_view>
+
 namespace engine {
 
-} // namespace engine
+class Logger;
+class CVars;
+struct EngineConfig;
+class EventBus;
+
+enum class PluginKind : uint8_t { Platform, Audio, Network, Scripting };
+
+struct PluginContext {
+    Logger& log;
+    CVars& cvars;
+    const EngineConfig& config;
+    EventBus& events;
+};
+
+class IPlugin {
+public:
+    virtual ~IPlugin() = default;
+    virtual PluginKind kind() const = 0;
+    virtual std::string_view name() const = 0;
+    virtual uint32_t apiVersion() const = 0;
+    virtual Result<void> init(const PluginContext& ctx) = 0;
+    virtual void shutdown() noexcept = 0;
+};
+
+}

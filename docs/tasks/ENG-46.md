@@ -12,10 +12,11 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/services/Console.hpp`
 - `src/services/Console.cpp`
+- `src/services/ConsoleUiSink.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/services/Console.hpp`
 
@@ -32,6 +33,16 @@ public:
     std::span<const std::string> output() const;
     std::vector<std::string> complete(std::string_view prefix) const; // tab completion
     bool open() const; void toggle();          // F1 by default (bound in input.yaml)
+};
+```
+
+### `src/services/ConsoleUiSink.cpp`
+
+```cpp
+class ConsoleUiSink final : public ILogSink {        // feeds the developer console (moved from ENG-44)
+public:
+    explicit ConsoleUiSink(Console& console);
+    void write(const LogRecord& r) override;
 };
 ```
 
@@ -52,6 +63,7 @@ public:
 ## To implement
 
 - [ ] registerCommand, execute, print, history, complete, toggle
+- [ ] ConsoleUiSink: the logger sink that feeds the console (moved from ENG-44)
 - [ ] Built-ins: help, set, get, cvars, quit, systems, system enable/disable, scene, entities, inspect, modules, net, bind, assets
 
 ## Done when

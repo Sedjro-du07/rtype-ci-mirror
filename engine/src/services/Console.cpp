@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Console
+*/
+
 // engine/src/services/Console.cpp
 // ENG-46 — Console and built-in commands
 // Spec: docs/engine/reference/12-services.md · ADR 0035 · guide 13
@@ -7,6 +14,4 @@
 
 #include "engine/services/Console.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {}

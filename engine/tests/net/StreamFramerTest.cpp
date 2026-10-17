@@ -23,16 +23,14 @@ using namespace engine;
 
 /// Build a framed byte sequence: [length u32 BE][payload].
 /// payload is treated as id(u16) + body — we pass it verbatim.
-static std::vector<std::byte> makeFrame(std::vector<uint8_t> payload)
-{
+static std::vector<std::byte> makeFrame(std::vector<uint8_t> payload) {
     std::vector<std::byte> out;
     std::span<const std::byte> sp(reinterpret_cast<const std::byte*>(payload.data()), payload.size());
     StreamFramer::frame(sp, out);
     return out;
 }
 
-static std::span<const std::byte> toSpan(const std::vector<std::byte>& v)
-{
+static std::span<const std::byte> toSpan(const std::vector<std::byte>& v) {
     return {v.data(), v.size()};
 }
 
@@ -40,8 +38,7 @@ static std::span<const std::byte> toSpan(const std::vector<std::byte>& v)
 // frame() static helper
 // ---------------------------------------------------------------------------
 
-TEST_CASE("frame() prepends a 4-byte big-endian length prefix", "[net][stream_framer]")
-{
+TEST_CASE("frame() prepends a 4-byte big-endian length prefix", "[net][stream_framer]") {
     // message = id(0x0001) + payload "hi"
     std::vector<uint8_t> msg = {0x00, 0x01, 0x68, 0x69}; // id=1, 'h','i'
     auto framed = makeFrame(msg);
@@ -65,8 +62,7 @@ TEST_CASE("frame() prepends a 4-byte big-endian length prefix", "[net][stream_fr
 // feed() + next(): happy path
 // ---------------------------------------------------------------------------
 
-TEST_CASE("one complete message arrives in one feed()", "[net][stream_framer]")
-{
+TEST_CASE("one complete message arrives in one feed()", "[net][stream_framer]") {
     StreamFramer sf(65536);
 
     std::vector<uint8_t> msg = {0x00, 0x01, 0xAA, 0xBB};
@@ -86,8 +82,7 @@ TEST_CASE("one complete message arrives in one feed()", "[net][stream_framer]")
     CHECK_FALSE(sf.next().has_value());
 }
 
-TEST_CASE("several messages arrive concatenated in one feed()", "[net][stream_framer]")
-{
+TEST_CASE("several messages arrive concatenated in one feed()", "[net][stream_framer]") {
     StreamFramer sf(65536);
 
     std::vector<uint8_t> m1 = {0x00, 0x01, 0x11};
@@ -116,8 +111,7 @@ TEST_CASE("several messages arrive concatenated in one feed()", "[net][stream_fr
     CHECK_FALSE(sf.next().has_value());
 }
 
-TEST_CASE("message split across two feed() calls is reassembled", "[net][stream_framer]")
-{
+TEST_CASE("message split across two feed() calls is reassembled", "[net][stream_framer]") {
     StreamFramer sf(65536);
 
     std::vector<uint8_t> msg = {0x00, 0x01, 0xDE, 0xAD, 0xBE, 0xEF};
@@ -139,8 +133,7 @@ TEST_CASE("message split across two feed() calls is reassembled", "[net][stream_
     CHECK(static_cast<uint8_t>((*result)[3]) == 0xAD);
 }
 
-TEST_CASE("message split one byte at a time is reassembled", "[net][stream_framer]")
-{
+TEST_CASE("message split one byte at a time is reassembled", "[net][stream_framer]") {
     StreamFramer sf(65536);
 
     std::vector<uint8_t> msg = {0x00, 0x05, 0x01, 0x02};
@@ -158,8 +151,7 @@ TEST_CASE("message split one byte at a time is reassembled", "[net][stream_frame
 // feed(): protocol errors
 // ---------------------------------------------------------------------------
 
-TEST_CASE("announced length above max closes the stream", "[net][stream_framer]")
-{
+TEST_CASE("announced length above max closes the stream", "[net][stream_framer]") {
     StreamFramer sf(1024);
 
     // Craft a frame header announcing 65536 bytes (above limit)
@@ -170,8 +162,7 @@ TEST_CASE("announced length above max closes the stream", "[net][stream_framer]"
     CHECK_FALSE(result); // must return error
 }
 
-TEST_CASE("announced length of 0 closes the stream", "[net][stream_framer]")
-{
+TEST_CASE("announced length of 0 closes the stream", "[net][stream_framer]") {
     StreamFramer sf(65536);
 
     std::vector<std::byte> bad = {
@@ -181,8 +172,7 @@ TEST_CASE("announced length of 0 closes the stream", "[net][stream_framer]")
     CHECK_FALSE(result);
 }
 
-TEST_CASE("announced length of 1 closes the stream (must be >= 2)", "[net][stream_framer]")
-{
+TEST_CASE("announced length of 1 closes the stream (must be >= 2)", "[net][stream_framer]") {
     StreamFramer sf(65536);
 
     std::vector<std::byte> bad = {
@@ -192,15 +182,16 @@ TEST_CASE("announced length of 1 closes the stream (must be >= 2)", "[net][strea
     CHECK_FALSE(result);
 }
 
-TEST_CASE("announced length exactly equal to max is accepted", "[net][stream_framer]")
-{
+TEST_CASE("announced length exactly equal to max is accepted", "[net][stream_framer]") {
     const uint32_t maxLen = 128;
     StreamFramer sf(maxLen);
 
     // Build a message of exactly maxLen bytes (id u16 + 126 bytes payload)
     std::vector<uint8_t> msg(maxLen);
-    msg[0] = 0x00; msg[1] = 0x01; // id
-    for (size_t i = 2; i < maxLen; ++i) msg[i] = static_cast<uint8_t>(i & 0xFF);
+    msg[0] = 0x00;
+    msg[1] = 0x01; // id
+    for (size_t i = 2; i < maxLen; ++i)
+        msg[i] = static_cast<uint8_t>(i & 0xFF);
 
     auto framed = makeFrame(msg);
     REQUIRE(sf.feed(toSpan(framed)));

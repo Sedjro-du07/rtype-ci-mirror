@@ -15,7 +15,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/scene/SceneLoader.hpp`
 
@@ -23,12 +23,16 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 class SceneLoader {
 public:
     SceneLoader(const TypeRegistry& types, AssetManager& assets, PrefabLibrary& prefabs);
-    Result<std::unique_ptr<Scene>> load(const std::filesystem::path& file);
-    // Pass 1: parse; for each entity create it, resolve its prefab, apply overrides, record uuid → entity.
-    // Pass 2: link Parent / Children and Entity fields by uuid (declaration order does not matter).
-    // Then request the assets. Any error returns file:line and leaves no partial scene behind.
+    Result<std::unique_ptr<Scene>> load(const std::filesystem::path& file);   // relative to the game root
+    // Pass 1: for each entity create it, instantiate its prefab with the overrides (position from its
+    // Position override), record uuid → entity; assets are requested while parsing.
+    // Pass 2: re-read the components that hold Entity fields with every uuid known (declaration order
+    // does not matter), then attach Parent with Registry::setParent. Unknown uuid, duplicate uuid,
+    // parent loop → error. Any error returns file:line and the half-built scene is discarded.
     Result<void> save(const Scene& scene, const std::filesystem::path& file) const;
-    // Writes uuids, prefab references and only the components that differ from the prefab; skips Transient types.
+    // Writes name, then per entity: uuid (generated if it had none), prefab, and the components that
+    // differ from the prefab's (compared as YAML); skips Transient types, Uuid, Children, and the
+    // entities a prefab created as children.
 };
 ```
 

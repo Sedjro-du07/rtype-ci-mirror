@@ -13,8 +13,8 @@
 
 namespace engine {
 
-using PlayerId     = uint32_t;   ///< What the game sees; 0 = none; one per connected player.
-using ConnectionId = uint32_t;   ///< Engine-internal: one UDP endpoint + its TCP stream.
+using PlayerId = uint32_t;     ///< What the game sees; 0 = none; one per connected player.
+using ConnectionId = uint32_t; ///< Engine-internal: one UDP endpoint + its TCP stream.
 
 /// Reason a player left or was dropped (RFC §6.8).
 enum class DisconnectReason : uint8_t {

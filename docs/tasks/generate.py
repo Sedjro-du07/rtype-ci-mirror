@@ -160,7 +160,7 @@ def api_section(t):
         return []
     lines = ['## Classes and methods', '',
              '**Declarations only**: what this task must write, without the bodies. Write the implementation in the '
-             'matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the '
+             'matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the '
              'pages in *Read first*.', '']
     if note:
         lines += [f'> {note}', '']
@@ -341,6 +341,22 @@ def spec_for(path):
     return 'docs/engine/reference/README.md'
 
 
+def epitech_header(path, comment):
+    """The Epitech header every file starts with; 'File description' is the file name without extension."""
+    name = os.path.basename(path).split('.')[0]
+    body = ['EPITECH PROJECT, 2026', 'G-ING-500-COT-5-1-rtype-2', 'File description:', name]
+    if comment == '//':
+        return '/*\n' + ''.join(f'** {x}\n' for x in body) + '*/\n\n'
+    mark = '##' if comment == '#' else comment                      # ## for CMake, -- for Lua
+    return f'{mark}\n' + ''.join(f'{mark} {x}\n' for x in body) + f'{mark}\n\n'
+
+
+def strip_epitech_header(text):
+    """Removes a leading Epitech header (any comment style) and the blank line after it."""
+    m = re.match(r'(/\*\n(\*\*.*\n)*\*/\n|(##|--)\n((##|--) .*\n)*(##|--)\n)\n?', text)
+    return text[m.end():] if m and 'EPITECH PROJECT' in m.group(0) else text
+
+
 def header(path, tid, comment, spec=None):
     t = BY_ID[tid]
     others = [x for x in owners()[path] if x != tid]
@@ -355,8 +371,8 @@ def header(path, tid, comment, spec=None):
 
 def skeleton_body(path):
     name = os.path.basename(path)
-    if name.endswith('.hpp'):
-        return '\n#pragma once\n\nnamespace engine {\n\n} // namespace engine\n'
+    if name.endswith('.hpp'):                                  # already clang-formatted (ENG-61)
+        return '\n#pragma once\n\nnamespace engine {}\n'
     if name.endswith('.cpp'):
         hpp = name[:-4] + '.hpp'
         if path.startswith('src/') and os.path.exists(os.path.join(ROOT, 'engine', os.path.dirname(path), hpp)):
@@ -364,7 +380,7 @@ def skeleton_body(path):
         else:
             rel = os.path.dirname(path).removeprefix('src/')
             inc = f'"engine/{rel}/{hpp}"'
-        return f'\n#include {inc}\n\nnamespace engine {{\n\n}} // namespace engine\n'
+        return f'\n#include {inc}\n\nnamespace engine {{}}\n'
     return '\n'
 
 
@@ -385,14 +401,16 @@ def skeletons():
             os.makedirs(full, exist_ok=True)
             continue
         c = comment_of(f)
-        head = header(f, own[f][0], c)
+        head = epitech_header(f, c) + header(f, own[f][0], c)
         if os.path.exists(full):
             old = open(full).read()
-            if not old.startswith(f'{c} engine/'):
-                continue                                       # real code: leave it alone
-            m = re.search(rf'^{re.escape(c)} Spec: (\S+)', old, flags=re.M)
-            head = header(f, own[f][0], c, m.group(1) if m else None)
-            body_lines = old.split('\n')
+            rest = strip_epitech_header(old)
+            # A skeleton still carries the task comment; real code does not and is left alone.
+            if not rest.startswith(f'{c} engine/') or f'{c} Status: not implemented yet' not in rest:
+                continue
+            m = re.search(rf'^{re.escape(c)} Spec: (\S+)', rest, flags=re.M)
+            head = epitech_header(f, c) + header(f, own[f][0], c, m.group(1) if m else None)
+            body_lines = rest.split('\n')
             i = 0
             while i < len(body_lines) and body_lines[i].startswith(c + ' '):
                 i += 1

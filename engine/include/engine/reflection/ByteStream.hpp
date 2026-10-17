@@ -28,28 +28,28 @@ class ENGINE_API ByteWriter {
 public:
     explicit ByteWriter(std::vector<std::byte>& out, size_t maxBytes);
 
-    bool write(uint8_t  v);
+    bool write(uint8_t v);
     bool write(uint16_t v);
     bool write(uint32_t v);
     bool write(uint64_t v);
-    bool write(int32_t  v);
-    bool write(int64_t  v);
-    bool write(float    v);   // IEEE 754, big-endian bit pattern
-    bool write(double   v);   // IEEE 754, big-endian bit pattern
+    bool write(int32_t v);
+    bool write(int64_t v);
+    bool write(float v);  // IEEE 754, big-endian bit pattern
+    bool write(double v); // IEEE 754, big-endian bit pattern
     /// Writes a length-prefixed UTF-8 string: u16 byte count then the bytes (RFC §5).
     bool write(std::string_view sv);
     /// Bit-packing: writes the lowest bitCount bits of value.
     bool writeBits(uint32_t value, uint8_t bitCount);
 
-    size_t size()       const noexcept;
-    bool   overflowed() const noexcept;
+    size_t size() const noexcept;
+    bool overflowed() const noexcept;
 
 private:
     std::vector<std::byte>& out_;
-    size_t                  max_;
-    bool                    overflow_ = false;
-    uint8_t                 bitBuf_   = 0;
-    uint8_t                 bitCount_ = 0;
+    size_t max_;
+    bool overflow_ = false;
+    uint8_t bitBuf_ = 0;
+    uint8_t bitCount_ = 0;
 
     bool reserve(size_t n);
     void flushBits();
@@ -61,28 +61,28 @@ class ENGINE_API ByteReader {
 public:
     explicit ByteReader(std::span<const std::byte> in);
 
-    std::optional<uint8_t>  u8();
+    std::optional<uint8_t> u8();
     std::optional<uint16_t> u16();
     std::optional<uint32_t> u32();
     std::optional<uint64_t> u64();
-    std::optional<int32_t>  i32();
-    std::optional<int64_t>  i64();
-    std::optional<float>    f32();   // IEEE 754 big-endian
-    std::optional<double>   f64();   // IEEE 754 big-endian
+    std::optional<int32_t> i32();
+    std::optional<int64_t> i64();
+    std::optional<float> f32();  // IEEE 754 big-endian
+    std::optional<double> f64(); // IEEE 754 big-endian
     /// Reads a u16-length-prefixed string; fails if length > maxLength or bytes missing.
     std::optional<std::string> string(size_t maxLength);
     /// Bit-packing: reads bitCount bits into the low bits of the result.
     std::optional<uint32_t> bits(uint8_t bitCount);
 
     size_t remaining() const noexcept;
-    bool   failed()    const noexcept;
+    bool failed() const noexcept;
 
 private:
     std::span<const std::byte> in_;
-    size_t                     pos_      = 0;
-    bool                       failed_   = false;
-    uint8_t                    bitBuf_   = 0;
-    uint8_t                    bitCount_ = 0;
+    size_t pos_ = 0;
+    bool failed_ = false;
+    uint8_t bitBuf_ = 0;
+    uint8_t bitCount_ = 0;
 
     bool check(size_t n);
     void flushBits();

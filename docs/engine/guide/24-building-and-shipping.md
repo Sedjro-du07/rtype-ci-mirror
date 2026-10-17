@@ -58,7 +58,7 @@ Do not ship `src/`, build folders, or `user/` (created at first run).
 
 - `cmake --install build/<preset> --prefix <dir>` installs headers, libraries, plugins and
   `rtype_engineConfig.cmake`: another project uses `find_package(rtype_engine)` (task ENG-62).
-- `cpack --preset <preset>` builds `r-type-<version>-linux.tar.gz` or `…-windows.zip` with the layout
+- `cpack --preset <preset>` builds `r-type-<version>-Linux.tar.gz` or `…-Windows.zip` with the layout
   below and the runtime DLLs.
 
 ## CI

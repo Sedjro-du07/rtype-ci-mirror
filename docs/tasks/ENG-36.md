@@ -15,7 +15,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/net/NetTypes.hpp`
 
@@ -73,6 +73,16 @@ public:
 };
 ```
 
+### `include/engine/events/EngineEvents.hpp`
+
+```cpp
+// network events, declared here with PlayerId and DisconnectReason (moved from ENG-27)
+struct PlayerJoined       { PlayerId player; };                                         ENGINE_EVENT(PlayerJoined)
+struct PlayerLeft         { PlayerId player; DisconnectReason reason; std::string message; }; ENGINE_EVENT(PlayerLeft)
+struct JoinedServer       { PlayerId me; };                                             ENGINE_EVENT(JoinedServer)
+struct LeftServer         { DisconnectReason reason; std::string message; };            ENGINE_EVENT(LeftServer)
+```
+
 ## Depends on
 
 - [ENG-11](ENG-11.md) — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE
@@ -93,6 +103,7 @@ public:
 
 - [ ] `PlayerId`, `ConnectionId`, `Endpoint` (`resolve`, `toString`), `Datagram`, `DisconnectReason`, `NetConfig`, `ConnectionStats`
 - [ ] `INetwork` (UDP and TCP)
+- [ ] Network events `PlayerJoined`, `PlayerLeft`, `JoinedServer`, `LeftServer` in `EngineEvents.hpp` (moved from ENG-27)
 
 ## Done when
 

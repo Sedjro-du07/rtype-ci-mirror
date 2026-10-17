@@ -11,27 +11,33 @@ Deferred structural changes so systems can spawn and destroy while iterating (AD
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/ecs/Commands.hpp`
+- `include/engine/ecs/Commands.inl`
 - `src/ecs/Commands.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/ecs/Commands.hpp`
 
 ```cpp
 class Commands {
 public:
+    explicit Commands(Registry& registry, PrefabLibrary* prefabs = nullptr); // one per world (scene, or room)
     Entity spawn();                                         // entity created now, components added at apply()
-    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply() (block 11)
+    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply() (ENG-41); null if
+                                                            // the prefab fails to load or no library was given
     void   destroy(Entity e);                               // destroyed (with children) at apply()
-    template <class T> void add(Entity e, T value);
+    template <class T> void add(Entity e, T value);         // nothing if the entity already has a T
     template <class T> void set(Entity e, T value);         // add or replace
     template <class T> void remove(Entity e);
     void   setParent(Entity child, Entity parent, Vec2 localOffset = {}); // Entity::null() detaches
-    void   addRaw(Entity e, ComponentId id, std::vector<std::byte> value); // scripts, replication
+    void   addRaw(Entity e, ComponentId id, std::vector<std::byte> value); // scripts, replication: value holds an
+                                                            // object built with TypeInfo::construct; copied at
+                                                            // apply(), then destroyed with TypeInfo::destroy
     bool   empty() const;
-    void   apply(Registry& registry, SceneManager& scenes); // engine only; in recording order; skips dead entities
+    void   apply();                                         // engine only; in recording order; skips dead entities;
+                                                            // commands recorded during apply() wait for the next one
 };
 ```
 
@@ -51,7 +57,7 @@ public:
 
 ## To implement
 
-- [ ] spawn (empty, prefab), destroy, add, set, remove, setParent, addRaw
+- [ ] spawn (empty), destroy, add, set, remove, setParent, addRaw; prefab spawn comes with ENG-41
 - [ ] `apply` in recording order, skipping dead entities
 
 ## Done when

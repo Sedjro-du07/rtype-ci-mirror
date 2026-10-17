@@ -14,7 +14,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `cmake/EngineModules.cmake`
 
@@ -29,11 +29,16 @@ engine_add_game_module(<name> [SHARED_SOURCES ...] [SERVER_SOURCES ...] [CLIENT_
                        [SOURCES ...] [DEPENDS <targets>])
 # ADR 0040. With SERVER_SOURCES / CLIENT_SOURCES: builds lib<name>_server (shared + server) and
 # lib<name>_client (shared + client) in <bin>/games. With SOURCES only: one lib<name> for every role.
-# Defines ENGINE_GAME_SERVER or ENGINE_GAME_CLIENT in the role builds.
+# Defines ENGINE_GAME_SERVER or ENGINE_GAME_CLIENT in the role builds. CMake targets are named
+# game_<name>_server / game_<name>_client (or game_<name>), so a launcher may be called <name>_client.
 
-engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
-# Builds engine/launcher/main.cpp with ENGINE_DEFAULT_CONFIG="<file.yaml>"; copies the config next
-# to the executable; in static mode links every plugin and the named game into the executable.
+engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>] [ROLE client|server|editor])
+# Builds the launcher main() (ENGINE_LAUNCHER_SOURCE, default engine/launcher/main.cpp) with
+# ENGINE_DEFAULT_CONFIG="<file.yaml>" into <bin>; copies the config next to it. Dynamic mode: builds
+# the plugins and the game with it. Static mode: links every plugin and the game whole
+# (WHOLE_ARCHIVE), so their registrars run; ROLE picks lib<name>_server (server) or lib<name>_client
+# (client, editor) for a split game and is required there.
+# Declare plugins and games before the launchers that use them.
 ```
 
 ## Depends on
@@ -59,7 +64,8 @@ engine_add_launcher(<executable> CONFIG <file.yaml> [GAME <name>])
 
 - [ ] `engine_add_plugin(<kind>_<name> SOURCES … [DEPENDS …])`: SHARED or STATIC per option, output to `<bin>/plugins`, hidden visibility, `ENGINE_BUILDING_PLUGIN`
 - [ ] `engine_add_game_module(<name> SHARED_SOURCES … SERVER_SOURCES … CLIENT_SOURCES …)`: builds `lib<name>_server` and `lib<name>_client` in `<bin>/games` (or one `lib<name>` with `SOURCES`), defines `ENGINE_GAME_SERVER` / `ENGINE_GAME_CLIENT` (ADR 0040)
-- [ ] `engine_add_launcher(<exe> CONFIG <file> [GAME <name>])`: builds `launcher/main.cpp` with `ENGINE_DEFAULT_CONFIG`, copies the config, links plugins and the game in static mode
+- [ ] `engine_add_launcher(<exe> CONFIG <file> [GAME <name>] [ROLE client|server|editor])`: builds `launcher/main.cpp` (`ENGINE_LAUNCHER_SOURCE`) with `ENGINE_DEFAULT_CONFIG` into `bin/`, copies the config, links plugins and the role's game build whole in static mode
+- [ ] Game targets named `game_<name>_server` / `game_<name>_client` (files keep `lib<name>_<role>`), so launchers may be called `<name>_client`
 
 ## Done when
 

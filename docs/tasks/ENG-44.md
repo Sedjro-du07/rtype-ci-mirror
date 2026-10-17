@@ -11,11 +11,13 @@ Thread-safe logging with tags and several sinks.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/services/Logger.hpp`
+- `include/engine/services/Logger.inl`
+- `src/include/services/LogSinks.hpp`
 - `src/services/Logger.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/services/Logger.hpp`
 
@@ -31,7 +33,8 @@ public:
     virtual void write(const LogRecord&) = 0;
     virtual void flush();                       // default: does nothing
 };
-// Provided sinks: ConsoleSink (colored stdout/stderr), FileSink (rotating file), ConsoleUiSink (developer console)
+// Provided sinks: ConsoleSink (colored stdout/stderr), FileSink (rotating file) in src/include/services/LogSinks.hpp,
+// ConsoleUiSink (developer console, with the Console: ENG-46). Lines: "YYYY-MM-DD HH:MM:SS.mmm LEVEL [tag] message", UTC.
 
 struct LogConfig { LogLevel level = LogLevel::Info; std::filesystem::path file = "logs/engine.log"; bool color = true; };
 
@@ -46,13 +49,15 @@ public:
     Logger tagged(std::string_view tag);           // child logger sharing sinks: "[platform_sfml] …"
     void   setLevel(LogLevel level);
     void   addSink(std::shared_ptr<ILogSink> sink);
-    void   flush();                                 // called at shutdown and on errors
+    void   flush();                                 // called at shutdown; Error records flush every sink
+    LogLevel level() const;
 };
 ```
 
-### `src/services/Logger.cpp`
+### `src/include/services/LogSinks.hpp`
 
 ```cpp
+std::string formatRecord(const LogRecord& r);       // "2026-10-17 14:02:11.120 INFO  [tag] message" (UTC)
 class ConsoleSink final : public ILogSink {          // coloured stdout (Info and below) / stderr (Warn, Error)
 public:
     explicit ConsoleSink(bool color);
@@ -65,11 +70,6 @@ public:
     void write(const LogRecord& r) override;
     void flush() override;
 };
-class ConsoleUiSink final : public ILogSink {        // feeds the developer console
-public:
-    explicit ConsoleUiSink(Console& console);
-    void write(const LogRecord& r) override;
-};
 ```
 
 ## Depends on
@@ -80,6 +80,7 @@ public:
 
 - [ENG-14](ENG-14.md) — ModuleManager: load by kind and name, version check, reverse unload
 - [ENG-26](ENG-26.md) — Scheduler: stages, names, after/before, roles, stats, failure policy
+- [ENG-40](ENG-40.md) — AssetManager: handles, cache, refcount, fallback, hot reload
 - [SRV-09](SRV-09.md) — Contexts: ServiceContext, LobbyContext, one Context per room
 
 ## Read first
@@ -90,7 +91,7 @@ public:
 ## To implement
 
 - [ ] Levels, `std::format` API, `tagged`
-- [ ] ConsoleSink (colours), FileSink (rotating), ConsoleUiSink
+- [ ] ConsoleSink (colours), FileSink (rotating) in the private `LogSinks.hpp`; ConsoleUiSink moves to ENG-46 (needs the Console)
 
 ## Done when
 

@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** NetComponents
+*/
+
 // engine/include/engine/net/NetComponents.hpp
 // ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems
 // Spec: docs/engine/reference/10-network.md · ADR 0033, 0041 · reference 10 · RFC §9
@@ -7,6 +14,4 @@
 
 #pragma once
 
-namespace engine {
-
-} // namespace engine
+namespace engine {}

@@ -1,3 +1,10 @@
+--
+-- EPITECH PROJECT, 2026
+-- G-ING-500-COT-5-1-rtype-2
+-- File description:
+-- msep
+--
+
 -- engine/tools/wireshark/msep.lua
 -- SRV-19 — Wireshark dissector for MSEP v1.0 (Magic Shifter Engine Protocol)
 -- Spec: docs/network/rfc.md · network step 7

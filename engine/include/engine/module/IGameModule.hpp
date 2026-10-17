@@ -1,12 +1,36 @@
-// engine/include/engine/module/IGameModule.hpp
-// ENG-11 — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE
-// Spec: docs/engine/reference/02-modules.md · ADR 0020, 0025 · reference 02
-// Details: docs/tasks/ENG-11.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** IGameModule
+*/
 
 #pragma once
 
+#include "engine/Export.hpp"
+
+#include <cstdint>
+#include <string_view>
+
 namespace engine {
 
-} // namespace engine
+class TypeRegistry;
+class Scheduler;
+class Context;
+class LobbyContext;
+class ServiceContext;
+enum class Role : uint8_t;
+
+class ENGINE_API IGameModule {
+public:
+    virtual ~IGameModule() = default;
+    virtual void registerTypes(TypeRegistry& types) = 0;
+    virtual void registerSystems(Role role, Scheduler& scheduler) = 0;
+    virtual std::string_view firstScene() const = 0;
+    virtual void onStart(Context& ctx);
+    virtual void onLobbyStart(LobbyContext& ctx);
+    virtual void onRoomStart(Context& ctx);
+    virtual void onShutdown(ServiceContext& ctx);
+};
+
+}

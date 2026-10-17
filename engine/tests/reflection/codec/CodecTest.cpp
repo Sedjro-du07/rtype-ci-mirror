@@ -32,30 +32,25 @@ using namespace engine::codec;
 // Helpers
 // ---------------------------------------------------------------------------
 
-static WireContext nullWire()
-{
+static WireContext nullWire() {
     WireContext w;
     w.networkIdOf = [](Entity) -> uint32_t { return 0u; };
-    w.entityOf    = [](uint32_t) -> Entity  { return Entity::null(); };
+    w.entityOf = [](uint32_t) -> Entity { return Entity::null(); };
     return w;
 }
 
-static FieldInfo makeField(FieldKind kind, size_t offset = 0,
-                            const EnumInfo* enumInfo = nullptr)
-{
+static FieldInfo makeField(FieldKind kind, size_t offset = 0, const EnumInfo* enumInfo = nullptr) {
     FieldInfo f;
-    f.kind     = kind;
-    f.offset   = offset;
-    f.maxLength= 0; // use defaults (256 / 64)
+    f.kind = kind;
+    f.offset = offset;
+    f.maxLength = 0; // use defaults (256 / 64)
     f.enumInfo = enumInfo;
     return f;
 }
 
 /// Round-trip a single field: encode it then decode it, comparing the results.
 template <class T>
-static T roundTripField(FieldKind kind, const T& value,
-                        const FieldInfo& field, const WireContext& wire)
-{
+static T roundTripField(FieldKind, const T& value, const FieldInfo& field, const WireContext& wire) {
     std::vector<std::byte> buf;
     ByteWriter w(buf, 4096);
 
@@ -75,36 +70,31 @@ static T roundTripField(FieldKind kind, const T& value,
 // Primitive FieldKind round-trips
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Codec: Bool round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Bool round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::Bool);
-    CHECK(roundTripField(FieldKind::Bool, true,  f, nullWire()) == true);
+    CHECK(roundTripField(FieldKind::Bool, true, f, nullWire()) == true);
     CHECK(roundTripField(FieldKind::Bool, false, f, nullWire()) == false);
 }
 
-TEST_CASE("Codec: Int32 round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Int32 round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::Int32);
-    CHECK(roundTripField(FieldKind::Int32, int32_t{-42},        f, nullWire()) == -42);
-    CHECK(roundTripField(FieldKind::Int32, int32_t{0},          f, nullWire()) == 0);
+    CHECK(roundTripField(FieldKind::Int32, int32_t{-42}, f, nullWire()) == -42);
+    CHECK(roundTripField(FieldKind::Int32, int32_t{0}, f, nullWire()) == 0);
     CHECK(roundTripField(FieldKind::Int32, int32_t{2147483647}, f, nullWire()) == 2147483647);
 }
 
-TEST_CASE("Codec: UInt32 round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: UInt32 round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::UInt32);
     CHECK(roundTripField(FieldKind::UInt32, uint32_t{0xDEADBEEF}, f, nullWire()) == 0xDEADBEEFu);
 }
 
-TEST_CASE("Codec: Float round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Float round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::Float);
     float result = roundTripField(FieldKind::Float, 3.14f, f, nullWire());
     CHECK(result == Catch::Approx(3.14f));
 }
 
-TEST_CASE("Codec: Float quantized round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Float quantized round-trip", "[codec][reflection]") {
     FieldInfo f = makeField(FieldKind::Float);
     f.quantMin = 0.f;
     f.quantMax = 1000.f;
@@ -114,40 +104,35 @@ TEST_CASE("Codec: Float quantized round-trip", "[codec][reflection]")
     CHECK(result == Catch::Approx(360.f).margin(0.02f));
 }
 
-TEST_CASE("Codec: Double round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Double round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::Double);
     double result = roundTripField(FieldKind::Double, 2.718281828, f, nullWire());
     CHECK(result == Catch::Approx(2.718281828));
 }
 
-TEST_CASE("Codec: String round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: String round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::String);
     std::string result = roundTripField(FieldKind::String, std::string{"Hello R-Type"}, f, nullWire());
     CHECK(result == "Hello R-Type");
 }
 
-TEST_CASE("Codec: Vec2 round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Vec2 round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::Vec2);
     Vec2 result = roundTripField(FieldKind::Vec2, Vec2{40.f, 90.f}, f, nullWire());
     CHECK(result.x == Catch::Approx(40.f));
     CHECK(result.y == Catch::Approx(90.f));
 }
 
-TEST_CASE("Codec: Vec2 quantized round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Vec2 quantized round-trip", "[codec][reflection]") {
     FieldInfo f = makeField(FieldKind::Vec2);
     f.quantMin = -1000.f;
-    f.quantMax =  1000.f;
+    f.quantMax = 1000.f;
     Vec2 result = roundTripField(FieldKind::Vec2, Vec2{-123.4f, 567.8f}, f, nullWire());
     CHECK(result.x == Catch::Approx(-123.4f).margin(0.04f));
-    CHECK(result.y == Catch::Approx( 567.8f).margin(0.04f));
+    CHECK(result.y == Catch::Approx(567.8f).margin(0.04f));
 }
 
-TEST_CASE("Codec: Rect round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Rect round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::Rect);
     Rect result = roundTripField(FieldKind::Rect, Rect{1.f, 2.f, 3.f, 4.f}, f, nullWire());
     CHECK(result.x == Catch::Approx(1.f));
@@ -156,8 +141,7 @@ TEST_CASE("Codec: Rect round-trip", "[codec][reflection]")
     CHECK(result.h == Catch::Approx(4.f));
 }
 
-TEST_CASE("Codec: Color round-trip", "[codec][reflection]")
-{
+TEST_CASE("Codec: Color round-trip", "[codec][reflection]") {
     auto f = makeField(FieldKind::Color);
     Color result = roundTripField(FieldKind::Color, Color{255, 128, 64, 32}, f, nullWire());
     CHECK(result.r == 255);
@@ -166,9 +150,8 @@ TEST_CASE("Codec: Color round-trip", "[codec][reflection]")
     CHECK(result.a == 32);
 }
 
-TEST_CASE("Codec: Entity encodes as NetworkId 0 when not replicated", "[codec][reflection]")
-{
-    auto f   = makeField(FieldKind::Entity);
+TEST_CASE("Codec: Entity encodes as NetworkId 0 when not replicated", "[codec][reflection]") {
+    auto f = makeField(FieldKind::Entity);
     auto wire = nullWire();
     Entity e{1, 0};
     Entity result = roundTripField(FieldKind::Entity, e, f, wire);
@@ -176,20 +159,18 @@ TEST_CASE("Codec: Entity encodes as NetworkId 0 when not replicated", "[codec][r
     CHECK(result.isNull());
 }
 
-TEST_CASE("Codec: Entity NetworkId round-trip via WireContext", "[codec][reflection]")
-{
+TEST_CASE("Codec: Entity NetworkId round-trip via WireContext", "[codec][reflection]") {
     auto f = makeField(FieldKind::Entity);
     WireContext wire;
     wire.networkIdOf = [](Entity e) -> uint32_t { return e.index + 1; };
-    wire.entityOf    = [](uint32_t id) -> Entity { return Entity{id - 1, 0}; };
+    wire.entityOf = [](uint32_t id) -> Entity { return Entity{id - 1, 0}; };
 
     Entity e{42, 0};
     Entity result = roundTripField(FieldKind::Entity, e, f, wire);
     CHECK(result.index == 42u);
 }
 
-TEST_CASE("Codec: Enum round-trip with known value", "[codec][reflection]")
-{
+TEST_CASE("Codec: Enum round-trip with known value", "[codec][reflection]") {
     EnumInfo info;
     info.values = {{"A", 0}, {"B", 1}, {"C", 2}};
     auto f = makeField(FieldKind::Enum, 0, &info);
@@ -199,8 +180,7 @@ TEST_CASE("Codec: Enum round-trip with known value", "[codec][reflection]")
     CHECK(result == 1);
 }
 
-TEST_CASE("Codec: Enum decode fails for unknown value", "[codec][reflection]")
-{
+TEST_CASE("Codec: Enum decode fails for unknown value", "[codec][reflection]") {
     EnumInfo info;
     info.values = {{"A", 0}, {"B", 1}};
     auto f = makeField(FieldKind::Enum, 0, &info);
@@ -217,8 +197,7 @@ TEST_CASE("Codec: Enum decode fails for unknown value", "[codec][reflection]")
     CHECK_FALSE(res);
 }
 
-TEST_CASE("Codec: Bool decode fails for value != 0 or 1", "[codec][reflection]")
-{
+TEST_CASE("Codec: Bool decode fails for value != 0 or 1", "[codec][reflection]") {
     // Craft a raw byte of 2
     std::vector<std::byte> buf = {std::byte{0x02}};
     bool out = false;
@@ -232,13 +211,11 @@ TEST_CASE("Codec: Bool decode fails for value != 0 or 1", "[codec][reflection]")
 // Fuzz: random bytes must not crash or over-allocate
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Codec: random bytes never crash on decode (fuzz light)", "[codec][reflection][fuzz]")
-{
+TEST_CASE("Codec: random bytes never crash on decode (fuzz light)", "[codec][reflection][fuzz]") {
     // Feed 256 different single-byte patterns through each FieldKind decoder.
     std::vector<FieldKind> kinds = {
-        FieldKind::Bool,   FieldKind::Int32, FieldKind::UInt32, FieldKind::Float,
-        FieldKind::Double, FieldKind::String,FieldKind::Vec2,   FieldKind::Rect,
-        FieldKind::Color,  FieldKind::Entity,FieldKind::Enum,
+        FieldKind::Bool, FieldKind::Int32, FieldKind::UInt32, FieldKind::Float,  FieldKind::Double, FieldKind::String,
+        FieldKind::Vec2, FieldKind::Rect,  FieldKind::Color,  FieldKind::Entity, FieldKind::Enum,
     };
 
     EnumInfo info;
@@ -261,16 +238,19 @@ TEST_CASE("Codec: random bytes never crash on decode (fuzz light)", "[codec][ref
 // fingerprint
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Codec: fingerprint is deterministic and order-sensitive", "[codec][reflection]")
-{
+TEST_CASE("Codec: fingerprint is deterministic and order-sensitive", "[codec][reflection]") {
     TypeInfo t1;
     t1.name = "Health";
-    FieldInfo f1; f1.name = "hp"; f1.kind = FieldKind::Int32;
+    FieldInfo f1;
+    f1.name = "hp";
+    f1.kind = FieldKind::Int32;
     t1.fields = {f1};
 
     TypeInfo t2;
     t2.name = "Position";
-    FieldInfo f2; f2.name = "pos"; f2.kind = FieldKind::Vec2;
+    FieldInfo f2;
+    f2.name = "pos";
+    f2.kind = FieldKind::Vec2;
     t2.fields = {f2};
 
     const TypeInfo* arr1[] = {&t1, &t2};
@@ -278,9 +258,9 @@ TEST_CASE("Codec: fingerprint is deterministic and order-sensitive", "[codec][re
 
     uint64_t fp1a = fingerprint(arr1);
     uint64_t fp1b = fingerprint(arr1);
-    uint64_t fp2  = fingerprint(arr2);
+    uint64_t fp2 = fingerprint(arr2);
 
-    CHECK(fp1a == fp1b);       // deterministic
-    CHECK(fp1a != fp2);        // order-sensitive
+    CHECK(fp1a == fp1b); // deterministic
+    CHECK(fp1a != fp2);  // order-sensitive
     CHECK(fp1a != 0);
 }

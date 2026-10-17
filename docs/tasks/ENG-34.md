@@ -11,11 +11,12 @@ The audio interface, buses and captions for every backend.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/audio/IAudio.hpp`
+- `src/include/audio/AudioCaptions.hpp`
 - `src/audio/AudioCaptions.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `include/engine/audio/IAudio.hpp`
 

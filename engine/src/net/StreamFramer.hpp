@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "engine/Export.hpp"
 #include "engine/core/Error.hpp"
 
 #include <cstdint>
@@ -29,7 +30,7 @@ namespace engine {
 /// One StreamFramer lives per TCP connection. feed() accumulates raw bytes; next() extracts
 /// one complete message at a time.  A protocol violation makes feed() return an error: the
 /// caller MUST close the stream immediately.
-class StreamFramer {
+class ENGINE_API StreamFramer {
 public:
     /// @param maxMessageBytes  Upper bound on `length`; matches net.maxStreamMessageBytes (65 536).
     explicit StreamFramer(uint32_t maxMessageBytes);
@@ -51,7 +52,7 @@ public:
 
 private:
     std::vector<std::byte> buffer_;
-    uint32_t               max_;
+    uint32_t max_;
 };
 
 } // namespace engine

@@ -1,4 +1,11 @@
-// engine/plugins/platform_sfml/SfmlPlatform.hpp
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** SfmlRenderer
+*/
+
+// engine/plugins/platform_sfml/include/SfmlRenderer.hpp
 // ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
 // Spec: docs/engine/reference/08-rendering.md · ADR 0007, 0031
 // Details: docs/tasks/ENG-31.md
@@ -7,6 +14,4 @@
 
 #pragma once
 
-namespace engine {
-
-} // namespace engine
+namespace engine {}

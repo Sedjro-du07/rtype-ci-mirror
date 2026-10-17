@@ -11,16 +11,26 @@ Lua 5.4 + sol2 implementation of IScripting.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `plugins/scripting_lua/CMakeLists.txt`
-- `plugins/scripting_lua/LuaScripting.hpp`
+- `plugins/scripting_lua/include/LuaScripting.hpp`
 - `plugins/scripting_lua/LuaScripting.cpp`
 - `plugins/scripting_lua/LuaApi.cpp`
 - `plugins/scripting_lua/Sandbox.cpp`
+- `src/script/ScriptSystems.cpp`
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `plugins/scripting_lua/LuaScripting.hpp`
+### `src/script/ScriptSystems.cpp`
+
+```cpp
+void scriptLifecycle(Context& ctx);   // "engine.script.lifecycle": on_spawn once; on_destroy through the Script onDestroy hook
+void scriptUpdate(Context& ctx);      // "engine.script.update":    on_update(self, dt) for every entity with Script
+void scriptCollision(Context& ctx);   // "engine.script.collision": on_collision(self, other) from Collision events
+void registerScriptSystems(Scheduler& s, IScripting& scripting);
+```
+
+### `plugins/scripting_lua/include/LuaScripting.hpp`
 
 ```cpp
 class LuaScripting final : public IScripting {
@@ -80,6 +90,7 @@ void installInstructionLimit(lua_State* L, uint32_t maxInstructions);   // lua_s
 - [ ] Sandbox (no io, os, package, debug, load)
 - [ ] Instruction limit hook
 - [ ] Reload keeping the handle
+- [ ] Script systems (moved from ENG-48): lifecycle, update, collision; a script error disables that script
 
 ## Done when
 

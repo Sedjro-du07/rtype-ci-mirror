@@ -21,7 +21,7 @@ At the repository root (no skeleton: this task creates them):
 
 ## Classes and methods
 
-**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp` (or in the header for templates). Behaviour of each method: the comments here and the pages in *Read first*.
+**Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
 ### `CMakeLists.txt`
 
@@ -73,8 +73,8 @@ add_subdirectory(engine)
   "name": "rtype", "version": "0.1.0",
   "builtin-baseline": "<pinned vcpkg commit>",
   "dependencies": [ "sfml", "yaml-cpp", "asio", "lua", "sol2", "miniaudio",
-                    { "name": "imgui", "features": [ "sfml-binding" ] }, "implot",
-                    "catch2", "tl-expected" ]
+                    "imgui", "imgui-sfml", "implot", "catch2", "tl-expected" ],
+  "overrides": [ { "name": "lua", "version": "5.4.8" } ]
 }
 ```
 
@@ -108,7 +108,7 @@ buildPresets and testPresets with the same names
 ## To implement
 
 - [ ] Root `CMakeLists.txt`: `project(rtype)`, `add_subdirectory(engine)` (the game is added later); the engine still configures alone from `engine/`
-- [ ] Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua, sol2, miniaudio, imgui[sfml-binding], implot, catch2, tl-expected (ADR 0045)
+- [ ] Root `vcpkg.json` (manifest mode, pinned `builtin-baseline`): sfml, yaml-cpp, asio, lua (override 5.4), sol2, miniaudio, imgui, imgui-sfml, implot, catch2, tl-expected (ADR 0045)
 - [ ] Root `CMakePresets.json`: `linux-gcc`, `linux-clang`, `windows-msvc` × `debug` / `release`, plus `-static` variants; toolchain `$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake`; binary dir `build/<preset>`
 - [ ] `engine/CMakeLists.txt`: `engine` library (SHARED when `ENGINE_DYNAMIC_MODULES`, else STATIC), `include/` public, `src/` private
 - [ ] `generate_export_header` → `engine/Export.hpp` with `ENGINE_API`; hidden visibility everywhere (`CXX_VISIBILITY_PRESET hidden`, `VISIBILITY_INLINES_HIDDEN`) (ADR 0044)

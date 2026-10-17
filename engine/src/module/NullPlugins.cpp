@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** NullPlugins
+*/
+
 // engine/src/module/NullPlugins.cpp
 // ENG-15 — Null Objects: NullPlatform, NullRenderer, NullAudio, NullNetwork, NullScripting
 // Spec: docs/engine/reference/02-modules.md · ADR 0023
@@ -7,6 +14,4 @@
 
 #include "engine/module/NullPlugins.hpp"
 
-namespace engine {
-
-} // namespace engine
+namespace engine {}

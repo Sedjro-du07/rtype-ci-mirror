@@ -1,0 +1,41 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## clang-format
+##
+
+# Code style of the engine and the game (ADR 0045 · ENG-61). Checked in CI.
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++20
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ColumnLimit: 120
+AccessModifierOffset: -4
+NamespaceIndentation: None
+FixNamespaceComments: false
+ReflowComments: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLambdasOnASingleLine: All
+AlwaysBreakTemplateDeclarations: Yes
+AlignConsecutiveAssignments: false
+AlignTrailingComments: true
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"'
+    Priority: 1
+  - Regex: '^<engine/'
+    Priority: 2
+  - Regex: '^<windows\.h>$'
+    Priority: 3
+    SortPriority: 3
+  - Regex: '^<[a-z_]+>$'
+    Priority: 5
+  - Regex: '.*'
+    Priority: 3
+    SortPriority: 4

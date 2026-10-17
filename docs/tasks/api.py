@@ -46,8 +46,8 @@ add_subdirectory(engine)
   "name": "rtype", "version": "0.1.0",
   "builtin-baseline": "<pinned vcpkg commit>",
   "dependencies": [ "sfml", "yaml-cpp", "asio", "lua", "sol2", "miniaudio",
-                    { "name": "imgui", "features": [ "sfml-binding" ] }, "implot",
-                    "catch2", "tl-expected" ]
+                    "imgui", "imgui-sfml", "implot", "catch2", "tl-expected" ],
+  "overrides": [ { "name": "lua", "version": "5.4.8" } ]
 }'''),
     ('/CMakePresets.json (repository root)', 'json', '''configurePresets: base (hidden: toolchain $env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake, binaryDir build/${presetName})
   linux-gcc-debug, linux-gcc-release, linux-clang-debug, linux-clang-release,
@@ -56,7 +56,7 @@ add_subdirectory(engine)
 buildPresets and testPresets with the same names'''),
 ]),
 'ENG-60': dict(auto=False, extra=[
-    ('src/os/Os.hpp', 'cpp', '''// Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
+    ('src/include/os/Os.hpp', 'cpp', '''// Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
 namespace engine::os {
 void                  secureRandom(std::span<std::byte> out);            // getrandom / BCryptGenRandom; aborts on failure
 std::filesystem::path userDataDir(std::string_view app);                  // created if missing
@@ -72,13 +72,15 @@ jobs:
   format:  clang-format --dry-run --Werror on changed *.hpp *.cpp'''),
 ]),
 'ENG-62': dict(extra=[
-    ('cmake/EngineInstall.cmake', 'cmake', '''install(TARGETS engine EXPORT rtype_engineTargets RUNTIME LIBRARY ARCHIVE)
-install(DIRECTORY include/ ${CMAKE_CURRENT_BINARY_DIR}/include/ DESTINATION include)
-install(FILES cmake/EngineModules.cmake DESTINATION lib/cmake/rtype_engine)
-install(EXPORT rtype_engineTargets NAMESPACE rtype_engine:: DESTINATION lib/cmake/rtype_engine)
-configure_package_config_file(cmake/rtype_engineConfig.cmake.in …)
-write_basic_package_version_file(… COMPATIBILITY SameMinorVersion)
-include(CPack)                         # TGZ on Linux, ZIP on Windows'''),
+    ('cmake/EngineInstall.cmake', 'cmake', '''engine_install_engine()      # engine + headers + Export.hpp + plugins (export set rtype_engineTargets),
+                             # CMake helpers and launcher main.cpp into lib/cmake/rtype_engine,
+                             # rtype_engineConfig.cmake + version file (SameMinorVersion)
+engine_enable_packaging(NAME <name> [VENDOR <vendor>])   # CPack: TGZ on Linux, ZIP on Windows'''),
+    ('cmake/rtype_engineConfig.cmake.in', 'cmake', '''@PACKAGE_INIT@
+find_dependency(tl-expected) when the engine was built with the fallback
+include(rtype_engineTargets.cmake)                     # rtype_engine::engine, rtype_engine::<plugins>
+set(ENGINE_DYNAMIC_MODULES <engine's mode>); ENGINE_LAUNCHER_SOURCE; ENGINE_PLUGIN_TARGETS
+include(EngineOptions) include(EngineModules) include(EngineInstall)'''),
 ]),
 'ENG-03': dict(extra=[
     ('cmake/FeatureProbe.cpp', 'cpp', '''// One function per allowed feature (ADR 0017); compiled with try_compile, never linked.
@@ -88,37 +90,38 @@ void                               probePrint();                 // std::print
 struct ProbeDeducingThis { template <class Self> auto& get(this Self& self); };
 int                                probeToUnderlying();          // std::to_underlying
 [[noreturn]] void                  probeUnreachable();           // std::unreachable'''),
-    ('cmake/EngineOptions.cmake', 'cmake', '''try_compile(ENGINE_HAS_STD_EXPECTED ... SOURCES cmake/FeatureProbe.cpp ...)
-# if FALSE: target_compile_definitions(engine PUBLIC ENGINE_USE_TL_EXPECTED)'''),
+    ('cmake/EngineFeatures.cmake', 'cmake', '''engine_probe_cxx23(<target>)   # try_compile FeatureProbe.cpp with -DPROBE_<FEATURE> for each feature
+# EXPECTED missing → ENGINE_USE_TL_EXPECTED + tl::expected; PRINT missing → ENGINE_NO_STD_PRINT;
+# MOVE_ONLY_FUNCTION, DEDUCING_THIS, TO_UNDERLYING, UNREACHABLE missing → configure error'''),
 ]),
 # ---------------------------------------------------------------- 01 Core
 'ENG-04': dict(skip=['core/math/'], extra=[
     ('include/engine/core/Hash.hpp', 'cpp', '''constexpr uint64_t fnv1a64(std::string_view text) noexcept;   // compile-time hash for type, event and action keys'''),
-    ('include/engine/core/math/Vec2.hpp', 'cpp', '''struct Vec2 {
+    ('include/engine/core/math/Vec2.hpp', 'cpp', '''struct ENGINE_API Vec2 {
     float x = 0, y = 0;
-    constexpr Vec2 operator+(Vec2 o) const;   constexpr Vec2 operator-(Vec2 o) const;
-    constexpr Vec2 operator*(float k) const;  constexpr Vec2 operator/(float k) const;
-    constexpr Vec2& operator+=(Vec2 o);       constexpr Vec2& operator-=(Vec2 o);
-    constexpr Vec2& operator*=(float k);
-    constexpr bool operator==(const Vec2&) const = default;
-    constexpr float dot(Vec2 o) const;
+    Vec2 operator+(Vec2 o) const;   Vec2 operator-(Vec2 o) const;
+    Vec2 operator*(float k) const;  Vec2 operator/(float k) const;
+    Vec2& operator+=(Vec2 o);       Vec2& operator-=(Vec2 o);
+    Vec2& operator*=(float k);
+    bool operator==(const Vec2&) const = default;
+    float dot(Vec2 o) const;
     float length() const;
     Vec2  normalized() const;                 // {0, 0} stays {0, 0}
-    static constexpr Vec2 lerp(Vec2 a, Vec2 b, float t);
+    static Vec2 lerp(Vec2 a, Vec2 b, float t);
 };'''),
-    ('include/engine/core/math/Rect.hpp', 'cpp', '''struct Rect {
+    ('include/engine/core/math/Rect.hpp', 'cpp', '''struct ENGINE_API Rect {
     float x = 0, y = 0, w = 0, h = 0;
-    constexpr bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
-    constexpr bool intersects(const Rect& o) const;  // touching edges do not intersect
-    constexpr Vec2 center() const;
-    constexpr bool operator==(const Rect&) const = default;
+    bool contains(Vec2 p) const;           // edges included on the left/top, excluded on the right/bottom
+    bool intersects(const Rect& o) const;  // touching edges do not intersect
+    Vec2 center() const;
+    bool operator==(const Rect&) const = default;
 };'''),
-    ('include/engine/core/math/Color.hpp', 'cpp', '''struct Color {
+    ('include/engine/core/math/Color.hpp', 'cpp', '''struct ENGINE_API Color {
     uint8_t r = 255, g = 255, b = 255, a = 255;
-    static constexpr Color white(); static constexpr Color black();
-    static constexpr Color red();   static constexpr Color green(); static constexpr Color blue();
-    static constexpr Color transparent();
-    constexpr bool operator==(const Color&) const = default;
+    static Color white(); static Color black();
+    static Color red();   static Color green(); static Color blue();
+    static Color transparent();
+    bool operator==(const Color&) const = default;
 };'''),
 ]),
 # ---------------------------------------------------------------- 02 Modules
@@ -283,6 +286,16 @@ Result<YamlNode> loadYamlFile(const std::filesystem::path& file);
 Result<void>     fromYaml(const TypeInfo& type, void* obj, const YamlNode& node, LoadContext& ctx); // generic, per FieldKind
 void             toYaml(const TypeInfo& type, const void* obj, YamlWriter& out, SaveContext& ctx);'''),
 ]),
+'ENG-18': dict(extra=[
+    ('include/engine/components/Identity.hpp', 'cpp', '''struct Name             { std::string value; };                           ENGINE_COMPONENT(Name)
+struct Uuid             { uint64_t hi = 0, lo = 0; static Uuid generate(); bool operator==(const Uuid&) const = default; };
+                                                                          ENGINE_COMPONENT(Uuid)
+struct Tags             { std::vector<uint64_t> ids; bool has(std::string_view tag) const; };
+                                                                          ENGINE_COMPONENT(Tags)
+template <> struct std::hash<engine::Uuid>;      // for the uuid index'''),
+    ('include/engine/components/Hierarchy.hpp', 'cpp', '''struct Parent           { Entity value; Vec2 offset; };                   ENGINE_COMPONENT(Parent)
+struct Children         { std::vector<Entity> list; };                    ENGINE_COMPONENT(Children)'''),
+]),
 'ENG-25': dict(extra=[
     ('include/engine/components/*.hpp', 'cpp', '''struct Position         { float x = 0, y = 0; };                          ENGINE_COMPONENT(Position)
 struct PreviousPosition { float x = 0, y = 0; };                          ENGINE_COMPONENT(PreviousPosition)
@@ -298,15 +311,6 @@ struct Collider         { Vec2 size; Vec2 offset; uint32_t layer = 1; uint32_t m
                                                                           ENGINE_COMPONENT(Collider)
 struct Lifetime         { float seconds = 0; };                           ENGINE_COMPONENT(Lifetime)
 struct Parallax         { float factor = 1; float wrapWidth = 0; };       ENGINE_COMPONENT(Parallax)
-// Identity.hpp
-struct Name             { std::string value; };                           ENGINE_COMPONENT(Name)
-struct Uuid             { uint64_t hi = 0, lo = 0; static Uuid generate(); bool operator==(const Uuid&) const = default; };
-                                                                          ENGINE_COMPONENT(Uuid)
-struct Tags             { std::vector<uint64_t> ids; bool has(std::string_view tag) const; };
-                                                                          ENGINE_COMPONENT(Tags)
-// Hierarchy.hpp
-struct Parent           { Entity value; Vec2 offset; };                   ENGINE_COMPONENT(Parent)
-struct Children         { std::vector<Entity> list; };                    ENGINE_COMPONENT(Children)
 // Script.hpp
 struct Script           { ScriptHandle handle; std::string file; };       ENGINE_COMPONENT(Script)'''),
     ('src/systems/RegisterEngineTypes.cpp', 'cpp', '''void registerEngineTypes(TypeRegistry& types);   // every component above with fields and flags,
@@ -317,17 +321,22 @@ struct Script           { ScriptHandle handle; std::string file; };       ENGINE
     ('include/engine/events/EngineEvents.hpp', 'cpp', '''struct QuitRequested      {};                                           ENGINE_EVENT(QuitRequested)
 struct WindowResized      { uint32_t width, height; };                    ENGINE_EVENT(WindowResized)
 struct WindowFocusChanged { bool focused; };                              ENGINE_EVENT(WindowFocusChanged)
+struct AppSuspended       {};                                           ENGINE_EVENT(AppSuspended)   // reserved for mobile
+struct AppResumed         {};                                           ENGINE_EVENT(AppResumed)
 struct Collision          { Entity a, b; };                               ENGINE_EVENT(Collision)
 struct SceneLoaded        { std::string name; };                          ENGINE_EVENT(SceneLoaded)
 struct SceneUnloading     { std::string name; };                          ENGINE_EVENT(SceneUnloading)
-struct PlayerJoined       { PlayerId player; };                           ENGINE_EVENT(PlayerJoined)
-struct PlayerLeft         { PlayerId player; DisconnectReason reason; };  ENGINE_EVENT(PlayerLeft)
-struct JoinedServer       { PlayerId me; };                               ENGINE_EVENT(JoinedServer)
-struct LeftServer         { DisconnectReason reason; };                   ENGINE_EVENT(LeftServer)
 struct Caption            { std::string text; float seconds; };           ENGINE_EVENT(Caption)
 struct ConsoleCommand     { std::string line; };                          ENGINE_EVENT(ConsoleCommand)'''),
 ]),
 # ---------------------------------------------------------------- 07 Input
+'ENG-36': dict(extra=[
+    ('include/engine/events/EngineEvents.hpp', 'cpp', '''// network events, declared here with PlayerId and DisconnectReason (moved from ENG-27)
+struct PlayerJoined       { PlayerId player; };                                         ENGINE_EVENT(PlayerJoined)
+struct PlayerLeft         { PlayerId player; DisconnectReason reason; std::string message; }; ENGINE_EVENT(PlayerLeft)
+struct JoinedServer       { PlayerId me; };                                             ENGINE_EVENT(JoinedServer)
+struct LeftServer         { DisconnectReason reason; std::string message; };            ENGINE_EVENT(LeftServer)'''),
+]),
 'ENG-28': dict(extra=[
     ('include/engine/input/Keys.hpp', 'cpp', '''std::string_view keyName(Key k);                         // label of the current keyboard layout, for display
 std::optional<Key>           keyFromName(std::string_view name);      // input.yaml ↔ enum
@@ -340,7 +349,7 @@ std::string_view             toName(Key k);  std::string_view toName(GamepadButt
     ('include/engine/render/IRenderer.hpp', 'cpp', '''struct RenderStats { uint32_t commands = 0, batches = 0, drawCalls = 0; double submitMs = 0; };'''),
 ]),
 'ENG-31': dict(extra=[
-    ('plugins/platform_sfml/SfmlPlatform.hpp', 'cpp', '''class SfmlPlatform final : public IPlatform {
+    ('plugins/platform_sfml/include/SfmlPlatform.hpp', 'cpp', '''class SfmlPlatform final : public IPlatform {
 public:
     // IPlugin
     PluginKind kind() const override;                 // Platform
@@ -365,7 +374,7 @@ private:
     WindowDesc       desc_;
 };
 ENGINE_PLUGIN(SfmlPlatform)'''),
-    ('plugins/platform_sfml/SfmlRenderer.hpp', 'cpp', '''class SfmlRenderer final : public IRenderer {
+    ('plugins/platform_sfml/include/SfmlRenderer.hpp', 'cpp', '''class SfmlRenderer final : public IRenderer {
 public:
     explicit SfmlRenderer(sf::RenderWindow& window);
     Result<TextureHandle> createTexture(std::span<const std::byte> encodedImage, std::string_view debugName) override;
@@ -409,7 +418,7 @@ uniform float     strength;      // 0..1
 vec3 simulate(vec3 rgb, int mode);
 vec3 daltonize(vec3 rgb, int mode);
 void main();'''),
-    ('plugins/platform_sfml/SfmlRenderer.hpp', 'cpp', '''void SfmlRenderer::setColorFilter(ColorFilter f) override;   // selects the shader mode
+    ('plugins/platform_sfml/include/SfmlRenderer.hpp', 'cpp', '''void SfmlRenderer::setColorFilter(ColorFilter f) override;   // selects the shader mode
 bool SfmlRenderer::supports(Feature f) const override;        // ColorFilter: sf::Shader::isAvailable()
 // private:
 sf::Shader        filter_;
@@ -430,7 +439,7 @@ private:
 };'''),
 ]),
 'ENG-35': dict(extra=[
-    ('plugins/audio_miniaudio/MiniaudioAudio.hpp', 'cpp', '''class MiniaudioAudio final : public IAudio {
+    ('plugins/audio_miniaudio/include/MiniaudioAudio.hpp', 'cpp', '''class MiniaudioAudio final : public IAudio {
 public:
     PluginKind kind() const override; std::string_view name() const override;   // "miniaudio"
     uint32_t apiVersion() const override;
@@ -514,7 +523,8 @@ struct PrefabChild {
 ]),
 # ---------------------------------------------------------------- 12 Services
 'ENG-44': dict(extra=[
-    ('src/services/Logger.cpp', 'cpp', '''class ConsoleSink final : public ILogSink {          // coloured stdout (Info and below) / stderr (Warn, Error)
+    ('src/include/services/LogSinks.hpp', 'cpp', '''std::string formatRecord(const LogRecord& r);       // "2026-10-17 14:02:11.120 INFO  [tag] message" (UTC)
+class ConsoleSink final : public ILogSink {          // coloured stdout (Info and below) / stderr (Warn, Error)
 public:
     explicit ConsoleSink(bool color);
     void write(const LogRecord& r) override;
@@ -525,11 +535,6 @@ public:
     FileSink(std::filesystem::path file, size_t maxBytes, int keepFiles);
     void write(const LogRecord& r) override;
     void flush() override;
-};
-class ConsoleUiSink final : public ILogSink {        // feeds the developer console
-public:
-    explicit ConsoleUiSink(Console& console);
-    void write(const LogRecord& r) override;
 };'''),
 ]),
 'ENG-45': dict(extra=[
@@ -538,6 +543,13 @@ public:
     uint32_t         flags;
     std::string      value;            // current value as text
     std::string      defaultValue;
+};'''),
+]),
+'ENG-46': dict(extra=[
+    ('src/services/ConsoleUiSink.cpp', 'cpp', '''class ConsoleUiSink final : public ILogSink {        // feeds the developer console (moved from ENG-44)
+public:
+    explicit ConsoleUiSink(Console& console);
+    void write(const LogRecord& r) override;
 };'''),
 ]),
 'ENG-47': dict(extra=[
@@ -555,14 +567,12 @@ void drawFrameGraph(const Metrics& metrics);
 void drawSystemTimings(std::span<const SystemStats> stats);
 void drawLagometer(const NetworkSession& net);'''),
 ]),
-'ENG-48': dict(extra=[
+'ENG-49': dict(extra=[
     ('src/script/ScriptSystems.cpp', 'cpp', '''void scriptLifecycle(Context& ctx);   // "engine.script.lifecycle": on_spawn once; on_destroy through the Script onDestroy hook
 void scriptUpdate(Context& ctx);      // "engine.script.update":    on_update(self, dt) for every entity with Script
 void scriptCollision(Context& ctx);   // "engine.script.collision": on_collision(self, other) from Collision events
 void registerScriptSystems(Scheduler& s, IScripting& scripting);'''),
-]),
-'ENG-49': dict(extra=[
-    ('plugins/scripting_lua/LuaScripting.hpp', 'cpp', '''class LuaScripting final : public IScripting {
+    ('plugins/scripting_lua/include/LuaScripting.hpp', 'cpp', '''class LuaScripting final : public IScripting {
 public:
     PluginKind kind() const override; std::string_view name() const override;   // "lua"
     uint32_t apiVersion() const override;

@@ -1,12 +1,32 @@
-// engine/include/engine/core/math/Vec2.hpp
-// ENG-04 — Core types: hash, Vec2/Rect/Color, Error, Result, BootError
-// Spec: docs/engine/reference/01-core.md · ADR 0017, 0024 · reference 01
-// Details: docs/tasks/ENG-04.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Vec2
+*/
 
 #pragma once
 
+#include "engine/Export.hpp"
+
 namespace engine {
 
-} // namespace engine
+struct ENGINE_API Vec2 {
+    float x = 0, y = 0;
+
+    Vec2 operator+(Vec2 o) const;
+    Vec2 operator-(Vec2 o) const;
+    Vec2 operator*(float k) const;
+    Vec2 operator/(float k) const;
+    Vec2& operator+=(Vec2 o);
+    Vec2& operator-=(Vec2 o);
+    Vec2& operator*=(float k);
+    bool operator==(const Vec2&) const = default;
+
+    float dot(Vec2 o) const;
+    float length() const;
+    Vec2 normalized() const;
+    static Vec2 lerp(Vec2 a, Vec2 b, float t);
+};
+
+}
