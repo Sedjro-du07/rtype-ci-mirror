@@ -1,12 +1,44 @@
-// engine/src/reflection/Codec.hpp
+/*
+** EPITECH PROJECT, 2026
+** G-ING-500-COT-5-1-rtype-2
+** File description:
+** Codec
+*/
 // SRV-04 — Generic binary codec: lists, structs, enums, Entity ↔ NetworkId, limits
 // Spec: docs/engine/reference/04-reflection.md · ADR 0036, 0037 · reference 04 · RFC §5
-// Details: docs/tasks/SRV-04.md
-// Board: Notion › R-Type — Architecture › Server — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
 
 #pragma once
 
-namespace engine {
+#include "engine/core/Error.hpp"
+#include "engine/reflection/ByteStream.hpp"
+#include "engine/reflection/TypeInfo.hpp"
 
+#include <cstddef>
+#include <cstdint>
+#include <span>
+
+namespace engine {
+namespace codec {
+
+/// Encode an object of `type` into `out` using the WireContext for Entity ↔ NetworkId.
+/// If TypeInfo::encode is set (custom codec), it is called instead of field-by-field.
+void encode(const TypeInfo& type, const void* obj, ByteWriter& out, const WireContext& wire);
+
+/// Decode an object of `type` from `in` into `obj` (must be default-constructed by the caller).
+/// Returns an error on any malformed input; `obj` may be partially written on failure.
+Result<void> decode(const TypeInfo& type, void* obj, ByteReader& in, const WireContext& wire);
+
+/// Encode one field value (at field.offset inside the object) into `out`.
+void encodeField(const FieldInfo& field, const std::byte* base, ByteWriter& out,
+                 const WireContext& wire);
+
+/// Decode one field value from `in` into the field (at field.offset inside the object).
+Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in,
+                         const WireContext& wire);
+
+/// Compute a format fingerprint: fnv1a64 over the names, field kinds and field names of all
+/// types in the span, in order.  Used by TypeRegistry::formatFingerprint() (RFC §6.3.1).
+uint64_t fingerprint(std::span<const TypeInfo* const> types);
+
+} // namespace codec
 } // namespace engine

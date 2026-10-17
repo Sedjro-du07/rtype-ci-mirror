@@ -31,3 +31,8 @@ engine_add_test(engine_net_room_types_tests SOURCES
 # SRV-06 — StreamFramer tests
 engine_add_test(engine_net_stream_framer_tests SOURCES
     net/StreamFramerTest.cpp)
+
+# ENG-24 / SRV-04 — ByteStream and Codec tests
+engine_add_test(engine_reflection_tests SOURCES
+    reflection/ByteStreamTest.cpp
+    reflection/codec/CodecTest.cpp)
