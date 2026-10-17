@@ -143,3 +143,49 @@ engine_add_test(engine_systems_tests SOURCES
     systems/EngineSystemsTest.cpp)
 engine_add_test(engine_net_session_tests SOURCES
     net/NetworkSessionTest.cpp)
+
+function(engine_add_loadable_fixture target folder output module)
+    cmake_parse_arguments(PARSE_ARGV 4 ARG "" "" "SOURCES;DEFINITIONS")
+    if(ENGINE_DYNAMIC_MODULES)
+        add_library(${target} SHARED ${ARG_SOURCES})
+        target_compile_definitions(${target} PRIVATE
+            "ENGINE_EXPORT=$<IF:$<CXX_COMPILER_ID:MSVC>,__declspec(dllexport),__attribute__((visibility(\"default\")))>")
+        set_target_properties(${target} PROPERTIES
+            PREFIX "lib" OUTPUT_NAME ${output}
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${folder}
+            LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${folder}
+            BUILD_RPATH "$ORIGIN/..")
+    else()
+        add_library(${target} STATIC ${ARG_SOURCES})
+    endif()
+    target_link_libraries(${target} PUBLIC rtype_engine::engine)
+    target_compile_definitions(${target} PRIVATE ENGINE_MODULE_NAME="${module}" ${ARG_DEFINITIONS})
+    engine_configure_target(${target})
+endfunction()
+
+engine_add_loadable_fixture(fixture_network_loadable plugins network_loadable network_loadable
+    SOURCES module/FixturePlugin.cpp)
+engine_add_loadable_fixture(fixture_audio_mislabeled plugins audio_mislabeled audio_mislabeled
+    SOURCES module/FixturePlugin.cpp)
+engine_add_loadable_fixture(fixture_game_loadable games loadable loadable
+    SOURCES module/FixtureGame.cpp)
+set(loading_fixtures fixture_network_loadable fixture_audio_mislabeled fixture_game_loadable)
+if(ENGINE_DYNAMIC_MODULES)
+    engine_add_loadable_fixture(fixture_network_oldapi plugins network_oldapi network_oldapi
+        SOURCES module/OldApiPlugin.cpp)
+    engine_add_loadable_fixture(fixture_split_server games split_server split
+        SOURCES module/SplitGame.cpp DEFINITIONS ENGINE_GAME_SERVER)
+    engine_add_loadable_fixture(fixture_split_client games split_client split
+        SOURCES module/SplitGame.cpp DEFINITIONS ENGINE_GAME_CLIENT)
+    list(APPEND loading_fixtures fixture_network_oldapi fixture_split_server fixture_split_client)
+endif()
+
+engine_add_test(engine_loading_tests SOURCES
+    module/LoadingTest.cpp)
+if(ENGINE_DYNAMIC_MODULES)
+    add_dependencies(engine_loading_tests ${loading_fixtures})
+else()
+    foreach(fixture IN LISTS loading_fixtures)
+        target_link_libraries(engine_loading_tests PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,${fixture}>")
+    endforeach()
+endif()

@@ -5,13 +5,41 @@
 ** DynamicLibrary
 */
 
-// engine/include/engine/module/DynamicLibrary.hpp
-// ENG-12 — DynamicLibrary for Linux and Windows
-// Spec: docs/engine/reference/02-modules.md · ADR 0002, 0025
-// Details: docs/tasks/ENG-12.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/Export.hpp"
+#include "engine/core/Error.hpp"
+
+#include <filesystem>
+#include <string>
+#include <string_view>
+
+namespace engine {
+
+class ENGINE_API DynamicLibrary {
+private:
+    void* _handle = nullptr;
+    std::filesystem::path _path;
+
+    DynamicLibrary(void* handle, std::filesystem::path path);
+    void close() noexcept;
+
+public:
+    static Result<DynamicLibrary> open(const std::filesystem::path& file);
+    static std::string decorate(std::string_view stem);
+
+    DynamicLibrary(const DynamicLibrary&) = delete;
+    DynamicLibrary& operator=(const DynamicLibrary&) = delete;
+    DynamicLibrary(DynamicLibrary&& other) noexcept;
+    DynamicLibrary& operator=(DynamicLibrary&& other) noexcept;
+    ~DynamicLibrary();
+
+    void* rawSymbol(std::string_view name) const;
+    template <class Fn>
+    Result<Fn> symbol(std::string_view name) const;
+    const std::filesystem::path& path() const;
+};
+
+}
+
+#include "engine/module/DynamicLibrary.inl"

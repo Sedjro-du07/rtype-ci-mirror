@@ -99,7 +99,8 @@ The only OS-specific loading code (Adapter over `dlopen` / `LoadLibraryW`). RAII
 class DynamicLibrary {
 public:
     static Result<DynamicLibrary> open(const std::filesystem::path& file); // FileNotFound / SymbolNotFound with the OS message
-    static std::string decorate(std::string_view stem);  // "platform_sfml" → "libplatform_sfml.so" / "platform_sfml.dll"
+    static std::string decorate(std::string_view stem);  // "platform_sfml" → "libplatform_sfml.so" / "libplatform_sfml.dll"
+                                                         // (the CMake functions use the lib prefix on every OS)
     DynamicLibrary(DynamicLibrary&&) noexcept; DynamicLibrary& operator=(DynamicLibrary&&) noexcept;
     ~DynamicLibrary();                                   // dlclose / FreeLibrary
     void* rawSymbol(std::string_view name) const;        // nullptr if absent
@@ -147,6 +148,13 @@ public:
     std::span<const LoadedModule> loaded() const;             // for the "modules" console command
 };
 ```
+
+Details: plugins are searched in `<dir>/plugins/lib<kind>_<name>`, games in `<dir>/games/lib<name>_<role>`
+then `lib<name>` (the editor uses the client build); in static mode the same stems are looked up in
+`StaticModuleTable`. `loadPlugin<I>` checks `kind()` and then `static_cast`s to `I` (no RTTI across modules).
+One game module at a time. `unloadAll` logs `unloading plugin <stem>` / `unloading game <name>` in reverse
+order. `pluginKindName(PluginKind)` gives `platform`, `audio`, `network`, `scripting`. Until ENG-15 the
+name `null` returns `PluginNotFound`.
 
 Rules enforced here: version mismatch → `ApiMismatch`; `create_*` returning `nullptr` → `GameModuleInvalid`
 or `PluginNotFound`; every object is destroyed by the `destroy_*` of the module that created it.
