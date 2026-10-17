@@ -115,7 +115,7 @@ Reader role(Role& out) {
     };
 }
 
-size_t distance(std::string_view a, std::string_view b) {
+size_t editDistance(std::string_view a, std::string_view b) {
     std::vector<size_t> row(b.size() + 1);
     for (size_t j = 0; j <= b.size(); ++j)
         row[j] = j;
@@ -140,7 +140,7 @@ Result<void> readMap(const YamlNode& node, std::string_view section, const std::
             std::string best;
             size_t bestDistance = 3;
             for (const auto& [known, unused] : readers)
-                if (const size_t d = distance(key, known); d < bestDistance) {
+                if (const size_t d = editDistance(key, known); d < bestDistance) {
                     bestDistance = d;
                     best = known;
                 }

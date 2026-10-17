@@ -13,7 +13,6 @@
 #include <cmath>
 #include <format>
 #include <fstream>
-#include <functional>
 #include <utility>
 
 namespace engine {
@@ -28,29 +27,96 @@ bool contains(const std::vector<ActionId>& list, ActionId a) {
     return std::ranges::find(list, a) != list.end();
 }
 
-Result<void> readSet(const YamlNode& node, std::string_view section,
-                     const std::function<void(ActionId, std::string_view)>& name,
-                     std::unordered_map<ActionId, std::vector<Binding>>& out, std::vector<ActionId>* order) {
+using Bindings = std::unordered_map<ActionId, std::vector<Binding>>;
+
+struct ParsedInput {
+    Bindings bindings;
+    Bindings oneHanded;
+    std::vector<ActionId> order;
+    std::vector<std::pair<ActionId, std::string>> names;
+    InputOptions options;
+};
+
+Result<void> readBindings(const YamlNode& list, std::string_view label, std::vector<Binding>& out) {
+    out.clear();
+    if (list.isNull()) return {};
+    if (!list.isSequence())
+        return list.error(Errc::ParseError, std::format("action '{}' expects a list of bindings", label));
+    for (size_t i = 0; i < list.size(); ++i) {
+        const auto binding = list[i].isScalar() ? parseBinding(list[i].scalar()) : std::nullopt;
+        if (!binding)
+            return list[i].error(Errc::ParseError,
+                                 std::format("unknown binding {} for action '{}'", list[i].describe(), label));
+        out.push_back(*binding);
+    }
+    return {};
+}
+
+Result<void> readSet(const YamlNode& node, std::string_view section, ParsedInput& parsed, Bindings& out, bool ordered) {
     if (node.isNull()) return {};
     if (!node.isMap()) return node.error(Errc::ParseError, std::format("'{}' maps action names to bindings", section));
     for (const auto& [label, list] : node.entries()) {
         const ActionId id = action(label);
-        name(id, label);
-        if (order && !contains(*order, id)) order->push_back(id);
-        std::vector<Binding>& bindings = out[id];
-        bindings.clear();
-        if (list.isNull()) continue;
-        if (!list.isSequence())
-            return list.error(Errc::ParseError, std::format("action '{}' expects a list of bindings", label));
-        for (size_t i = 0; i < list.size(); ++i) {
-            const auto binding = list[i].isScalar() ? parseBinding(list[i].scalar()) : std::nullopt;
-            if (!binding)
-                return list[i].error(Errc::ParseError,
-                                     std::format("unknown binding {} for action '{}'", list[i].describe(), label));
-            bindings.push_back(*binding);
-        }
+        parsed.names.emplace_back(id, label);
+        if (ordered && !contains(parsed.order, id)) parsed.order.push_back(id);
+        if (auto ok = readBindings(list, label, out[id]); !ok) return ok;
     }
     return {};
+}
+
+Result<void> readActionList(const YamlNode& node, std::string_view option, std::vector<ActionId>& out) {
+    if (!node.isSequence()) return node.error(Errc::ParseError, std::format("'{}' expects a list of actions", option));
+    for (size_t i = 0; i < node.size(); ++i)
+        out.push_back(action(node[i].scalar()));
+    return {};
+}
+
+Result<void> readPositive(const YamlNode& node, std::string_view option, float& out) {
+    const auto number = node.asDouble();
+    if (!number || *number < 0)
+        return node.error(Errc::ParseError, std::format("'{}' expects a positive number", option));
+    out = static_cast<float>(*number);
+    return {};
+}
+
+Result<void> readFlag(const YamlNode& node, std::string_view option, bool& out) {
+    const auto flag = node.asBool();
+    if (!flag) return node.error(Errc::ParseError, std::format("'{}' expects true or false", option));
+    out = *flag;
+    return {};
+}
+
+Result<void> readOption(std::string_view option, const YamlNode& node, InputOptions& options) {
+    if (option == "holdToToggle") return readActionList(node, option, options.holdToToggle);
+    if (option == "autoRepeat") return readActionList(node, option, options.autoRepeat);
+    if (option == "autoRepeatHz") return readPositive(node, option, options.autoRepeatHz);
+    if (option == "deadzone") return readPositive(node, option, options.deadzone);
+    if (option == "oneHanded") return readFlag(node, option, options.oneHanded);
+    return node.error(Errc::ParseError, std::format("unknown input option '{}'", option));
+}
+
+Result<void> readOptions(const YamlNode& node, InputOptions& options) {
+    if (!node.isMap()) return node.error(Errc::ParseError, "'options' is a map");
+    for (const auto& [option, setting] : node.entries())
+        if (auto ok = readOption(option, setting, options); !ok) return ok;
+    return {};
+}
+
+Result<void> readSection(std::string_view key, const YamlNode& node, ParsedInput& parsed) {
+    if (key == "actions") return readSet(node, key, parsed, parsed.bindings, true);
+    if (key == "one_handed") return readSet(node, key, parsed, parsed.oneHanded, false);
+    if (key == "options") return readOptions(node, parsed.options);
+    return node.error(Errc::ParseError,
+                      std::format("unknown key '{}' (expected 'actions', 'one_handed' or 'options')", key));
+}
+
+Result<ParsedInput> parseInput(const YamlNode& root) {
+    if (!root.isMap())
+        return root.error(Errc::ParseError, "input.yaml is a map with 'actions', 'one_handed', 'options'");
+    ParsedInput parsed;
+    for (const auto& [key, value] : root.entries())
+        if (auto ok = readSection(key, value, parsed); !ok) return unexpected(ok.error());
+    return parsed;
 }
 
 }
@@ -107,49 +173,14 @@ void InputMap::refresh() {
 Result<void> InputMap::load(const std::filesystem::path& file) {
     auto root = YamlNode::load(file, file.generic_string());
     if (!root) return unexpected(root.error());
-    if (!root->isMap())
-        return root->error(Errc::ParseError, "input.yaml is a map with 'actions', 'one_handed', 'options'");
-    BindingSet bindings;
-    BindingSet oneHanded;
-    std::vector<ActionId> order;
-    InputOptions options;
-    const auto name = [this](ActionId a, std::string_view label) { this->remember(a, label); };
-    for (const auto& [key, value] : root->entries()) {
-        if (key == "actions") {
-            if (auto ok = readSet(value, key, name, bindings, &order); !ok) return ok;
-        } else if (key == "one_handed") {
-            if (auto ok = readSet(value, key, name, oneHanded, nullptr); !ok) return ok;
-        } else if (key == "options") {
-            if (!value.isMap()) return value.error(Errc::ParseError, "'options' is a map");
-            for (const auto& [option, setting] : value.entries()) {
-                if (option == "holdToToggle" || option == "autoRepeat") {
-                    if (!setting.isSequence())
-                        return setting.error(Errc::ParseError, std::format("'{}' expects a list of actions", option));
-                    auto& list = option == "holdToToggle" ? options.holdToToggle : options.autoRepeat;
-                    for (size_t i = 0; i < setting.size(); ++i)
-                        list.push_back(action(setting[i].scalar()));
-                } else if (option == "autoRepeatHz" || option == "deadzone") {
-                    const auto number = setting.asDouble();
-                    if (!number || *number < 0)
-                        return setting.error(Errc::ParseError, std::format("'{}' expects a positive number", option));
-                    (option == "autoRepeatHz" ? options.autoRepeatHz : options.deadzone) = static_cast<float>(*number);
-                } else if (option == "oneHanded") {
-                    const auto flag = setting.asBool();
-                    if (!flag) return setting.error(Errc::ParseError, "'oneHanded' expects true or false");
-                    options.oneHanded = *flag;
-                } else {
-                    return setting.error(Errc::ParseError, std::format("unknown input option '{}'", option));
-                }
-            }
-        } else {
-            return value.error(Errc::ParseError,
-                               std::format("unknown key '{}' (expected 'actions', 'one_handed' or 'options')", key));
-        }
-    }
-    this->_bindings = std::move(bindings);
-    this->_oneHanded = std::move(oneHanded);
-    this->_order = std::move(order);
-    this->_options = std::move(options);
+    auto parsed = parseInput(*root);
+    if (!parsed) return unexpected(parsed.error());
+    for (const auto& [id, label] : parsed->names)
+        this->remember(id, label);
+    this->_bindings = std::move(parsed->bindings);
+    this->_oneHanded = std::move(parsed->oneHanded);
+    this->_order = std::move(parsed->order);
+    this->_options = std::move(parsed->options);
     this->refresh();
     return {};
 }
@@ -381,5 +412,4 @@ const ActionState& InputMap::state() const {
 void InputMap::captureNextBinding(std::move_only_function<void(Binding)> onCaptured) {
     this->_capture = std::move(onCaptured);
 }
-
 }
