@@ -33,12 +33,11 @@ constexpr uint64_t CheckTick = 60;
 
 void check(engine::Context& ctx) {
     if (ctx.time().tick + 1 != CheckTick) return;
-    for (auto [e, marker, position] : ctx.world().view<Marker, engine::Position>()) {
-        if (std::fabs(position.x - 60.f) > 0.5f) throw std::runtime_error("the marker did not move one second");
-        ctx.requestQuit();
-        return;
-    }
-    throw std::runtime_error("the scene has no marker");
+    const engine::Entity marker = ctx.world().view<Marker, engine::Position>().front();
+    if (marker.isNull()) throw std::runtime_error("the scene has no marker");
+    if (std::fabs(ctx.world().get<engine::Position>(marker).x - 60.f) > 0.5f)
+        throw std::runtime_error("the marker did not move one second");
+    ctx.requestQuit();
 }
 
 class SmokeGame final : public engine::IGameModule {
