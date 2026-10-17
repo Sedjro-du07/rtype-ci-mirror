@@ -162,7 +162,8 @@ DETAILS = {
     goal="The per-scene world: entities, typed and raw component access, identity and hierarchy.",
     todo=["Entities: create, destroy (recursive over Children), alive, clear",
           "Typed: emplace, get, tryGet, has, replace, remove via TypeRegistry ids", "Raw: storage, getRaw, emplaceRaw, removeRaw, componentsOf",
-          "Identity: find(name), find(Uuid) indexed, withTag", "Hierarchy: setParent, parent, children", "World singletons: `singleton<T>()`, `trySingleton<T>()` on a hidden entity (ADR 0039)"],
+          "Identity: find(name), find(Uuid) indexed, withTag", "Hierarchy: setParent, parent, children", "World singletons: `singleton<T>()`, `trySingleton<T>()` on a hidden entity (ADR 0039)",
+          "Identity and hierarchy components `Name`, `Uuid` (`generate()` with `os::secureRandom`), `Tags`, `Parent`, `Children` (moved here from ENG-25: they need no rendering)"],
     done=["Tests: every method, unregistered type error message, recursive destroy"],
     watch=["Hooks fire on every path, including raw and Commands"]),
 'ENG-19': dict(
@@ -202,7 +203,7 @@ DETAILS = {
     watch=["Big-endian on the wire, floats via `std::bit_cast<uint32_t>` (network D1): keep it in one place"]),
 'ENG-25': dict(
     goal="The engine's built-in components and their registration.",
-    todo=["Headers of reference 13 with `ENGINE_COMPONENT`", "`registerEngineTypes`: fields and flags (Position/Velocity/Sprite Replicated, PreviousPosition Transient…) and engine events"],
+    todo=["Headers of reference 13 with `ENGINE_COMPONENT` (identity and hierarchy are written by ENG-18)", "`registerEngineTypes`: fields and flags (Position/Velocity/Sprite Replicated, PreviousPosition Transient…) and engine events"],
     done=["Inspector-style dump (`types` console command) lists every engine component with its fields"],
     watch=["Names are reserved: a game type with the same name is a boot error"]),
 # ---------------------------------------------------------------- 05 Scheduler

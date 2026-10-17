@@ -34,8 +34,8 @@ engine/
 │       ├── components/
 │       │   ├── Animation.hpp                             ENG-25
 │       │   ├── Collider.hpp                              ENG-25
-│       │   ├── Hierarchy.hpp                             ENG-25
-│       │   ├── Identity.hpp                              ENG-25
+│       │   ├── Hierarchy.hpp                             ENG-18
+│       │   ├── Identity.hpp                              ENG-18
 │       │   ├── Lifetime.hpp                              ENG-25
 │       │   ├── Parallax.hpp                              ENG-25
 │       │   ├── Position.hpp                              ENG-25
@@ -61,9 +61,11 @@ engine/
 │       │   ├── EntityAllocator.hpp                       ENG-16
 │       │   ├── IStorage.hpp                              ENG-17
 │       │   ├── Registry.hpp                              ENG-18, ENG-21
+│       │   ├── Registry.inl                              ENG-18
 │       │   ├── SparseSet.hpp                             ENG-17
 │       │   ├── SparseSet.inl                             ENG-17
-│       │   └── View.hpp                                  ENG-19
+│       │   ├── View.hpp                                  ENG-19
+│       │   └── View.inl                                  ENG-19
 │       ├── events/
 │       │   ├── EngineEvents.hpp                          ENG-27
 │       │   └── EventBus.hpp                              ENG-27
@@ -166,6 +168,8 @@ engine/
 │   │   └── AudioCaptions.cpp                             ENG-34
 │   ├── client/
 │   │   └── ClientLobby.cpp                               SRV-14
+│   ├── components/
+│   │   └── Identity.cpp                                  ENG-18
 │   ├── core/
 │   │   ├── math/
 │   │   │   ├── Color.cpp                                 ENG-04

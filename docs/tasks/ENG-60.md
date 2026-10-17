@@ -36,6 +36,7 @@ void                  onQuitSignal(std::move_only_function<void()> fn);  // SIGI
 ## Unlocks
 
 - [ENG-10](ENG-10.md) — Generic launcher main() and signal handling
+- [ENG-18](ENG-18.md) — Registry: typed and type-erased access, identity, hierarchy
 - [ENG-45](ENG-45.md) — CVars: typed variables, flags, ranges, archive
 - [SRV-02](SRV-02.md) — Handshake: Hello checks, game admission, Challenge / UdpLink, Accepted / Refused, flood limits
 

@@ -33,7 +33,7 @@ Board: [Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7) · ta
 | 3 | [ENG-56](ENG-56.md) | 14 Tests & bench | ECS storage benchmark: sparse set vs sparse array vs archetypes | [ENG-17](ENG-17.md) |
 | 3 | [ENG-62](ENG-62.md) | 00 Build | Installable engine: install, export, find_package(rtype_engine), CPack packages | [ENG-02](ENG-02.md) |
 | 4 | [ENG-14](ENG-14.md) | 02 Modules | ModuleManager: load by kind and name, version check, reverse unload | [ENG-12](ENG-12.md), [ENG-13](ENG-13.md), [ENG-11](ENG-11.md), [ENG-44](ENG-44.md) |
-| 4 | [ENG-18](ENG-18.md) | 03 ECS | Registry: typed and type-erased access, identity, hierarchy | [ENG-17](ENG-17.md), [ENG-22](ENG-22.md), [ENG-06](ENG-06.md) |
+| 4 | [ENG-18](ENG-18.md) | 03 ECS | Registry: typed and type-erased access, identity, hierarchy | [ENG-17](ENG-17.md), [ENG-22](ENG-22.md), [ENG-06](ENG-06.md), [ENG-60](ENG-60.md) |
 | 4 | [ENG-23](ENG-23.md) | 04 Reflection | YAML wrappers and field codecs | [ENG-22](ENG-22.md) |
 | 4 | [ENG-25](ENG-25.md) | 04 Reflection | Engine components and their registration | [ENG-22](ENG-22.md), [ENG-30](ENG-30.md) |
 | 4 | [ENG-27](ENG-27.md) | 06 Events | EventBus: queued, immediate, thread inbox; engine events | [ENG-06](ENG-06.md), [ENG-22](ENG-22.md) |

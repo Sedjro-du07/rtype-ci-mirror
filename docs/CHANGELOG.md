@@ -7,6 +7,22 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — engine ECS: ENG-18, ENG-19, ENG-21
+
+### Added
+
+- `Registry` (ENG-18): entities (`create`, recursive `destroy`, `alive`, `clear`), typed and raw component
+  access through the `TypeRegistry`, identity (`find` by name, by `Uuid` through an index, `withTag`),
+  hierarchy (`setParent`, `parent`, `children`) and world singletons on a hidden entity. Using a type that
+  was not registered prints its name and exits with code 3.
+- Identity and hierarchy components `Name`, `Uuid` (`generate()` from `os::secureRandom`), `Tags`,
+  `Parent`, `Children`: moved from ENG-25 to ENG-18, since they need no rendering.
+- `View<Ts...>` and `exclude<Xs...>` (ENG-19): walks the smallest storage, structured bindings, `each`,
+  `front`, `sizeHint`.
+- `ComponentHooks` (ENG-21): `onCreate`, `onReplace`, `onDestroy` fired by typed and raw access,
+  `destroy` and `clear`; `onDestroy` fires while the component can still be read.
+- 15 tests and one process test (unregistered component).
+
 ## [2026-10-15] — engine reflection: ENG-22
 
 ### Added

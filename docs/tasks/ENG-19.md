@@ -11,6 +11,7 @@ Queries over entities that have a set of components.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/ecs/View.hpp`
+- `include/engine/ecs/View.inl`
 
 ## Classes and methods
 
