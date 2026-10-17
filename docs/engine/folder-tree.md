@@ -107,6 +107,7 @@ engine/
 │       │   ├── Camera2D.hpp                              ENG-30
 │       │   ├── DrawCmd.hpp                               ENG-30
 │       │   ├── Handles.hpp                               ENG-30
+│       │   ├── Handles.inl                               ENG-30
 │       │   ├── IPlatform.hpp                             ENG-30
 │       │   ├── IRenderer.hpp                             ENG-30
 │       │   ├── RenderQueue.hpp                           ENG-30

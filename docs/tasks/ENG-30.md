@@ -11,6 +11,7 @@ The rendering API as plain data: the engine never draws itself.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/render/Handles.hpp`
+- `include/engine/render/Handles.inl`
 - `include/engine/render/WindowDesc.hpp`
 - `include/engine/render/Camera2D.hpp`
 - `include/engine/render/DrawCmd.hpp`

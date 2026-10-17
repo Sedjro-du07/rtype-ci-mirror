@@ -107,3 +107,6 @@ foreach(pair IN ITEMS "engine_module_tests:game_fixture" "engine_module_tests:ne
         target_link_libraries(${test} PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,${module}>")
     endif()
 endforeach()
+
+engine_add_test(engine_render_tests SOURCES
+    render/RenderTest.cpp)

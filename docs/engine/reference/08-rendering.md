@@ -58,6 +58,10 @@ struct Camera2D {
 };
 ```
 
+`center` is drawn at the middle of the virtual resolution; `zoom` scales around it and `rotation` (degrees)
+turns the view. The virtual resolution is then scaled by `min(width / virtualWidth, height / virtualHeight)`
+and centred in the window (letterbox bars on the free sides). `screenToWorld` is the exact inverse.
+
 ## `struct DrawCmd` — `render/DrawCmd.hpp`
 
 ```cpp
