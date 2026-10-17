@@ -5,13 +5,44 @@
 ** RawInputEvent
 */
 
-// engine/include/engine/input/RawInputEvent.hpp
-// ENG-28 — Keys, RawInputEvent, ActionId
-// Spec: docs/engine/reference/07-input.md · ADR 0030, 0044
-// Details: docs/tasks/ENG-28.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/core/math/Vec2.hpp"
+#include "engine/input/Keys.hpp"
+
+#include <cstdint>
+
+namespace engine {
+
+struct RawInputEvent {
+    enum class Type : uint8_t {
+        KeyDown,
+        KeyUp,
+        MouseDown,
+        MouseUp,
+        MouseMove,
+        MouseWheel,
+        GamepadDown,
+        GamepadUp,
+        GamepadAxis,
+        GamepadConnected,
+        GamepadDisconnected,
+        TextEntered,
+        TouchDown,
+        TouchUp,
+        TouchMove
+    };
+
+    Type type = Type::KeyDown;
+    uint8_t device = 0;
+    Key key = Key::Unknown;
+    MouseButton mouse{};
+    GamepadButton button{};
+    engine::GamepadAxis axis{};
+    float value = 0.f;
+    Vec2 position;
+    char32_t text = 0;
+    uint8_t finger = 0;
+};
+
+}

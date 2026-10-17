@@ -5,13 +5,28 @@
 ** Action
 */
 
-// engine/include/engine/input/Action.hpp
-// ENG-28 — Keys, RawInputEvent, ActionId
-// Spec: docs/engine/reference/07-input.md · ADR 0030, 0044
-// Details: docs/tasks/ENG-28.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <string_view>
+
+namespace engine {
+
+struct ActionId {
+    uint64_t key = 0;
+
+    constexpr bool operator==(const ActionId&) const = default;
+};
+
+constexpr ActionId action(std::string_view name) noexcept;
+
+}
+
+template <>
+struct std::hash<engine::ActionId> {
+    constexpr size_t operator()(const engine::ActionId& id) const noexcept;
+};
+
+#include "engine/input/Action.inl"

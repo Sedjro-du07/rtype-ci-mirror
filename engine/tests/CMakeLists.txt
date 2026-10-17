@@ -189,3 +189,5 @@ else()
         target_link_libraries(engine_loading_tests PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,${fixture}>")
     endforeach()
 endif()
+engine_add_test(engine_input_tests SOURCES
+    input/InputTest.cpp)

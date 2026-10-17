@@ -5,13 +5,40 @@
 ** ActionState
 */
 
-// engine/include/engine/input/ActionState.hpp
-// ENG-29 — InputMap and ActionState: input.yaml, rebinding, accessibility options, masks
-// Spec: docs/engine/reference/07-input.md · ADR 0030 · reference 07
-// Details: docs/tasks/ENG-29.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/Export.hpp"
+#include "engine/input/Action.hpp"
+
+#include <cstdint>
+#include <span>
+#include <unordered_map>
+
+namespace engine {
+
+class ENGINE_API ActionState {
+private:
+    struct Entry {
+        bool held = false;
+        bool pressed = false;
+        bool released = false;
+        float axis = 0;
+    };
+
+    std::unordered_map<ActionId, Entry> _actions;
+
+    const Entry* find(ActionId a) const;
+
+    friend class InputMap;
+
+public:
+    bool pressed(ActionId a) const;
+    bool held(ActionId a) const;
+    bool released(ActionId a) const;
+    float axis(ActionId a) const;
+
+    uint64_t toMask(std::span<const ActionId> order) const;
+    static ActionState fromMask(uint64_t mask, uint64_t previousMask, std::span<const ActionId> order);
+};
+
+}

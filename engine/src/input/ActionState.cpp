@@ -5,13 +5,53 @@
 ** ActionState
 */
 
-// engine/src/input/ActionState.cpp
-// ENG-29 — InputMap and ActionState: input.yaml, rebinding, accessibility options, masks
-// Spec: docs/engine/reference/07-input.md · ADR 0030 · reference 07
-// Details: docs/tasks/ENG-29.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #include "engine/input/ActionState.hpp"
 
-namespace engine {}
+#include <algorithm>
+#include <cstddef>
+
+namespace engine {
+
+const ActionState::Entry* ActionState::find(ActionId a) const {
+    const auto it = this->_actions.find(a);
+    return it == this->_actions.end() ? nullptr : &it->second;
+}
+
+bool ActionState::pressed(ActionId a) const {
+    const Entry* entry = this->find(a);
+    return entry && entry->pressed;
+}
+
+bool ActionState::held(ActionId a) const {
+    const Entry* entry = this->find(a);
+    return entry && entry->held;
+}
+
+bool ActionState::released(ActionId a) const {
+    const Entry* entry = this->find(a);
+    return entry && entry->released;
+}
+
+float ActionState::axis(ActionId a) const {
+    const Entry* entry = this->find(a);
+    return entry ? entry->axis : 0.f;
+}
+
+uint64_t ActionState::toMask(std::span<const ActionId> order) const {
+    uint64_t mask = 0;
+    for (size_t i = 0; i < std::min<size_t>(order.size(), 64); ++i)
+        if (this->held(order[i])) mask |= uint64_t{1} << i;
+    return mask;
+}
+
+ActionState ActionState::fromMask(uint64_t mask, uint64_t previousMask, std::span<const ActionId> order) {
+    ActionState state;
+    for (size_t i = 0; i < std::min<size_t>(order.size(), 64); ++i) {
+        const bool now = (mask >> i) & 1;
+        const bool before = (previousMask >> i) & 1;
+        state._actions[order[i]] = Entry{now, now && !before, !now && before, now ? 1.f : 0.f};
+    }
+    return state;
+}
+
+}
