@@ -174,20 +174,25 @@ inside the loop is safe; structural changes must go through `Commands`.
 ## `class Commands` — `ecs/Commands.hpp`
 
 Command buffer (ADR 0015). Recorded during a stage, applied by the engine at the end of the stage.
+One per world, built with that world's `Registry` (so `spawn()` can create the entity at once).
 
 ```cpp
 class Commands {
 public:
+    explicit Commands(Registry& registry);                  // one per world (scene, or room on the server)
     Entity spawn();                                         // entity created now, components added at apply()
-    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply() (block 11)
+    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply(): added by ENG-41
     void   destroy(Entity e);                               // destroyed (with children) at apply()
-    template <class T> void add(Entity e, T value);
+    template <class T> void add(Entity e, T value);         // nothing if the entity already has a T
     template <class T> void set(Entity e, T value);         // add or replace
     template <class T> void remove(Entity e);
     void   setParent(Entity child, Entity parent, Vec2 localOffset = {}); // Entity::null() detaches
-    void   addRaw(Entity e, ComponentId id, std::vector<std::byte> value); // scripts, replication
+    void   addRaw(Entity e, ComponentId id, std::vector<std::byte> value); // scripts, replication: value holds an
+                                                            // object built with TypeInfo::construct; copied at
+                                                            // apply(), then destroyed with TypeInfo::destroy
     bool   empty() const;
-    void   apply(Registry& registry, SceneManager& scenes); // engine only; in recording order; skips dead entities
+    void   apply();                                         // engine only; in recording order; skips dead entities;
+                                                            // commands recorded during apply() wait for the next one
 };
 ```
 

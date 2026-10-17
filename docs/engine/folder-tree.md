@@ -56,6 +56,7 @@ engine/
 │       │   └── Time.hpp                                  ENG-05
 │       ├── ecs/
 │       │   ├── Commands.hpp                              ENG-20
+│       │   ├── Commands.inl                              ENG-20
 │       │   ├── Entity.hpp                                ENG-16
 │       │   ├── Entity.inl                                ENG-16
 │       │   ├── EntityAllocator.hpp                       ENG-16

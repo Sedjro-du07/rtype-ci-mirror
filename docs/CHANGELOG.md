@@ -7,10 +7,14 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2026-10-17] — engine ECS: ENG-18, ENG-19, ENG-21
+## [2026-10-17] — engine ECS: ENG-18, ENG-19, ENG-20, ENG-21
 
 ### Added
 
+- `Commands` (ENG-20): one per world, built with its `Registry`; `spawn` creates the entity at once,
+  `destroy`, `add`, `set`, `remove`, `setParent`, `addRaw` are applied in recording order by `apply()`,
+  skipping dead entities, with hooks fired there. Prefab spawn moves to ENG-41 (needs the prefab
+  library). `Registry::types()` added. 8 tests.
 - `Registry` (ENG-18): entities (`create`, recursive `destroy`, `alive`, `clear`), typed and raw component
   access through the `TypeRegistry`, identity (`find` by name, by `Uuid` through an index, `withTag`),
   hierarchy (`setParent`, `parent`, `children`) and world singletons on a hidden entity. Using a type that

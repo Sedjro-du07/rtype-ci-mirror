@@ -76,6 +76,8 @@ public:
     Registry(const Registry&) = delete;
     Registry& operator=(const Registry&) = delete;
 
+    const TypeRegistry& types() const;
+
     Entity create();
     void destroy(Entity e);
     bool alive(Entity e) const;

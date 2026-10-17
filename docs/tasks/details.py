@@ -173,7 +173,7 @@ DETAILS = {
     watch=["Writing component values during iteration is fine; structural changes are not"]),
 'ENG-20': dict(
     goal="Deferred structural changes so systems can spawn and destroy while iterating (ADR 0015).",
-    todo=["spawn (empty, prefab), destroy, add, set, remove, setParent, addRaw", "`apply` in recording order, skipping dead entities"],
+    todo=["spawn (empty), destroy, add, set, remove, setParent, addRaw; prefab spawn comes with ENG-41", "`apply` in recording order, skipping dead entities"],
     done=["Tests: spawn inside a view loop, destroy then add on the same entity, prefab spawn"],
     watch=["The Entity returned by spawn is valid immediately but has components only after apply"]),
 'ENG-21': dict(
@@ -300,7 +300,7 @@ DETAILS = {
            "A path must match the file's case exactly, checked on Windows too; never write under the game root (ADR 0044)"]),
 'ENG-41': dict(
     goal="Prefabs: parsed once, instantiated with overrides and children.",
-    todo=["`PrefabLibrary::get` (cached), `findByKey`, `instantiate`, `clear`"],
+    todo=["`PrefabLibrary::get` (cached), `findByKey`, `instantiate`, `clear`", "`Commands::spawn(prefab, position)`: instantiate at `apply()` (left out of ENG-20)"],
     done=["Tests: overrides, nested children with offsets"],
     watch=["`Prefab::key` is used by replication: same hash on every machine"]),
 'ENG-42': dict(
