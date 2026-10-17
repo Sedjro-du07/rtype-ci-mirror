@@ -42,7 +42,9 @@ engine_add_test(engine_ecs_tests SOURCES
     ecs/ViewTest.cpp)
 
 engine_add_test(engine_reflection_tests SOURCES
-    reflection/TypeRegistryTest.cpp)
+    reflection/TypeRegistryTest.cpp
+    reflection/ByteStreamTest.cpp
+    reflection/codec/CodecTest.cpp)
 
 foreach(case IN ITEMS 1 2 3)
     add_executable(engine_compile_fail_${case} EXCLUDE_FROM_ALL reflection/CompileFail.cpp)
@@ -131,3 +133,9 @@ engine_add_test(engine_scheduler_tests SOURCES
     scheduler/SchedulerTest.cpp)
 engine_add_test(engine_components_tests SOURCES
     components/EngineTypesTest.cpp)
+engine_add_test(engine_net_room_types_tests SOURCES
+    net/RoomTypesTest.cpp)
+engine_add_test(engine_net_stream_framer_tests SOURCES
+    net/StreamFramerTest.cpp)
+engine_add_test(engine_room_tests SOURCES
+    room/PartyRoomTest.cpp)
