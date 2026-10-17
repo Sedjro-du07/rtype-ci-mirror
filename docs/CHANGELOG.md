@@ -7,6 +7,14 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — reflection: small integer fields
+
+### Changed
+
+- `FieldKind` gains `Int8`, `UInt8`, `Int16`, `UInt16` (`int8_t` … `uint16_t` fields), needed by the game
+  types of GAM-04 (`Health` in `int16_t`, lives and difficulty in `uint8_t`) and by `Sprite::layer` /
+  `Text::size` (ENG-25). The binary codec (SRV-04) must encode them too. 1 test.
+
 ## [2026-10-17] — engine ECS: ENG-18, ENG-19, ENG-20, ENG-21
 
 ### Added
