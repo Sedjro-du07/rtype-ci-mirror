@@ -10,14 +10,14 @@ Keep every operating-system call in one private place, so the rest of the engine
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `src/os/Os.hpp`
+- `src/include/os/Os.hpp`
 - `src/os/Os.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `src/os/Os.hpp`
+### `src/include/os/Os.hpp`
 
 ```cpp
 // Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).

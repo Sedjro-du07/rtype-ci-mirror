@@ -16,7 +16,7 @@ function(engine_add_test name)
     cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "SOURCES")
     add_executable(${name} ${ARG_SOURCES})
     target_link_libraries(${name} PRIVATE rtype_engine::engine Catch2::Catch2WithMain)
-    target_include_directories(${name} PRIVATE ${PROJECT_SOURCE_DIR}/src)   # private headers too
+    target_include_directories(${name} PRIVATE ${PROJECT_SOURCE_DIR}/src/include ${PROJECT_SOURCE_DIR}/src)   # private headers too
     engine_configure_target(${name})
     # Next to engine.dll: Windows looks for DLLs in the executable's folder.
     set_target_properties(${name} PROPERTIES
@@ -127,3 +127,7 @@ engine_add_test(engine_scene_tests SOURCES
     scene/PrefabTest.cpp
     scene/SceneTest.cpp)
 target_include_directories(engine_scene_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+engine_add_test(engine_scheduler_tests SOURCES
+    scheduler/SchedulerTest.cpp)
+engine_add_test(engine_components_tests SOURCES
+    components/EngineTypesTest.cpp)

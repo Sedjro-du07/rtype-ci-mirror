@@ -5,13 +5,26 @@
 ** Text
 */
 
-// engine/include/engine/components/Text.hpp
-// ENG-25 — Engine components and their registration
-// Spec: docs/engine/reference/13-components-systems.md · ADR 0016 · reference 13
-// Details: docs/tasks/ENG-25.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/core/math/Color.hpp"
+#include "engine/reflection/TypeKey.hpp"
+#include "engine/render/Handles.hpp"
+
+#include <cstdint>
+#include <string>
+
+namespace engine {
+
+struct Text {
+    std::string value;
+    FontHandle font;
+    uint16_t size = 16;
+    Color color;
+    int16_t layer = 0;
+    bool screenSpace = false;
+};
+
+}
+
+ENGINE_COMPONENT(engine::Text)

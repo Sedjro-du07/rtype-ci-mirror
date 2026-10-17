@@ -104,7 +104,7 @@ TEST_CASE("overrides keep the prefab values they do not write", "[prefab]") {
     CHECK(f.world.get<Health>(a).maxHp == 99);
 
     const ComponentData fromCode[] = {ComponentData::of(f.types, Health{5, 5}),
-                                      ComponentData::of(f.types, Sprite{{}, 7})};
+                                      ComponentData::of(f.types, Sprite{{}, {}, 7})};
     const Entity b = f.prefabs.instantiate(f.world, force, {}, fromCode);
     CHECK(f.world.get<Health>(b).hp == 5);
     CHECK(f.world.get<Health>(b).maxHp == 5);

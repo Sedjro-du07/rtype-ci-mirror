@@ -11,14 +11,14 @@ One audio plugin for all platforms, on miniaudio.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `plugins/audio_miniaudio/CMakeLists.txt`
-- `plugins/audio_miniaudio/MiniaudioAudio.hpp`
+- `plugins/audio_miniaudio/include/MiniaudioAudio.hpp`
 - `plugins/audio_miniaudio/MiniaudioAudio.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `plugins/audio_miniaudio/MiniaudioAudio.hpp`
+### `plugins/audio_miniaudio/include/MiniaudioAudio.hpp`
 
 ```cpp
 class MiniaudioAudio final : public IAudio {

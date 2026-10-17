@@ -9,6 +9,7 @@
 
 #include "engine/assets/AssetManager.hpp"
 #include "engine/components/Hierarchy.hpp"
+#include "engine/components/Position.hpp"
 #include "engine/reflection/TypeRegistry.hpp"
 #include "engine/reflection/Yaml.hpp"
 
@@ -53,20 +54,13 @@ bool refersToEntities(const TypeRegistry& types, const TypeInfo& type, int depth
 }
 
 Vec2 positionIn(const TypeRegistry& types, std::span<const ComponentData> components) {
-    const TypeInfo* position = types.find("Position");
+    const TypeInfo* position = types.findByKey(typeKey<Position>());
     if (!position) return {};
-    for (const ComponentData& data : components) {
-        if (data.type().id != position->id) continue;
-        Vec2 result;
-        for (const FieldInfo& field : position->fields) {
-            if (field.kind != FieldKind::Float) continue;
-            const auto* value =
-                reinterpret_cast<const float*>(static_cast<const std::byte*>(data.value()) + field.offset);
-            if (field.name == "x") result.x = *value;
-            if (field.name == "y") result.y = *value;
+    for (const ComponentData& data : components)
+        if (data.type().id == position->id) {
+            const auto* value = static_cast<const Position*>(data.value());
+            return {value->x, value->y};
         }
-        return result;
-    }
     return {};
 }
 

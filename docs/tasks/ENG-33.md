@@ -27,7 +27,7 @@ vec3 daltonize(vec3 rgb, int mode);
 void main();
 ```
 
-### `plugins/platform_sfml/SfmlRenderer.hpp`
+### `plugins/platform_sfml/include/SfmlRenderer.hpp`
 
 ```cpp
 void SfmlRenderer::setColorFilter(ColorFilter f) override;   // selects the shader mode

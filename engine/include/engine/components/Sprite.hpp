@@ -5,13 +5,29 @@
 ** Sprite
 */
 
-// engine/include/engine/components/Sprite.hpp
-// ENG-25 — Engine components and their registration
-// Spec: docs/engine/reference/13-components-systems.md · ADR 0016 · reference 13
-// Details: docs/tasks/ENG-25.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/core/math/Color.hpp"
+#include "engine/core/math/Rect.hpp"
+#include "engine/core/math/Vec2.hpp"
+#include "engine/reflection/TypeKey.hpp"
+#include "engine/render/Handles.hpp"
+
+#include <cstdint>
+
+namespace engine {
+
+struct Sprite {
+    TextureHandle texture;
+    Rect frame;
+    int16_t layer = 0;
+    Color tint;
+    Vec2 scale{1, 1};
+    Vec2 origin;
+    float rotation = 0;
+    bool visible = true;
+};
+
+}
+
+ENGINE_COMPONENT(engine::Sprite)

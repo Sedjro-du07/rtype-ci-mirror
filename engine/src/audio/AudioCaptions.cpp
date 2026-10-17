@@ -5,7 +5,7 @@
 ** AudioCaptions
 */
 
-#include "AudioCaptions.hpp"
+#include "audio/AudioCaptions.hpp"
 
 #include "engine/events/EngineEvents.hpp"
 #include "engine/events/EventBus.hpp"

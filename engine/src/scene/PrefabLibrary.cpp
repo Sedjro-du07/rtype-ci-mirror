@@ -7,6 +7,7 @@
 
 #include "engine/assets/AssetManager.hpp"
 #include "engine/components/Hierarchy.hpp"
+#include "engine/components/Position.hpp"
 #include "engine/core/Hash.hpp"
 #include "engine/ecs/Registry.hpp"
 #include "engine/reflection/TypeRegistry.hpp"
@@ -22,12 +23,6 @@
 namespace engine {
 
 namespace {
-
-float* floatField(const TypeInfo& type, void* object, std::string_view name) {
-    const auto field = std::ranges::find(type.fields, name, &FieldInfo::name);
-    if (field == type.fields.end() || field->kind != FieldKind::Float) return nullptr;
-    return reinterpret_cast<float*>(static_cast<std::byte*>(object) + field->offset);
-}
 
 void put(Registry& registry, Entity e, const ComponentData& data) {
     registry.removeRaw(e, data.type().id);
@@ -132,21 +127,13 @@ const Prefab* PrefabLibrary::findByKey(uint32_t key) const {
 }
 
 void PrefabLibrary::place(Registry& registry, Entity e, Vec2 position) {
-    const TypeInfo* type = this->_types->find("Position");
-    if (!type || type->category != TypeCategory::Component) return;
-    void* existing = registry.getRaw(e, type->id);
-    ComponentData fresh;
-    void* target = existing;
-    if (!target) {
-        fresh = ComponentData(*type);
-        target = fresh.value();
-    }
-    float* x = floatField(*type, target, "x");
-    float* y = floatField(*type, target, "y");
-    if (!x || !y) return;
-    *x = position.x;
-    *y = position.y;
-    if (!existing) registry.emplaceRaw(e, type->id, target);
+    const TypeInfo* type = this->_types->findByKey(typeKey<Position>());
+    if (!type) return;
+    const Position value{position.x, position.y};
+    if (auto* existing = static_cast<Position*>(registry.getRaw(e, type->id)))
+        *existing = value;
+    else
+        registry.emplaceRaw(e, type->id, &value);
 }
 
 void PrefabLibrary::build(Registry& registry, Entity e, std::span<const ComponentData> base,
