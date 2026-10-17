@@ -151,7 +151,7 @@ public:
 
 Details: plugins are searched in `<dir>/plugins/lib<kind>_<name>`, games in `<dir>/games/lib<name>_<role>`
 then `lib<name>` (the editor uses the client build); in static mode the same stems are looked up in
-`StaticModuleTable`. `loadPlugin<I>` checks `kind()` and then `static_cast`s to `I` (no RTTI across modules).
+`StaticModuleTable`; the name `null` gives the Null Object of the kind (ENG-15). `loadPlugin<I>` checks `kind()` and then `static_cast`s to `I` (no RTTI across modules).
 One game module at a time. `unloadAll` logs `unloading plugin <stem>` / `unloading game <name>` in reverse
 order. `pluginKindName(PluginKind)` gives `platform`, `audio`, `network`, `scripting`. Until ENG-15 the
 name `null` returns `PluginNotFound`.
@@ -168,6 +168,10 @@ or `PluginNotFound`; every object is destroyed by the `destroy_*` of the module 
 | `NullAudio` | `IAudio` | every call does nothing; `play` returns an invalid voice id |
 | `NullNetwork` | `INetwork` | for offline runs and tests; `send` drops, `receive` yields nothing |
 | `NullScripting` | `IScripting` | used when `scripting` is empty; `load` returns an error explaining scripting is disabled |
+
+`std::unique_ptr<IPlugin> makeNullPlugin(PluginKind)` builds the one of a kind; `ModuleManager::loadPlugin`
+uses it for the name `null` (stem `<kind>_null`, no file). `NullNetwork::connectTcp` fails with
+`NetworkError`; `NullAudio` keeps bus volumes (clamped to [0, 1]); `NullPlatform` keeps the clipboard text.
 
 Used on the server, in headless CI, and when no audio device exists (ADR 0023). The plugin name `null`
 (`platform: null`, `--audio null`…) selects the built-in Null Object of that kind instead of loading a library. A client whose

@@ -8,6 +8,7 @@
 #include "engine/module/ModuleManager.hpp"
 
 #include "engine/module/Export.hpp"
+#include "engine/module/NullPlugins.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -23,17 +24,6 @@ namespace {
 
 using PluginVersion = uint32_t (*)() noexcept;
 using GameVersion = uint32_t (*)() noexcept;
-
-[[maybe_unused]] std::string_view roleName(Role role) {
-    switch (role) {
-    case Role::Server:
-        return "server";
-    case Role::Client:
-    case Role::Editor:
-        break;
-    }
-    return "client";
-}
 
 }
 
@@ -60,40 +50,44 @@ ModuleManager::~ModuleManager() {
 
 Result<IPlugin*> ModuleManager::loadPluginAs(PluginKind kind, std::string_view name, const PluginContext& ctx) {
     const std::string stem = std::format("{}_{}", pluginKindName(kind), name);
-    if (name == "null")
-        return fail(Errc::PluginNotFound,
-                    std::format("the null {} plugin is not available yet (ENG-15)", pluginKindName(kind)));
     Entry entry;
     LoadedModule info{stem, {}, false};
+    if (name == "null") {
+        entry.plugin = makeNullPlugin(kind).release();
+        entry.destroyPlugin = [](IPlugin* plugin) noexcept { delete plugin; };
+        this->_log.info("using the null {} plugin", pluginKindName(kind));
+    } else {
 #if defined(ENGINE_STATIC_MODULES)
-    const PluginEntry* found = StaticModuleTable::findPlugin(stem);
-    if (!found) return fail(Errc::PluginNotFound, std::format("plugin '{}' is not linked into this executable", stem));
-    entry.plugin = found->create();
-    entry.destroyPlugin = found->destroy;
+        const PluginEntry* found = StaticModuleTable::findPlugin(stem);
+        if (!found)
+            return fail(Errc::PluginNotFound, std::format("plugin '{}' is not linked into this executable", stem));
+        entry.plugin = found->create();
+        entry.destroyPlugin = found->destroy;
 #else
-    const std::filesystem::path file = this->_dir / "plugins" / DynamicLibrary::decorate(stem);
-    auto library = DynamicLibrary::open(file);
-    if (!library)
-        return fail(Errc::PluginNotFound, std::format("plugin '{}': {}", stem, library.error().message),
-                    file.generic_string());
-    auto version = library->symbol<PluginVersion>("plugin_api_version");
-    auto create = library->symbol<StaticModuleTable::CreatePlugin>("create_plugin");
-    auto destroy = library->symbol<StaticModuleTable::DestroyPlugin>("destroy_plugin");
-    if (!version || !create || !destroy)
-        return fail(
-            Errc::SymbolNotFound,
-            std::format("plugin '{}' does not export create_plugin, destroy_plugin and plugin_api_version", stem),
-            file.generic_string());
-    if (const uint32_t built = (*version)(); built != ENGINE_PLUGIN_API_VERSION)
-        return fail(Errc::ApiMismatch,
-                    std::format("plugin '{}' was built for plugin API {}, the engine uses {}", stem, built,
-                                ENGINE_PLUGIN_API_VERSION),
-                    file.generic_string());
-    entry.plugin = (*create)();
-    entry.destroyPlugin = *destroy;
-    info.file = file;
-    entry.library = std::move(*library);
+        const std::filesystem::path file = this->_dir / "plugins" / DynamicLibrary::decorate(stem);
+        auto library = DynamicLibrary::open(file);
+        if (!library)
+            return fail(Errc::PluginNotFound, std::format("plugin '{}': {}", stem, library.error().message),
+                        file.generic_string());
+        auto version = library->symbol<PluginVersion>("plugin_api_version");
+        auto create = library->symbol<StaticModuleTable::CreatePlugin>("create_plugin");
+        auto destroy = library->symbol<StaticModuleTable::DestroyPlugin>("destroy_plugin");
+        if (!version || !create || !destroy)
+            return fail(
+                Errc::SymbolNotFound,
+                std::format("plugin '{}' does not export create_plugin, destroy_plugin and plugin_api_version", stem),
+                file.generic_string());
+        if (const uint32_t built = (*version)(); built != ENGINE_PLUGIN_API_VERSION)
+            return fail(Errc::ApiMismatch,
+                        std::format("plugin '{}' was built for plugin API {}, the engine uses {}", stem, built,
+                                    ENGINE_PLUGIN_API_VERSION),
+                        file.generic_string());
+        entry.plugin = (*create)();
+        entry.destroyPlugin = *destroy;
+        info.file = file;
+        entry.library = std::move(*library);
 #endif
+    }
     if (!entry.plugin) return fail(Errc::PluginNotFound, std::format("plugin '{}' failed to create its object", stem));
     const auto reject = [&](Error error) -> Result<IPlugin*> {
         entry.destroyPlugin(entry.plugin);
@@ -128,7 +122,9 @@ Result<IGameModule*> ModuleManager::loadGame(std::string_view name, Role role) {
     entry.destroyGame = found->destroy;
 #else
     const std::filesystem::path folder = this->_dir / "games";
-    std::filesystem::path file = folder / DynamicLibrary::decorate(std::format("{}_{}", name, roleName(role)));
+    std::filesystem::path file =
+        folder /
+        DynamicLibrary::decorate(std::format("{}_{}", name, roleName(role == Role::Editor ? Role::Client : role)));
     std::error_code error;
     if (!std::filesystem::is_regular_file(file, error)) file = folder / DynamicLibrary::decorate(name);
     auto library = DynamicLibrary::open(file);
