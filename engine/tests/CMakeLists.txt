@@ -24,6 +24,10 @@ function(engine_add_test name)
     catch_discover_tests(${name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin DISCOVERY_MODE PRE_TEST)
 endfunction()
 
+# SRV-08 — RoomTypes and RoomEvents tests
+engine_add_test(engine_net_room_types_tests SOURCES
+    net/RoomTypesTest.cpp)
+
 # SRV-06 — StreamFramer tests
 engine_add_test(engine_net_stream_framer_tests SOURCES
     net/StreamFramerTest.cpp)
