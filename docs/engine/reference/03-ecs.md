@@ -87,7 +87,11 @@ destroy): the dense array moves. Keep the `Entity` and look it up again.
 ## `class Registry` — `ecs/Registry.hpp`
 
 One per scene. All template methods resolve `T` through the `TypeRegistry` (block 4); using a type
-that was not registered is a programming error reported at the first use.
+that was not registered is a programming error reported at the first use: the process prints
+`component 'Foo' is not registered: call types.add<Foo>() in registerTypes()` and exits with code 3.
+A `Registry` is neither copyable nor movable (its uuid index listens to its own hooks). Identity and
+hierarchy (`Name`, `Uuid`, `Tags`, `Parent`, `Children`) are written with it (ENG-18); `find`, `withTag`
+and the hierarchy return empty results while those components are not registered.
 
 ```cpp
 class Registry {

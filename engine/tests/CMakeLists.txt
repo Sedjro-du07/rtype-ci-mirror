@@ -35,7 +35,10 @@ engine_add_test(engine_os_tests SOURCES
 
 engine_add_test(engine_ecs_tests SOURCES
     ecs/EntityTest.cpp
-    ecs/SparseSetTest.cpp)
+    ecs/HooksTest.cpp
+    ecs/RegistryTest.cpp
+    ecs/SparseSetTest.cpp
+    ecs/ViewTest.cpp)
 
 engine_add_test(engine_reflection_tests SOURCES
     reflection/TypeRegistryTest.cpp)
@@ -54,3 +57,14 @@ set_tests_properties("compile fails: reflection case 2" PROPERTIES
     PASS_REGULAR_EXPRESSION "member.*flags|flags.*member" RUN_SERIAL TRUE)
 set_tests_properties("compile fails: reflection case 3" PROPERTIES
     PASS_REGULAR_EXPRESSION "unsupported field type" RUN_SERIAL TRUE)
+
+add_executable(engine_unregistered_component ecs/UnregisteredComponent.cpp)
+target_link_libraries(engine_unregistered_component PRIVATE rtype_engine::engine)
+engine_configure_target(engine_unregistered_component)
+set_target_properties(engine_unregistered_component PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    BUILD_RPATH "$ORIGIN")
+add_test(NAME "unregistered component is reported" COMMAND engine_unregistered_component
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_tests_properties("unregistered component is reported" PROPERTIES
+    PASS_REGULAR_EXPRESSION "component 'Unregistered' is not registered")

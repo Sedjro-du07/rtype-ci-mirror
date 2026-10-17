@@ -286,6 +286,16 @@ Result<YamlNode> loadYamlFile(const std::filesystem::path& file);
 Result<void>     fromYaml(const TypeInfo& type, void* obj, const YamlNode& node, LoadContext& ctx); // generic, per FieldKind
 void             toYaml(const TypeInfo& type, const void* obj, YamlWriter& out, SaveContext& ctx);'''),
 ]),
+'ENG-18': dict(extra=[
+    ('include/engine/components/Identity.hpp', 'cpp', '''struct Name             { std::string value; };                           ENGINE_COMPONENT(Name)
+struct Uuid             { uint64_t hi = 0, lo = 0; static Uuid generate(); bool operator==(const Uuid&) const = default; };
+                                                                          ENGINE_COMPONENT(Uuid)
+struct Tags             { std::vector<uint64_t> ids; bool has(std::string_view tag) const; };
+                                                                          ENGINE_COMPONENT(Tags)
+template <> struct std::hash<engine::Uuid>;      // for the uuid index'''),
+    ('include/engine/components/Hierarchy.hpp', 'cpp', '''struct Parent           { Entity value; Vec2 offset; };                   ENGINE_COMPONENT(Parent)
+struct Children         { std::vector<Entity> list; };                    ENGINE_COMPONENT(Children)'''),
+]),
 'ENG-25': dict(extra=[
     ('include/engine/components/*.hpp', 'cpp', '''struct Position         { float x = 0, y = 0; };                          ENGINE_COMPONENT(Position)
 struct PreviousPosition { float x = 0, y = 0; };                          ENGINE_COMPONENT(PreviousPosition)
@@ -301,15 +311,6 @@ struct Collider         { Vec2 size; Vec2 offset; uint32_t layer = 1; uint32_t m
                                                                           ENGINE_COMPONENT(Collider)
 struct Lifetime         { float seconds = 0; };                           ENGINE_COMPONENT(Lifetime)
 struct Parallax         { float factor = 1; float wrapWidth = 0; };       ENGINE_COMPONENT(Parallax)
-// Identity.hpp
-struct Name             { std::string value; };                           ENGINE_COMPONENT(Name)
-struct Uuid             { uint64_t hi = 0, lo = 0; static Uuid generate(); bool operator==(const Uuid&) const = default; };
-                                                                          ENGINE_COMPONENT(Uuid)
-struct Tags             { std::vector<uint64_t> ids; bool has(std::string_view tag) const; };
-                                                                          ENGINE_COMPONENT(Tags)
-// Hierarchy.hpp
-struct Parent           { Entity value; Vec2 offset; };                   ENGINE_COMPONENT(Parent)
-struct Children         { std::vector<Entity> list; };                    ENGINE_COMPONENT(Children)
 // Script.hpp
 struct Script           { ScriptHandle handle; std::string file; };       ENGINE_COMPONENT(Script)'''),
     ('src/systems/RegisterEngineTypes.cpp', 'cpp', '''void registerEngineTypes(TypeRegistry& types);   // every component above with fields and flags,
