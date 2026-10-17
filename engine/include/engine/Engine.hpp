@@ -5,13 +5,92 @@
 ** Engine
 */
 
-// engine/include/engine/Engine.hpp
-// ENG-08 — Engine: lifecycle, member order, fixed-step loop, error policy
-// Spec: docs/engine/reference/01-core.md · ADR 0003, 0021, 0024 · reference 01
-// Details: docs/tasks/ENG-08.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/Context.hpp"
+#include "engine/EngineConfig.hpp"
+#include "engine/Export.hpp"
+#include "engine/assets/AssetManager.hpp"
+#include "engine/core/Signal.hpp"
+#include "engine/core/Time.hpp"
+#include "engine/ecs/Commands.hpp"
+#include "engine/events/EventBus.hpp"
+#include "engine/input/InputMap.hpp"
+#include "engine/module/ModuleManager.hpp"
+#include "engine/net/NetworkSession.hpp"
+#include "engine/reflection/TypeRegistry.hpp"
+#include "engine/render/RenderQueue.hpp"
+#include "engine/scene/SceneManager.hpp"
+#include "engine/scheduler/Scheduler.hpp"
+#include "engine/services/CVars.hpp"
+#include "engine/services/Logger.hpp"
+
+#include <atomic>
+#include <optional>
+#include <string_view>
+
+namespace engine {
+
+class IAudio;
+class IGameModule;
+class INetwork;
+class IPlatform;
+class IScripting;
+
+class ENGINE_API Engine {
+private:
+    EngineConfig _config;
+    Logger _log;
+    CVars _cvars;
+    ModuleManager _modules;
+    TypeRegistry _types;
+    EventBus _events;
+    AssetManager _assets;
+    InputMap _input;
+    std::optional<NetworkSession> _network;
+    Scheduler _scheduler;
+    SceneManager _scenes;
+    std::optional<Commands> _commands;
+    RenderQueue _render;
+    std::optional<Context> _context;
+    Time _time;
+    Clock _clock;
+    Subscription _quitEvent;
+    IPlatform* _platform = nullptr;
+    IAudio* _audio = nullptr;
+    INetwork* _transport = nullptr;
+    IScripting* _scripting = nullptr;
+    IGameModule* _game = nullptr;
+    std::atomic_bool _quit = false;
+    double _accumulator = 0;
+    int _exitCode = 0;
+    bool _booted = false;
+
+    std::string_view pluginName(PluginKind kind) const;
+    template <class I>
+    I* plugin(PluginKind kind);
+    void boot();
+    void loadPlugins();
+    void loadGame();
+    void load();
+    void buildSchedule();
+    void openFirstScene();
+    void makeContext();
+    void loop();
+    void frame(double elapsed);
+    bool tick(double step);
+    void endFrame();
+    void shutdown();
+
+public:
+    explicit Engine(EngineConfig config);
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
+    ~Engine();
+
+    int run();
+    void requestQuit() noexcept;
+    const Time& time() const;
+};
+
+}

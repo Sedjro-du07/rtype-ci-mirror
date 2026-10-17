@@ -1,0 +1,6 @@
+name: Smoke
+entities:
+  - uuid: 01
+    Marker: { id: 1 }
+    Position: { x: 0, y: 0 }
+    Velocity: { dx: 60, dy: 0 }

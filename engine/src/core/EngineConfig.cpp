@@ -8,6 +8,7 @@
 #include "engine/EngineConfig.hpp"
 
 #include "engine/reflection/Yaml.hpp"
+#include "os/Os.hpp"
 
 #include <algorithm>
 #include <array>
@@ -228,6 +229,13 @@ Result<void> parseInteger(std::string_view option, std::string_view value, T& ou
     return {};
 }
 
+std::filesystem::path besideExecutable(const std::filesystem::path& file) {
+    std::error_code error;
+    if (file.empty() || file.is_absolute() || std::filesystem::exists(file, error)) return file;
+    const std::filesystem::path beside = os::executableDir() / file;
+    return std::filesystem::exists(beside, error) ? beside : file;
+}
+
 Result<void> applyOption(EngineConfig& config, std::string_view option, std::string_view value) {
     if (option == "--role") {
         const auto parsed = roleFromName(value);
@@ -303,6 +311,7 @@ Result<EngineConfig> EngineConfig::load(const std::filesystem::path& file, std::
     std::filesystem::path chosen = file;
     for (const auto& [option, value] : options)
         if (option == "--config") chosen = std::filesystem::path(value);
+    chosen = besideExecutable(chosen);
 
     EngineConfig config;
     if (!chosen.empty()) {

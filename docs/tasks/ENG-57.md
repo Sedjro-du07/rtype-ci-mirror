@@ -10,7 +10,10 @@ A CI smoke test: a client with null plugins runs 1000 ticks.
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `tests/headless/`
+- `tests/engine/EngineTest.cpp`
+- `tests/module/SmokeGame.cpp`
+- `tests/fixtures/smoke.yaml`
+- `tests/fixtures/smoke/`
 
 ## Classes and methods
 

@@ -10,8 +10,8 @@ Split the door into the engine in three so that world access in lobby code does 
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
-- `include/engine/ServiceContext.hpp`
-- `src/core/ServiceContext.cpp`
+- `include/engine/ServiceContext.hpp` (shared with [ENG-09](ENG-09.md))
+- `src/core/ServiceContext.cpp` (shared with [ENG-09](ENG-09.md))
 - `include/engine/server/LobbyContext.hpp`
 - `src/server/LobbyContext.cpp`
 - `include/engine/Context.hpp` (shared with [ENG-09](ENG-09.md))

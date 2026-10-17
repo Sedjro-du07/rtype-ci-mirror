@@ -1,0 +1,9 @@
+role: client
+game: smoke
+platform: "null"
+audio: "null"
+network: "null"
+scripting: "null"
+tickRate: 60
+root: smoke
+log: { level: info, file: "" }

@@ -1,0 +1,4 @@
+name: Still
+entities:
+  - Marker: { id: 1 }
+    Position: { x: 0, y: 0 }

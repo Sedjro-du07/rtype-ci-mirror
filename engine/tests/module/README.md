@@ -2,6 +2,8 @@
 
 Placeholder created from the architecture. Replace this file's list as files are written.
 
-Task: ENG-53 — Unit tests: core and modules, with a test plugin and a test game (details: `docs/tasks/ENG-53.md`)
+| File to create | Task | Details |
+|---|---|---|
+| `SmokeGame.cpp` | ENG-57 — Headless smoke test in CI: client with Null plugins runs 1000 ticks | `docs/tasks/ENG-57.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

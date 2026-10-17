@@ -7,6 +7,24 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-18] — the engine runs: ENG-08, ENG-09, ENG-10, ENG-57
+
+### Added
+
+- `Engine` (ENG-08): owns every block in destruction order, `run` = boot (plugins of the role, game
+  module, types) → load (engine then game systems, schedule, input bindings, window, first scene,
+  `onStart`) → fixed-step loop (input, network poll, FixedUpdate × N, LateUpdate, network flush, scene
+  switch, Render, submit, audio) → shutdown (game objects before the game module). Exit codes 1 to 5;
+  `--ticks` runs deterministic ticks; Ctrl+C quits cleanly.
+- `ServiceContext` and `Context` (ENG-09): the game's door to the engine; the engine systems now get their
+  targets from it.
+- The launcher `main()` (ENG-10): config file (working directory, then next to the executable) and
+  command line, then `Engine::run`.
+- Headless smoke test (ENG-57): a test game module and scene, run through `Engine` (5 tests: client,
+  tick limit, server, boot failures 2/3/4, a throwing system → 5) and through the real launcher in
+  `ctest` (client and server with null plugins, a bad option → 1).
+- `CVars` exists as an empty class until ENG-45, so plugins get a real `PluginContext`.
+
 ## [2026-10-17] — configuration and Null Objects: ENG-07, ENG-15
 
 ### Added

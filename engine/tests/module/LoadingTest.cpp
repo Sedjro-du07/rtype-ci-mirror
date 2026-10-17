@@ -12,6 +12,7 @@
 #include "engine/module/Export.hpp"
 #include "engine/module/ModuleManager.hpp"
 #include "engine/render/IPlatform.hpp"
+#include "engine/services/CVars.hpp"
 #include "os/Os.hpp"
 
 #include <catch2/catch_test_macros.hpp>
@@ -19,12 +20,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-namespace engine {
-
-class CVars {};
-
-}
 
 using namespace engine;
 

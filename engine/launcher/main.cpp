@@ -5,11 +5,22 @@
 ** main
 */
 
-// engine/launcher/main.cpp
-// ENG-10 — Generic launcher main() and signal handling
-// Spec: docs/engine/reference/01-core.md · ADR 0005 · reference 01
-// Details: docs/tasks/ENG-10.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
+#include "engine/Engine.hpp"
+#include "engine/EngineConfig.hpp"
 
-// int main(int argc, char** argv) — see the spec: config, signals, Engine::run().
+#include <cstdio>
+#include <utility>
+
+#if !defined(ENGINE_DEFAULT_CONFIG)
+#define ENGINE_DEFAULT_CONFIG ""
+#endif
+
+int main(int argc, char** argv) {
+    auto config = engine::EngineConfig::load(ENGINE_DEFAULT_CONFIG, argc, argv);
+    if (!config) {
+        std::fprintf(stderr, "%s\n", config.error().toString().c_str());
+        return 1;
+    }
+    engine::Engine engine(std::move(*config));
+    return engine.run();
+}
