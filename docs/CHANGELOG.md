@@ -28,6 +28,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   SRV-03; timeouts publish `PlayerLeft{Timeout}` until the grace period (SRV-16); reliable messages are
   sent once until `ReliableChannel` (SRV-05); `attach` takes no `NetworkIdMap` until ENG-39.
 
+## [2026-10-17] — engine systems: ENG-50, ENG-51, ENG-52
+
+### Added
+
+- `engine.previous_position`, `engine.movement`, `engine.hierarchy`, `engine.parallax`, `engine.lifetime`
+  (ENG-50), `engine.collision` with a uniform grid and the layer/mask rule (ENG-51), `engine.animation`,
+  `engine.render.sprites` (interpolated), `engine.render.text`, `engine.render.debug` (ENG-52), and
+  `registerEngineSystems` with the names, stages, roles and order of reference 13. 10 tests, including
+  1000 colliders within budget.
+
+### Deviations
+
+- Systems take their dependencies through `SystemTargets` (`TargetsOf(Context&)`) until `Context`
+  exists (ENG-09); grid cell and debug outlines come from it until the CVars exist (ENG-45).
+
 ## [2026-10-17] — engine components and scheduler: ENG-25, ENG-26
 
 ### Added
