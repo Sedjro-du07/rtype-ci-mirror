@@ -1,7 +1,5 @@
 # `engine/include/engine/scheduler/`
 
-Stages, systems, Scheduler.
-
 Placeholder created from the architecture. Replace this file's list as files are written.
 
 | File to create | Task | Details |

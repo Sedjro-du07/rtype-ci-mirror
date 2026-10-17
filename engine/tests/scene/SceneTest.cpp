@@ -39,7 +39,6 @@ struct LoaderFixture : SceneFixture {
     SceneLoader loader{types, assets, prefabs};
 
     explicit LoaderFixture(const std::string& folder) : SceneFixture(folder) {
-        this->types.add<Uuid>();
         this->types.add<Aim>().field("target", &Aim::target);
         std::filesystem::create_directories(this->root / "scenes");
         this->write("prefabs/ship.yaml", "Health: { hp: 3, maxHp: 3 }\n"

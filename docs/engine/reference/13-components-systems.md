@@ -27,6 +27,19 @@ Every game receives these without writing them. Engine components are registered
 | `Script` | see block 12 | | `engine.script.*` |
 | `NetworkId`, `NetPrefab`, `NetOwner`, `RemoteInput`, `NetInterpolation`, `NetPriority` | see block 10 | | `engine.net.*` |
 
+All of them, the engine events (`QuitRequested`, `WindowResized`, `WindowFocusChanged`, `AppSuspended`,
+`AppResumed`, `Collision`, `SceneLoaded`, `SceneUnloading`, `Caption`, `ConsoleCommand`) and `PreviousPosition`
+(in `Position.hpp`) are registered by `registerEngineTypes(TypeRegistry&)` (`src/systems/RegisterEngineTypes.hpp`).
+A game type with an engine name is a boot error (`DuplicateName`, exit code 3).
+
+YAML forms that are not field by field:
+
+| Component | In a file |
+|---|---|
+| `Uuid` | `Uuid: a1f3c2d4e5f60718` (hex) |
+| `Tags` | `Tags: [player, flying]`; written back as ids (`["#5a1f…"]`) because only the hash is kept |
+| `Script` | `Script: { file: scripts/boss.lua }` or `Script: scripts/boss.lua`; the handle is loaded, not saved |
+
 ## Systems
 
 | Name | Stage | Roles | After | Does |

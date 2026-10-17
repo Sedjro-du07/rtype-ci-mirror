@@ -93,9 +93,8 @@ public:
 
 Errors: unknown component with the closest name, unknown prefab, a prefab that includes itself,
 `children` without the `Parent` component registered, all with `file:line`. `instantiate` sets the
-`Position` component (a registered component named `Position` with float fields `x` and `y`) to
-`position`, and each child's to `position + offset`, then attaches it with `Registry::setParent`.
-Until ENG-25 registers the engine components, this lookup is by name.
+`Position` component to `position` (when `Position` is registered), and each child's to
+`position + offset`, then attaches it with `Registry::setParent`.
 
 ## `class SceneLoader` — `scene/SceneLoader.hpp`
 

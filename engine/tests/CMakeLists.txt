@@ -127,3 +127,7 @@ engine_add_test(engine_scene_tests SOURCES
     scene/PrefabTest.cpp
     scene/SceneTest.cpp)
 target_include_directories(engine_scene_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+engine_add_test(engine_scheduler_tests SOURCES
+    scheduler/SchedulerTest.cpp)
+engine_add_test(engine_components_tests SOURCES
+    components/EngineTypesTest.cpp)

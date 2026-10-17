@@ -10,11 +10,14 @@
 #include "engine/assets/AssetManager.hpp"
 #include "engine/audio/IAudio.hpp"
 #include "engine/components/Hierarchy.hpp"
+#include "engine/components/Position.hpp"
+#include "engine/components/Sprite.hpp"
 #include "engine/ecs/Registry.hpp"
 #include "engine/reflection/TypeRegistry.hpp"
 #include "engine/render/IRenderer.hpp"
 #include "engine/script/IScripting.hpp"
 #include "engine/services/Logger.hpp"
+#include "systems/RegisterEngineTypes.hpp"
 
 #include <cstdint>
 #include <filesystem>
@@ -57,18 +60,9 @@ struct Everything {
     Stats main;
 };
 
-struct Position {
-    float x = 0, y = 0;
-};
-
 struct Health {
     int32_t hp = 1;
     int32_t maxHp = 1;
-};
-
-struct Sprite {
-    TextureHandle texture;
-    int32_t layer = 0;
 };
 
 }
@@ -76,9 +70,7 @@ struct Sprite {
 ENGINE_ENUM(scenetest::Kind, Grunt, Boss)
 ENGINE_STRUCT(scenetest::Stats)
 ENGINE_COMPONENT(scenetest::Everything)
-ENGINE_COMPONENT(scenetest::Position)
 ENGINE_COMPONENT(scenetest::Health)
-ENGINE_COMPONENT(scenetest::Sprite)
 
 namespace scenetest {
 
@@ -162,8 +154,7 @@ struct SceneFixture {
         std::filesystem::create_directories(this->root / "assets");
         this->write("assets/ship.png", "png");
         this->assets.attach(this->renderer, this->audio, this->scripting);
-        this->types.add<Parent>().field("value", &Parent::value).field("offset", &Parent::offset);
-        this->types.add<Children>().field("list", &Children::list);
+        registerEngineTypes(this->types);
         this->types.add<Kind>();
         this->types.add<Stats>().field("power", &Stats::power).field("label", &Stats::label);
         this->types.add<Everything>()
@@ -189,9 +180,7 @@ struct SceneFixture {
             .field("stats", &Everything::stats)
             .field("kinds", &Everything::kinds)
             .field("main", &Everything::main);
-        this->types.add<Position>().field("x", &Position::x).field("y", &Position::y);
         this->types.add<Health>().field("hp", &Health::hp).field("maxHp", &Health::maxHp);
-        this->types.add<Sprite>().field("texture", &Sprite::texture).field("layer", &Sprite::layer);
     }
     ~SceneFixture() { std::filesystem::remove_all(this->root); }
 

@@ -73,8 +73,12 @@ public:
                                           // catches exceptions (policy below)
     void setEnabled(std::string_view name, bool enabled);   // console "system enable/disable <name>"
     bool enabled(std::string_view name) const;
-    std::span<const SystemStats> stats() const;             // metrics overlay, console "systems"
-    void clearGameSystems();                                 // before unloading a game module
+    std::span<const SystemStats> stats() const;             // metrics overlay, console "systems"; valid after
+                                                             // build(), in run order, stage by stage
+    void beginGameSystems();                                 // engine only: after the engine systems
+    void clearGameSystems();                                 // before unloading a game module (build() again)
+    bool quitRequested() const;                              // the failure policy asked to stop
+    int  exitCode() const;                                   // 5 when a system fault ends the client or session
 };
 ```
 
