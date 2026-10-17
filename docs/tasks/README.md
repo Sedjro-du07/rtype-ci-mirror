@@ -54,7 +54,7 @@ Board: [Notion](https://app.notion.com/p/3f4efac8d89981ba846fe7cddf25ead7) · ta
 | 6 | [ENG-31](ENG-31.md) | 08 Rendering | platform_sfml plugin: window, events to InputMap, batching renderer | [ENG-30](ENG-30.md), [ENG-29](ENG-29.md), [ENG-11](ENG-11.md), [ENG-02](ENG-02.md) |
 | 6 | [ENG-35](ENG-35.md) | 09 Audio | audio_miniaudio plugin | [ENG-34](ENG-34.md), [ENG-02](ENG-02.md) |
 | 6 | [ENG-39](ENG-39.md) | 10 Network | Replication: NetworkIdMap, net components, snapshot and input systems | [ENG-38](ENG-38.md), [ENG-18](ENG-18.md), [ENG-22](ENG-22.md), [ENG-29](ENG-29.md), [SRV-04](SRV-04.md) |
-| 6 | [ENG-40](ENG-40.md) | 11 Scenes & assets | AssetManager: handles, cache, refcount, fallback, hot reload | [ENG-30](ENG-30.md), [ENG-34](ENG-34.md), [ENG-48](ENG-48.md) |
+| 6 | [ENG-40](ENG-40.md) | 11 Scenes & assets | AssetManager: handles, cache, refcount, fallback, hot reload | [ENG-30](ENG-30.md), [ENG-34](ENG-34.md), [ENG-48](ENG-48.md), [ENG-44](ENG-44.md) |
 | 6 | [ENG-46](ENG-46.md) | 12 Services | Console and built-in commands | [ENG-45](ENG-45.md), [ENG-27](ENG-27.md) |
 | 6 | [ENG-49](ENG-49.md) | 12 Services | scripting_lua plugin: sol2 API, sandbox, reload | [ENG-48](ENG-48.md), [ENG-02](ENG-02.md) |
 | 6 | [ENG-50](ENG-50.md) | 13 Engine systems | Systems: previous_position, movement, hierarchy, parallax, lifetime | [ENG-25](ENG-25.md), [ENG-26](ENG-26.md), [ENG-20](ENG-20.md) |

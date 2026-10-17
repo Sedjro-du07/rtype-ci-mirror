@@ -113,3 +113,12 @@ engine_add_test(engine_render_tests SOURCES
 
 engine_add_test(engine_events_tests SOURCES
     events/EventBusTest.cpp)
+
+engine_add_test(engine_audio_tests SOURCES
+    audio/CaptionedAudioTest.cpp)
+engine_add_test(engine_script_tests SOURCES
+    script/ScriptingTest.cpp)
+engine_add_test(engine_services_tests SOURCES
+    services/LoggerTest.cpp)
+engine_add_test(engine_assets_tests SOURCES
+    assets/AssetManagerTest.cpp)

@@ -4,14 +4,13 @@ Board: **Engine — folder tree & tasks** ([Notion](https://app.notion.com/p/3f4
 
 ## Goal
 
-The scripting interface, the Script component and the script systems.
+The scripting interface that plugins implement and the AssetManager loads scripts through.
 
 ## Files
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/script/IScripting.hpp`
-- `src/script/ScriptSystems.cpp`
 
 ## Classes and methods
 
@@ -39,15 +38,6 @@ public:
 };
 ```
 
-### `src/script/ScriptSystems.cpp`
-
-```cpp
-void scriptLifecycle(Context& ctx);   // "engine.script.lifecycle": on_spawn once; on_destroy through the Script onDestroy hook
-void scriptUpdate(Context& ctx);      // "engine.script.update":    on_update(self, dt) for every entity with Script
-void scriptCollision(Context& ctx);   // "engine.script.collision": on_collision(self, other) from Collision events
-void registerScriptSystems(Scheduler& s, IScripting& scripting);
-```
-
 ## Depends on
 
 - [ENG-18](ENG-18.md) — Registry: typed and type-erased access, identity, hierarchy
@@ -67,12 +57,11 @@ void registerScriptSystems(Scheduler& s, IScripting& scripting);
 
 ## To implement
 
-- [ ] `ScriptHost`, `IScripting` declarations
-- [ ] Script systems: lifecycle, update, collision; error → script disabled
+- [ ] `ScriptHost`, `IScripting` declarations (the script systems move to ENG-49: they need Context and the Scheduler)
 
 ## Done when
 
-- With NullScripting, a Script component logs one clear error
+- A fake IScripting loads, answers `has` and unloads scripts
 
 ## Watch out
 

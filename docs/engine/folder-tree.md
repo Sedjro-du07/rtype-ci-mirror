@@ -132,6 +132,7 @@ engine/
 │       │   ├── Console.hpp                               ENG-46
 │       │   ├── CVars.hpp                                 ENG-45
 │       │   ├── Logger.hpp                                ENG-44
+│       │   ├── Logger.inl                                ENG-44
 │       │   └── Metrics.hpp                               ENG-47
 │       ├── Context.hpp                                   ENG-09, SRV-09
 │       ├── Engine.hpp                                    ENG-08
@@ -168,7 +169,8 @@ engine/
 │   ├── assets/
 │   │   └── AssetManager.cpp                              ENG-40
 │   ├── audio/
-│   │   └── AudioCaptions.cpp                             ENG-34
+│   │   ├── AudioCaptions.cpp                             ENG-34
+│   │   └── AudioCaptions.hpp                             ENG-34
 │   ├── client/
 │   │   └── ClientLobby.cpp                               SRV-14
 │   ├── components/
@@ -240,7 +242,7 @@ engine/
 │   ├── scheduler/
 │   │   └── Scheduler.cpp                                 ENG-26
 │   ├── script/
-│   │   └── ScriptSystems.cpp                             ENG-48
+│   │   └── ScriptSystems.cpp                             ENG-49
 │   ├── server/
 │   │   ├── IRoomHost.hpp                                 SRV-12
 │   │   ├── Lobby.cpp                                     SRV-13
@@ -264,8 +266,10 @@ engine/
 │   │   └── WorkerPool.hpp                                SRV-12
 │   ├── services/
 │   │   ├── Console.cpp                                   ENG-46
+│   │   ├── ConsoleUiSink.cpp                             ENG-46
 │   │   ├── CVars.cpp                                     ENG-45
 │   │   ├── Logger.cpp                                    ENG-44
+│   │   ├── LogSinks.hpp                                  ENG-44
 │   │   └── Metrics.cpp                                   ENG-47
 │   └── systems/
 │       ├── AnimationSystem.cpp                           ENG-52
