@@ -63,6 +63,36 @@ YAML forms that are not field by field:
 | `engine.render.debug` | Render | client, editor | — | collider outlines when `r_debug_colliders` |
 | `engine.debug_overlay` | Render | client, editor | last | console and metrics (block 12) |
 
+### How the systems are written — `src/include/systems/EngineSystems.hpp` (private)
+
+Each system is a function taking exactly what it uses, so it can be tested without an engine:
+
+```cpp
+void previousPosition(Registry&);                 void movement(Registry&, double dt);
+void hierarchy(Registry&);                        void parallax(Registry&);
+void lifetime(Registry&, Commands&, double dt);   void animation(Registry&, double dt);
+void collision(Registry&, EventBus&, float cellSize);
+void renderSprites(Registry&, RenderQueue&, double alpha);
+void renderText(Registry&, RenderQueue&);          void renderDebug(Registry&, RenderQueue&);
+
+struct SystemTargets { Registry& world; Commands& commands; EventBus& events; const Time& time;
+                       RenderQueue* render; float gridCell; bool debugColliders; };
+using TargetsOf = std::function<SystemTargets(Context&)>;
+void registerEngineSystems(Scheduler&, TargetsOf);   // names, stages, roles and order of the table above
+```
+
+`registerEngineSystems` wraps each function in a `SystemFn` that asks `targetsOf(ctx)` for its world,
+commands, time…: the engine (ENG-08/09) passes the function that reads them from `Context`, and
+`phys_grid_cell` / `r_debug_colliders` until the CVars exist (ENG-45). The `after` constraints on the net
+systems and `engine.debug_overlay` are added with those systems (ENG-39, ENG-47).
+
+Conventions: a collider box is `Position + offset` (top-left) with `size`; boxes that only touch do not
+collide; `Collision{a, b}` has `a` before `b` by entity index, one per pair per tick, in a stable order.
+`engine.parallax` keeps `x` in `(-wrapWidth, 0]`; `factor` shifts the drawn sprite by the camera's travel
+from its default centre times `1 - factor`. `engine.render.sprites` draws `PreviousPosition` lerped to
+`Position` with `alpha`; `engine.render.debug` draws outlines on layer 30000 (yellow for triggers).
+`engine.lifetime` records one `destroy` when the time runs out.
+
 Collision rule: a pair (a, b) collides when their boxes overlap and `(a.layer & b.mask) != 0` and
 `(b.layer & a.mask) != 0`. `engine.collision` only detects and publishes `Collision` every tick the
 pair overlaps; there is no physical response in Part 1. `trigger` marks sensors for game rules and
