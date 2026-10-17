@@ -55,6 +55,7 @@ struct AssetStats { uint32_t textures, fonts, sounds, musics, scripts; uint64_t 
 - [ENG-30](ENG-30.md) — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform
 - [ENG-34](ENG-34.md) — IAudio, PlayParams, buses, captions
 - [ENG-48](ENG-48.md) — IScripting, Script component, script systems
+- [ENG-44](ENG-44.md) — Logger and sinks (console, file, developer console)
 
 ## Unlocks
 

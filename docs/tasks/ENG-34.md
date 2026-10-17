@@ -11,6 +11,7 @@ The audio interface, buses and captions for every backend.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/audio/IAudio.hpp`
+- `src/audio/AudioCaptions.hpp`
 - `src/audio/AudioCaptions.cpp`
 
 ## Classes and methods

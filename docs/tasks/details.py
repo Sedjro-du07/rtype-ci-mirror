@@ -335,13 +335,13 @@ DETAILS = {
     done=["Overlay shows per-system times matching `systems`"],
     watch=["Recording must stay cheap: no allocation per sample"]),
 'ENG-48': dict(
-    goal="The scripting interface, the Script component and the script systems.",
-    todo=["`ScriptHost`, `IScripting` declarations", "Script systems: lifecycle, update, collision; error → script disabled"],
-    done=["With NullScripting, a Script component logs one clear error"],
+    goal="The scripting interface that plugins implement and the AssetManager loads scripts through.",
+    todo=["`ScriptHost`, `IScripting` declarations (the script systems move to ENG-49: they need Context and the Scheduler)"],
+    done=["A fake IScripting loads, answers `has` and unloads scripts"],
     watch=["Script errors never stop the game"]),
 'ENG-49': dict(
     goal="Lua 5.4 + sol2 implementation of IScripting.",
-    todo=["API of guide 11 by reflection (components by name)", "Sandbox (no io, os, package, debug, load)", "Instruction limit hook", "Reload keeping the handle"],
+    todo=["API of guide 11 by reflection (components by name)", "Sandbox (no io, os, package, debug, load)", "Instruction limit hook", "Reload keeping the handle", "Script systems (moved from ENG-48): lifecycle, update, collision; a script error disables that script"],
     done=["The guide 11 boss script runs; an infinite loop is stopped"],
     watch=["No binding code per component type"]),
 # ---------------------------------------------------------------- 13 Engine systems

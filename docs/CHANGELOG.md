@@ -7,6 +7,20 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — audio and scripting interfaces, logger, assets: ENG-34, ENG-48, ENG-44, ENG-40
+
+### Added
+
+- `IAudio`, `AudioBus`, `PlayParams`, `VoiceId` (ENG-34) and `CaptionedAudio`, the decorator that publishes a
+  `Caption` event for every sound played with a caption, whatever the backend (2 tests, fake backend).
+- `ScriptHost`, `IScripting` (ENG-48) (1 test, fake backend).
+
+### Changed
+
+- The script systems move from ENG-48 to ENG-49: they need `Context` and the `Scheduler`, and Part 1 runs
+  without scripting (game decision G-2).
+- ENG-40 now depends on ENG-44: `AssetManager` takes a `Logger`.
+
 ## [2026-10-17] — engine events: ENG-27
 
 ### Added

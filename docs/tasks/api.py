@@ -564,13 +564,11 @@ void drawFrameGraph(const Metrics& metrics);
 void drawSystemTimings(std::span<const SystemStats> stats);
 void drawLagometer(const NetworkSession& net);'''),
 ]),
-'ENG-48': dict(extra=[
+'ENG-49': dict(extra=[
     ('src/script/ScriptSystems.cpp', 'cpp', '''void scriptLifecycle(Context& ctx);   // "engine.script.lifecycle": on_spawn once; on_destroy through the Script onDestroy hook
 void scriptUpdate(Context& ctx);      // "engine.script.update":    on_update(self, dt) for every entity with Script
 void scriptCollision(Context& ctx);   // "engine.script.collision": on_collision(self, other) from Collision events
 void registerScriptSystems(Scheduler& s, IScripting& scripting);'''),
-]),
-'ENG-49': dict(extra=[
     ('plugins/scripting_lua/LuaScripting.hpp', 'cpp', '''class LuaScripting final : public IScripting {
 public:
     PluginKind kind() const override; std::string_view name() const override;   // "lua"

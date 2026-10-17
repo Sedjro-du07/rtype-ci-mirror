@@ -168,7 +168,8 @@ engine/
 │   ├── assets/
 │   │   └── AssetManager.cpp                              ENG-40
 │   ├── audio/
-│   │   └── AudioCaptions.cpp                             ENG-34
+│   │   ├── AudioCaptions.cpp                             ENG-34
+│   │   └── AudioCaptions.hpp                             ENG-34
 │   ├── client/
 │   │   └── ClientLobby.cpp                               SRV-14
 │   ├── components/
@@ -240,7 +241,7 @@ engine/
 │   ├── scheduler/
 │   │   └── Scheduler.cpp                                 ENG-26
 │   ├── script/
-│   │   └── ScriptSystems.cpp                             ENG-48
+│   │   └── ScriptSystems.cpp                             ENG-49
 │   ├── server/
 │   │   ├── IRoomHost.hpp                                 SRV-12
 │   │   ├── Lobby.cpp                                     SRV-13
