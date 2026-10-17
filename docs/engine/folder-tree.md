@@ -121,6 +121,7 @@ engine/
 │       │   └── SceneManager.hpp                          ENG-43
 │       ├── scheduler/
 │       │   ├── Scheduler.hpp                             ENG-26
+│       │   ├── Scheduler.inl                             ENG-26
 │       │   ├── Stage.hpp                                 ENG-26
 │       │   └── System.hpp                                ENG-26
 │       ├── script/
@@ -283,6 +284,7 @@ engine/
 │       ├── NetSystems.cpp                                ENG-39
 │       ├── RegisterEngineSystems.cpp                     ENG-50
 │       ├── RegisterEngineTypes.cpp                       ENG-25
+│       ├── RegisterEngineTypes.hpp                       ENG-25
 │       └── RenderSystems.cpp                             ENG-52
 ├── tests/
 │   ├── core/                                             ENG-53

@@ -13,6 +13,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/scheduler/Stage.hpp`
 - `include/engine/scheduler/System.hpp`
 - `include/engine/scheduler/Scheduler.hpp`
+- `include/engine/scheduler/Scheduler.inl`
 - `src/scheduler/Scheduler.cpp`
 
 ## Classes and methods

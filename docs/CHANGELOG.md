@@ -7,6 +7,30 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — engine components and scheduler: ENG-25, ENG-26
+
+### Added
+
+- Engine components (ENG-25): `Position`, `PreviousPosition`, `Velocity`, `Sprite`, `Animation`, `Text`,
+  `Collider`, `Lifetime`, `Parallax`, `Script`, and `registerEngineTypes`, which registers them with
+  identity, hierarchy and the engine events, with their flags. Custom YAML for `Uuid`, `Tags`, `Script`.
+  3 tests.
+- `Scheduler` (ENG-26): stages, `after` / `before` with a stable topological sort, roles, disabled and
+  critical systems, timing, the failure policy of ADR 0024, one copy of each system per room
+  (`instantiate`), `beginGameSystems` / `clearGameSystems`. 7 tests.
+- `Role` in `EngineConfig.hpp` (the rest of the file is ENG-07).
+
+### Changed
+
+- `PrefabLibrary` and `SceneLoader` use the real `Position` type instead of a lookup by name.
+- The scene tests use the engine components.
+
+### Deviations
+
+- `Scheduler` reports the end of the run through `quitRequested()` / `exitCode()` (5) until `Context`
+  (ENG-09) has `requestQuit()`. The scheduler tests define a stand-in `Context` until then.
+- `Tags` are written back as ids: the names are not kept.
+
 ## [2026-10-17] — scenes: ENG-42, ENG-43
 
 ### Added
