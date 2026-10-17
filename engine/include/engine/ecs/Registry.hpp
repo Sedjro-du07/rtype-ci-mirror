@@ -106,9 +106,11 @@ public:
 
     IStorage* storage(ComponentId id);
     void* getRaw(Entity e, ComponentId id);
+    const void* getRaw(Entity e, ComponentId id) const;
     void* emplaceRaw(Entity e, ComponentId id, const void* src);
     void removeRaw(Entity e, ComponentId id);
     std::vector<ComponentId> componentsOf(Entity e) const;
+    std::vector<Entity> entities() const;
 
     Entity find(std::string_view name) const;
     Entity find(const Uuid& uuid) const;

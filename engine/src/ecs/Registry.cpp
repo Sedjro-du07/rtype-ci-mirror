@@ -104,6 +104,11 @@ void* Registry::getRaw(Entity e, ComponentId id) {
     return set ? set->getRaw(e) : nullptr;
 }
 
+const void* Registry::getRaw(Entity e, ComponentId id) const {
+    const IStorage* set = this->storage(id);
+    return set ? set->getRaw(e) : nullptr;
+}
+
 void* Registry::emplaceRaw(Entity e, ComponentId id, const void* src) {
     assert(this->alive(e));
     this->assure(id).emplaceRaw(e, src);
@@ -124,6 +129,18 @@ std::vector<ComponentId> Registry::componentsOf(Entity e) const {
     for (ComponentId id = 0; id < this->_storages.size(); ++id)
         if (this->_storages[id] && this->_storages[id]->has(e)) ids.push_back(id);
     return ids;
+}
+
+std::vector<Entity> Registry::entities() const {
+    std::vector<Entity> found;
+    for (const auto& set : this->_storages)
+        if (set)
+            for (Entity e : set->entities())
+                if (e != this->_singletons && this->alive(e)) found.push_back(e);
+    std::ranges::sort(found, {}, &Entity::index);
+    const auto [first, last] = std::ranges::unique(found);
+    found.erase(first, last);
+    return found;
 }
 
 const TypeInfo* Registry::registered(std::string_view name) const {

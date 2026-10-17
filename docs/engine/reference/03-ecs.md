@@ -121,9 +121,11 @@ public:
     // Type-erased access (scene loader, editor, scripts, replication)
     IStorage*       storage(ComponentId id);          // nullptr if no entity ever had it
     void*           getRaw(Entity e, ComponentId id);
+    const void*     getRaw(Entity e, ComponentId id) const;
     void*           emplaceRaw(Entity e, ComponentId id, const void* src);
     void            removeRaw(Entity e, ComponentId id);
     std::vector<ComponentId> componentsOf(Entity e) const;   // for the inspector and save()
+    std::vector<Entity> entities() const;                    // alive entities with a component, by index
 
     // Identity and hierarchy (ADR 0016)
     Entity find(std::string_view name) const;         // first entity whose Name matches, or null

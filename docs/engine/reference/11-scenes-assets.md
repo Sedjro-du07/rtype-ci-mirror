@@ -103,48 +103,65 @@ Until ENG-25 registers the engine components, this lookup is by name.
 class SceneLoader {
 public:
     SceneLoader(const TypeRegistry& types, AssetManager& assets, PrefabLibrary& prefabs);
-    Result<std::unique_ptr<Scene>> load(const std::filesystem::path& file);
-    // Pass 1: parse; for each entity create it, resolve its prefab, apply overrides, record uuid → entity.
-    // Pass 2: link Parent / Children and Entity fields by uuid (declaration order does not matter).
-    // Then request the assets. Any error returns file:line and leaves no partial scene behind.
+    Result<std::unique_ptr<Scene>> load(const std::filesystem::path& file);   // relative to the game root
+    // Pass 1: for each entity create it, instantiate its prefab with the overrides (position from its
+    // Position override), record uuid → entity; assets are requested while parsing.
+    // Pass 2: re-read the components that hold Entity fields with every uuid known (declaration order
+    // does not matter), then attach Parent with Registry::setParent. Unknown uuid, duplicate uuid,
+    // parent loop → error. Any error returns file:line and the half-built scene is discarded.
     Result<void> save(const Scene& scene, const std::filesystem::path& file) const;
-    // Writes uuids, prefab references and only the components that differ from the prefab; skips Transient types.
+    // Writes name, then per entity: uuid (generated if it had none), prefab, and the components that
+    // differ from the prefab's (compared as YAML); skips Transient types, Uuid, Children, and the
+    // entities a prefab created as children.
 };
 ```
+
+Scene file keys: `name`, `entities`; entity keys: `uuid`, `prefab`, component names. `children` is refused
+in scenes: children belong to prefabs.
 
 ## `class Scene` — `scene/Scene.hpp`
 
 ```cpp
-class Scene {
+class Scene {                                      // not copyable: owned through std::unique_ptr
 public:
+    Scene(const TypeRegistry& types, std::string name, std::filesystem::path path);
     const std::string& name() const;
     const std::filesystem::path& path() const;
-    Registry& registry();
+    Registry& registry(); const Registry& registry() const;
+    void setUuid(Entity, const Uuid&);  std::optional<Uuid> uuidOf(Entity) const;     // filled by the loader
+    void setPrefab(Entity, std::string); std::string_view prefabOf(Entity) const;     // "" if none
+    void markGenerated(Entity);         bool generated(Entity) const;   // created as a prefab's child
 };
 ```
 
+The uuid is also stored as the `Uuid` component when that type is registered (`Registry::find(Uuid)`).
+
 ## `class SceneManager` — `scene/SceneManager.hpp`
 
-One active scene at a time.
+One active scene at a time; before the first `load`, `world()` is an empty registry.
 
 ```cpp
 class SceneManager {
 public:
     SceneManager(const TypeRegistry&, AssetManager&, EventBus&, Logger&);
     Result<void> load(const std::filesystem::path& file);   // engine only (first scene): immediate
-    void switchTo(const std::filesystem::path& file);      // deferred to the end of the frame
-    void markPersistent(Entity e);                         // copied into the next scene on switch (the player)
+    void switchTo(const std::filesystem::path& file);      // deferred to applyPending (end of the frame)
+    void markPersistent(Entity e);                         // copied with its children into the next scene
     Result<void> save(const std::filesystem::path& file) const;
     Registry& world();                                     // active scene's registry
+    const Scene& active() const;
     std::string_view activeName() const;
     PrefabLibrary& prefabs();
-    void applyPending(Context& ctx);                       // engine only: SceneUnloading → clear → load → SceneLoaded
-    void clear();                                          // engine only: shutdown, before the game module unloads
+    bool hasPending() const;
+    void applyPending();     // engine only: load the next scene; on success emit SceneUnloading (old world
+                             // still readable), copy the persistent entities, swap, emit SceneLoaded
+    void clear();            // engine only: shutdown, before the game module unloads
 };
 ```
 
-If loading the next scene fails, the current scene stays active and the error is logged and
-shown; the game does not end on a bad level file.
+If loading the next scene fails, the current scene stays active and the error is logged; the game
+does not end on a bad level file. Persistent entities keep their uuid and components; `Entity` fields
+other than `Parent` still point into the old scene and must be refreshed by the game.
 
 ## File formats
 

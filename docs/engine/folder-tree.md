@@ -240,6 +240,7 @@ engine/
 │   ├── scene/
 │   │   ├── ComponentData.cpp                             ENG-41
 │   │   ├── PrefabLibrary.cpp                             ENG-41
+│   │   ├── Scene.cpp                                     ENG-43
 │   │   ├── SceneLoader.cpp                               ENG-42
 │   │   └── SceneManager.cpp                              ENG-43
 │   ├── scheduler/

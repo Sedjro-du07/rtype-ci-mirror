@@ -7,6 +7,25 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — scenes: ENG-42, ENG-43
+
+### Added
+
+- `SceneLoader` (ENG-42): two passes (create with prefab and overrides, then link `Entity` fields and
+  `Parent` by uuid), errors with `file:line` and nothing left behind, `save` that writes only what differs
+  from the prefab and skips `Transient`, `Uuid`, `Children` and prefab-made children.
+- `Scene` and `SceneManager` (ENG-43): one active scene owning its `Registry`, `switchTo` applied by
+  `applyPending`, a failed switch keeps the current scene, persistent entities copied with their children,
+  `SceneUnloading` / `SceneLoaded` emitted. 4 tests.
+- `Registry::entities()` and a `const` `getRaw` (needed to save a scene).
+
+### Deviations
+
+- `applyPending()` takes no `Context`: `Context` arrives with ENG-09.
+- `SceneManager` does not call `AssetManager::collectUnused()` yet: nothing retains handles until the
+  engine components (ENG-25) do, so it would free assets still in use.
+- `Entity` fields of persistent entities other than `Parent` are not remapped into the next scene.
+
 ## [2026-10-17] — YAML and prefabs: ENG-23, ENG-41
 
 ### Added
