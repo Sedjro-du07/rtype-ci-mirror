@@ -10,12 +10,29 @@ Movement-related built-in systems and the registration of all engine systems.
 
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
+- `src/include/systems/EngineSystems.hpp`
 - `src/systems/MovementSystems.cpp`
 - `src/systems/RegisterEngineSystems.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
+
+### `src/include/systems/EngineSystems.hpp`
+
+```cpp
+void previousPosition(Registry&);                 void movement(Registry&, double dt);
+void hierarchy(Registry&);                        void parallax(Registry&);
+void lifetime(Registry&, Commands&, double dt);   void animation(Registry&, double dt);
+void collision(Registry&, EventBus&, float cellSize);
+void renderSprites(Registry&, RenderQueue&, double alpha);
+void renderText(Registry&, RenderQueue&);          void renderDebug(Registry&, RenderQueue&);
+
+struct SystemTargets { Registry& world; Commands& commands; EventBus& events; const Time& time;
+                       RenderQueue* render; float gridCell; bool debugColliders; };
+using TargetsOf = std::function<SystemTargets(Context&)>;
+void registerEngineSystems(Scheduler&, TargetsOf);   // names, stages, roles and order of the table above
+```
 
 ### `src/systems/MovementSystems.cpp`
 

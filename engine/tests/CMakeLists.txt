@@ -131,3 +131,5 @@ engine_add_test(engine_scheduler_tests SOURCES
     scheduler/SchedulerTest.cpp)
 engine_add_test(engine_components_tests SOURCES
     components/EngineTypesTest.cpp)
+engine_add_test(engine_systems_tests SOURCES
+    systems/EngineSystemsTest.cpp)

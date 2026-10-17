@@ -6,6 +6,7 @@ Placeholder created from the architecture. Replace this file's list as files are
 
 | File to create | Task | Details |
 |---|---|---|
+| `EngineSystems.hpp` | ENG-50 — Systems: previous_position, movement, hierarchy, parallax, lifetime | `docs/tasks/ENG-50.md` |
 | `RegisterEngineTypes.hpp` | ENG-25 — Engine components and their registration | `docs/tasks/ENG-25.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.
