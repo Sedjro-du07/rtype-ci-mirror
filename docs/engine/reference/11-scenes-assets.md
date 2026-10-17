@@ -49,26 +49,53 @@ On the server the renderer and audio are Null Objects: handles are still valid, 
 The "missing" texture is a built-in 8×8 magenta and black checkerboard PNG. A path that fails is logged once;
 later calls return the same fallback silently and count in `AssetStats::failed`.
 
-## `struct Prefab` and `class PrefabLibrary` — `scene/Prefab.hpp`
+## `ComponentData`, `struct Prefab` and `class PrefabLibrary` — `scene/Prefab.hpp`
 
 ```cpp
-struct Prefab {
-    std::string                     path;
-    uint32_t                        key;       // fnv1a(path), used by NetPrefab
-    std::vector<ComponentData>      components;// parsed values, already type-checked
-    std::vector<PrefabChild>        children;  // nested prefabs or inline entities, with local offsets
+class ComponentData {                              // one component value of a type known only at run time
+public:
+    explicit ComponentData(const TypeInfo& type);  // default-constructed value
+    static Result<ComponentData> parse(const TypeInfo&, const YamlNode&, LoadContext&); // keeps the node
+    template <class T> static ComponentData of(const TypeRegistry&, T value);           // from code
+    const TypeInfo& type() const; void* value(); const void* value() const;
+    const YamlNode& source() const;                // defined when parsed: an override then only writes
+};                                                 // the keys of that node; otherwise it replaces the value
+
+struct PrefabChild {
+    std::string                prefab;             // empty: inline entity
+    const Prefab*              resolved = nullptr;
+    Vec2                       offset;             // from its `Parent: { offset }` entry
+    std::vector<ComponentData> components;         // overrides of the child prefab, or the inline entity
+    std::vector<PrefabChild>   children;
 };
 
+struct Prefab {
+    std::string                path;
+    uint32_t                   key;                // prefabKey(path), used by NetPrefab
+    std::vector<ComponentData> components;         // parsed values, already type-checked
+    std::vector<PrefabChild>   children;
+};
+
+uint32_t prefabKey(std::string_view path);         // fnv1a64 folded to 32 bits; two prefabs with the same
+                                                   // key are refused at load
 class PrefabLibrary {
 public:
     PrefabLibrary(const TypeRegistry& types, AssetManager& assets);
-    Result<const Prefab*> get(std::string_view path);   // parses on first use, cached
+    Result<const Prefab*> get(std::string_view path);   // parses on first use, cached; children prefabs too
     const Prefab* findByKey(uint32_t key) const;        // replication spawn
     Entity instantiate(Registry& r, const Prefab& p, Vec2 position,
                        std::span<const ComponentData> overrides = {}); // creates the entity and its children
-    void clear();
+    void instantiateInto(Registry& r, Entity e, const Prefab& p, Vec2 position,
+                         std::span<const ComponentData> overrides = {}); // same on an existing entity
+    void clear();                                       // invalidates every Prefab pointer
 };
 ```
+
+Errors: unknown component with the closest name, unknown prefab, a prefab that includes itself,
+`children` without the `Parent` component registered, all with `file:line`. `instantiate` sets the
+`Position` component (a registered component named `Position` with float fields `x` and `y`) to
+`position`, and each child's to `position + offset`, then attaches it with `Registry::setParent`.
+Until ENG-25 registers the engine components, this lookup is by name.
 
 ## `class SceneLoader` — `scene/SceneLoader.hpp`
 

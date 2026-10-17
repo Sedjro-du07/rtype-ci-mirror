@@ -12,5 +12,6 @@ Placeholder created from the architecture. Replace this file's list as files are
 | `TypeBuilder.cpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) | `docs/tasks/ENG-22.md` |
 | `TypeRegistry.cpp` | ENG-22 — TypeRegistry, TypeInfo, builders and type macros (component, event, message, struct, enum) | `docs/tasks/ENG-22.md` |
 | `Yaml.cpp` | ENG-23 — YAML wrappers and field codecs | `docs/tasks/ENG-23.md` |
+| `YamlCodec.cpp` | ENG-23 — YAML wrappers and field codecs | `docs/tasks/ENG-23.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

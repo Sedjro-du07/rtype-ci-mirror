@@ -179,9 +179,10 @@ One per world, built with that world's `Registry` (so `spawn()` can create the e
 ```cpp
 class Commands {
 public:
-    explicit Commands(Registry& registry);                  // one per world (scene, or room on the server)
+    explicit Commands(Registry& registry, PrefabLibrary* prefabs = nullptr); // one per world (scene, or room)
     Entity spawn();                                         // entity created now, components added at apply()
-    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply(): added by ENG-41
+    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply() (ENG-41); null if
+                                                            // the prefab fails to load or no library was given
     void   destroy(Entity e);                               // destroyed (with children) at apply()
     template <class T> void add(Entity e, T value);         // nothing if the entity already has a T
     template <class T> void set(Entity e, T value);         // add or replace

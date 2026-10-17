@@ -122,3 +122,7 @@ engine_add_test(engine_services_tests SOURCES
     services/LoggerTest.cpp)
 engine_add_test(engine_assets_tests SOURCES
     assets/AssetManagerTest.cpp)
+engine_add_test(engine_scene_tests SOURCES
+    reflection/YamlTest.cpp
+    scene/PrefabTest.cpp)
+target_include_directories(engine_scene_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

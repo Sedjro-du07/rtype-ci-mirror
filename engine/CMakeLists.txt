@@ -57,6 +57,9 @@ target_include_directories(engine
 # Third-party libraries are linked by the task that first uses them; vcpkg.json lists them all.
 # Never let a third-party type into include/engine (reference README).
 
+find_package(yaml-cpp CONFIG REQUIRED)
+target_link_libraries(engine PRIVATE yaml-cpp::yaml-cpp)
+
 # Plugins: one sub-directory each, built by engine_add_plugin (ENG-02 and the plugin tasks).
 file(GLOB ENGINE_PLUGIN_DIRS LIST_DIRECTORIES true ${CMAKE_CURRENT_SOURCE_DIR}/plugins/*)
 foreach(dir IN LISTS ENGINE_PLUGIN_DIRS)

@@ -11,6 +11,8 @@ Prefabs: parsed once, instantiated with overrides and children.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/scene/Prefab.hpp`
+- `include/engine/scene/Prefab.inl`
+- `src/scene/ComponentData.cpp`
 - `src/scene/PrefabLibrary.cpp`
 
 ## Classes and methods
@@ -20,21 +22,42 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ### `include/engine/scene/Prefab.hpp`
 
 ```cpp
-struct Prefab {
-    std::string                     path;
-    uint32_t                        key;       // fnv1a(path), used by NetPrefab
-    std::vector<ComponentData>      components;// parsed values, already type-checked
-    std::vector<PrefabChild>        children;  // nested prefabs or inline entities, with local offsets
+class ComponentData {                              // one component value of a type known only at run time
+public:
+    explicit ComponentData(const TypeInfo& type);  // default-constructed value
+    static Result<ComponentData> parse(const TypeInfo&, const YamlNode&, LoadContext&); // keeps the node
+    template <class T> static ComponentData of(const TypeRegistry&, T value);           // from code
+    const TypeInfo& type() const; void* value(); const void* value() const;
+    const YamlNode& source() const;                // defined when parsed: an override then only writes
+};                                                 // the keys of that node; otherwise it replaces the value
+
+struct PrefabChild {
+    std::string                prefab;             // empty: inline entity
+    const Prefab*              resolved = nullptr;
+    Vec2                       offset;             // from its `Parent: { offset }` entry
+    std::vector<ComponentData> components;         // overrides of the child prefab, or the inline entity
+    std::vector<PrefabChild>   children;
 };
 
+struct Prefab {
+    std::string                path;
+    uint32_t                   key;                // prefabKey(path), used by NetPrefab
+    std::vector<ComponentData> components;         // parsed values, already type-checked
+    std::vector<PrefabChild>   children;
+};
+
+uint32_t prefabKey(std::string_view path);         // fnv1a64 folded to 32 bits; two prefabs with the same
+                                                   // key are refused at load
 class PrefabLibrary {
 public:
     PrefabLibrary(const TypeRegistry& types, AssetManager& assets);
-    Result<const Prefab*> get(std::string_view path);   // parses on first use, cached
+    Result<const Prefab*> get(std::string_view path);   // parses on first use, cached; children prefabs too
     const Prefab* findByKey(uint32_t key) const;        // replication spawn
     Entity instantiate(Registry& r, const Prefab& p, Vec2 position,
                        std::span<const ComponentData> overrides = {}); // creates the entity and its children
-    void clear();
+    void instantiateInto(Registry& r, Entity e, const Prefab& p, Vec2 position,
+                         std::span<const ComponentData> overrides = {}); // same on an existing entity
+    void clear();                                       // invalidates every Prefab pointer
 };
 
 struct ComponentData {                 // one parsed component value, ready to copy into a registry

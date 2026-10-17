@@ -115,6 +115,7 @@ engine/
 │       │   └── WindowDesc.hpp                            ENG-30
 │       ├── scene/
 │       │   ├── Prefab.hpp                                ENG-41
+│       │   ├── Prefab.inl                                ENG-41
 │       │   ├── Scene.hpp                                 ENG-43
 │       │   ├── SceneLoader.hpp                           ENG-42
 │       │   └── SceneManager.hpp                          ENG-43
@@ -231,11 +232,13 @@ engine/
 │   │   ├── Codec.hpp                                     SRV-04
 │   │   ├── TypeBuilder.cpp                               ENG-22
 │   │   ├── TypeRegistry.cpp                              ENG-22
-│   │   └── Yaml.cpp                                      ENG-23
+│   │   ├── Yaml.cpp                                      ENG-23
+│   │   └── YamlCodec.cpp                                 ENG-23
 │   ├── render/
 │   │   ├── Camera2D.cpp                                  ENG-30
 │   │   └── RenderQueue.cpp                               ENG-30
 │   ├── scene/
+│   │   ├── ComponentData.cpp                             ENG-41
 │   │   ├── PrefabLibrary.cpp                             ENG-41
 │   │   ├── SceneLoader.cpp                               ENG-42
 │   │   └── SceneManager.cpp                              ENG-43
