@@ -36,3 +36,21 @@ engine_add_test(engine_os_tests SOURCES
 engine_add_test(engine_ecs_tests SOURCES
     ecs/EntityTest.cpp
     ecs/SparseSetTest.cpp)
+
+engine_add_test(engine_reflection_tests SOURCES
+    reflection/TypeRegistryTest.cpp)
+
+foreach(case IN ITEMS 1 2 3)
+    add_executable(engine_compile_fail_${case} EXCLUDE_FROM_ALL reflection/CompileFail.cpp)
+    target_link_libraries(engine_compile_fail_${case} PRIVATE rtype_engine::engine)
+    target_compile_definitions(engine_compile_fail_${case} PRIVATE ENGINE_COMPILE_FAIL_CASE=${case})
+    engine_configure_target(engine_compile_fail_${case})
+    add_test(NAME "compile fails: reflection case ${case}"
+             COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target engine_compile_fail_${case})
+endforeach()
+set_tests_properties("compile fails: reflection case 1" PROPERTIES
+    PASS_REGULAR_EXPRESSION "has no type macro" RUN_SERIAL TRUE)
+set_tests_properties("compile fails: reflection case 2" PROPERTIES
+    PASS_REGULAR_EXPRESSION "member.*flags|flags.*member" RUN_SERIAL TRUE)
+set_tests_properties("compile fails: reflection case 3" PROPERTIES
+    PASS_REGULAR_EXPRESSION "unsupported field type" RUN_SERIAL TRUE)

@@ -93,9 +93,12 @@ engine/
 │       ├── reflection/
 │       │   ├── ByteStream.hpp                            ENG-24
 │       │   ├── TypeBuilder.hpp                           ENG-22
+│       │   ├── TypeBuilder.inl                           ENG-22
 │       │   ├── TypeInfo.hpp                              ENG-22
 │       │   ├── TypeKey.hpp                               ENG-22
+│       │   ├── TypeKey.inl                               ENG-22
 │       │   ├── TypeRegistry.hpp                          ENG-22
+│       │   ├── TypeRegistry.inl                          ENG-22
 │       │   └── Yaml.hpp                                  ENG-23
 │       ├── render/
 │       │   ├── Camera2D.hpp                              ENG-30
@@ -216,6 +219,7 @@ engine/
 │   │   ├── ByteStream.cpp                                ENG-24
 │   │   ├── Codec.cpp                                     SRV-04
 │   │   ├── Codec.hpp                                     SRV-04
+│   │   ├── TypeBuilder.cpp                               ENG-22
 │   │   ├── TypeRegistry.cpp                              ENG-22
 │   │   └── Yaml.cpp                                      ENG-23
 │   ├── render/
