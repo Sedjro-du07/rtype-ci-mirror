@@ -27,7 +27,7 @@ public:
 
     TextureHandle texture(std::string_view path);  // loads once, returns the cached handle afterwards;
                                                    // on failure logs the error and returns the "missing" texture
-    FontHandle    font(std::string_view path);     // failure → engine default font
+    FontHandle    font(std::string_view path);     // failure → invalid handle (no default font yet)
     SoundHandle   sound(std::string_view path);    // failure → invalid handle (play does nothing)
     MusicHandle   music(std::string_view path);
     ScriptHandle  script(std::string_view path);
@@ -41,7 +41,8 @@ public:
     void release(TextureHandle); void release(FontHandle); void release(SoundHandle);
     void release(MusicHandle);   void release(ScriptHandle);
     void collectUnused();                          // frees zero-count assets; called after a scene switch
-    void reloadChanged();                          // dev: re-reads files whose timestamp changed (CVar asset_hot_reload)
+    void reloadChanged();                          // dev: reloads scripts whose timestamp changed; other kinds
+                                                   // are only reported (CVar asset_hot_reload)
     std::filesystem::path resolve(std::string_view path) const; // game root + path; rejects "../" escapes and
                                                                  // a case that differs from the file on disk (ADR 0044)
     AssetStats stats() const;                      // counts and bytes per kind

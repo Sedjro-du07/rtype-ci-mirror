@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Logger` (ENG-44): levels, `std::format` API, `tagged` child loggers sharing the sinks, thread-safe writes
   (whole lines, ThreadSanitizer clean), `ConsoleSink` (colours, stderr for warnings and errors), rotating
   `FileSink`; never a singleton. `ConsoleUiSink` moves to ENG-46 with the Console. 5 tests.
+- `AssetManager` (ENG-40): one load per path, reverse lookup, reference counting and `collectUnused`,
+  `resolve` that rejects absolute paths, `..` and a case that differs from the disk, one log line per failing
+  path, `stats`. 6 tests with fake backends.
+
+### Deviations
+
+- A missing texture is a built-in 8×8 magenta and black checkerboard PNG, created on first need.
+- There is no engine default font yet: a missing font gives an invalid handle and an error in the log.
+- `reloadChanged` reloads scripts only; a changed texture, font or sound is reported in the log
+  (restart to see it), because live handles cannot be swapped under the renderer and audio yet.
 
 ### Changed
 

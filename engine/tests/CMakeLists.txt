@@ -120,3 +120,5 @@ engine_add_test(engine_script_tests SOURCES
     script/ScriptingTest.cpp)
 engine_add_test(engine_services_tests SOURCES
     services/LoggerTest.cpp)
+engine_add_test(engine_assets_tests SOURCES
+    assets/AssetManagerTest.cpp)
