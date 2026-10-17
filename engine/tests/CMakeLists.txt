@@ -27,3 +27,7 @@ endfunction()
 # SRV-08 — RoomTypes and RoomEvents tests
 engine_add_test(engine_net_room_types_tests SOURCES
     net/RoomTypesTest.cpp)
+
+# SRV-10 — PartyTable and RoomDirectory tests
+engine_add_test(engine_room_tests SOURCES
+    room/PartyRoomTest.cpp)
