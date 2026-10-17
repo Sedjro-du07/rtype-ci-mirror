@@ -102,11 +102,11 @@ struct Session {
     TypeRegistry types;
     EventBus events;
     Logger log{[] {
-        LogConfig config;
-        config.file.clear();
-        config.color = false;
-        config.level = LogLevel::Error;
-        return config;
+        LogConfig settings;
+        settings.file.clear();
+        settings.color = false;
+        settings.level = LogLevel::Error;
+        return settings;
     }()};
     NetConfig config;
     FakeNetwork network;
