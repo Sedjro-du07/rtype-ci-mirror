@@ -36,3 +36,7 @@ engine_add_test(engine_net_stream_framer_tests SOURCES
 engine_add_test(engine_reflection_tests SOURCES
     reflection/ByteStreamTest.cpp
     reflection/codec/CodecTest.cpp)
+
+# SRV-10 — PartyTable and RoomDirectory tests
+engine_add_test(engine_room_tests SOURCES
+    room/PartyRoomTest.cpp)
