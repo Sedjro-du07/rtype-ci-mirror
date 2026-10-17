@@ -321,17 +321,22 @@ struct Script           { ScriptHandle handle; std::string file; };       ENGINE
     ('include/engine/events/EngineEvents.hpp', 'cpp', '''struct QuitRequested      {};                                           ENGINE_EVENT(QuitRequested)
 struct WindowResized      { uint32_t width, height; };                    ENGINE_EVENT(WindowResized)
 struct WindowFocusChanged { bool focused; };                              ENGINE_EVENT(WindowFocusChanged)
+struct AppSuspended       {};                                           ENGINE_EVENT(AppSuspended)   // reserved for mobile
+struct AppResumed         {};                                           ENGINE_EVENT(AppResumed)
 struct Collision          { Entity a, b; };                               ENGINE_EVENT(Collision)
 struct SceneLoaded        { std::string name; };                          ENGINE_EVENT(SceneLoaded)
 struct SceneUnloading     { std::string name; };                          ENGINE_EVENT(SceneUnloading)
-struct PlayerJoined       { PlayerId player; };                           ENGINE_EVENT(PlayerJoined)
-struct PlayerLeft         { PlayerId player; DisconnectReason reason; };  ENGINE_EVENT(PlayerLeft)
-struct JoinedServer       { PlayerId me; };                               ENGINE_EVENT(JoinedServer)
-struct LeftServer         { DisconnectReason reason; };                   ENGINE_EVENT(LeftServer)
 struct Caption            { std::string text; float seconds; };           ENGINE_EVENT(Caption)
 struct ConsoleCommand     { std::string line; };                          ENGINE_EVENT(ConsoleCommand)'''),
 ]),
 # ---------------------------------------------------------------- 07 Input
+'ENG-36': dict(extra=[
+    ('include/engine/events/EngineEvents.hpp', 'cpp', '''// network events, declared here with PlayerId and DisconnectReason (moved from ENG-27)
+struct PlayerJoined       { PlayerId player; };                                         ENGINE_EVENT(PlayerJoined)
+struct PlayerLeft         { PlayerId player; DisconnectReason reason; std::string message; }; ENGINE_EVENT(PlayerLeft)
+struct JoinedServer       { PlayerId me; };                                             ENGINE_EVENT(JoinedServer)
+struct LeftServer         { DisconnectReason reason; std::string message; };            ENGINE_EVENT(LeftServer)'''),
+]),
 'ENG-28': dict(extra=[
     ('include/engine/input/Keys.hpp', 'cpp', '''std::string_view keyName(Key k);                         // label of the current keyboard layout, for display
 std::optional<Key>           keyFromName(std::string_view name);      // input.yaml ↔ enum

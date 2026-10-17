@@ -217,7 +217,7 @@ DETAILS = {
 'ENG-27': dict(
     goal="Typed queued events with RAII subscriptions, plus the engine's own events.",
     todo=["`subscribe`, `publish` (queued), `emit` (immediate), `publishFromAnyThread` (mutex inbox)", "`dispatch`: deliver in publish order; events published during dispatch wait",
-          "Engine events of reference 06 (player events included), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)"],
+          "Engine events of reference 06 except the network ones (written with ENG-36), with `AppSuspended` / `AppResumed` reserved for mobile (ADR 0044)", "`beginGameSubscriptions` / `clearGameSubscriptions` (game listeners dropped before the module is unloaded)"],
     done=["Tests: order, publish during dispatch, unsubscribe during dispatch, thread inbox"],
     watch=["Events never leave the process"]),
 # ---------------------------------------------------------------- 07 Input
@@ -267,7 +267,7 @@ DETAILS = {
 # ---------------------------------------------------------------- 10 Network
 'ENG-36': dict(
     goal="Network vocabulary and the byte transport interface.",
-    todo=["`PlayerId`, `ConnectionId`, `Endpoint` (`resolve`, `toString`), `Datagram`, `DisconnectReason`, `NetConfig`, `ConnectionStats`", "`INetwork` (UDP and TCP)"],
+    todo=["`PlayerId`, `ConnectionId`, `Endpoint` (`resolve`, `toString`), `Datagram`, `DisconnectReason`, `NetConfig`, `ConnectionStats`", "`INetwork` (UDP and TCP)", "Network events `PlayerJoined`, `PlayerLeft`, `JoinedServer`, `LeftServer` in `EngineEvents.hpp` (moved from ENG-27)"],
     done=["Endpoint resolves IPv4 and IPv6 hosts"],
     watch=["`ConnectionId` is engine-internal; games use `PlayerId`"]),
 'ENG-37': dict(

@@ -69,7 +69,8 @@ engine/
 │       │   └── View.inl                                  ENG-19
 │       ├── events/
 │       │   ├── EngineEvents.hpp                          ENG-27
-│       │   └── EventBus.hpp                              ENG-27
+│       │   ├── EventBus.hpp                              ENG-27
+│       │   └── EventBus.inl                              ENG-27
 │       ├── input/
 │       │   ├── Action.hpp                                ENG-28
 │       │   ├── ActionState.hpp                           ENG-29

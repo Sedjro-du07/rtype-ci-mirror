@@ -110,3 +110,6 @@ endforeach()
 
 engine_add_test(engine_render_tests SOURCES
     render/RenderTest.cpp)
+
+engine_add_test(engine_events_tests SOURCES
+    events/EventBusTest.cpp)
