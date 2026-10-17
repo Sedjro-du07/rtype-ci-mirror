@@ -66,6 +66,7 @@ struct PrefabChild {
 ## To implement
 
 - [ ] `PrefabLibrary::get` (cached), `findByKey`, `instantiate`, `clear`
+- [ ] `Commands::spawn(prefab, position)`: instantiate at `apply()` (left out of ENG-20)
 
 ## Done when
 

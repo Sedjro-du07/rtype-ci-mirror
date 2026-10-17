@@ -40,6 +40,10 @@ Registry::Registry(const TypeRegistry& types) : _types(&types) {
     this->_uuidIndex.push_back(hooks.onDestroy.connect([this](Registry&, Entity e) { this->unindexUuid(e); }));
 }
 
+const TypeRegistry& Registry::types() const {
+    return *this->_types;
+}
+
 Entity Registry::create() {
     return this->_entities.create();
 }
