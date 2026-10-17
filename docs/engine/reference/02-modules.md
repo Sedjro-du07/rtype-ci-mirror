@@ -153,8 +153,7 @@ Details: plugins are searched in `<dir>/plugins/lib<kind>_<name>`, games in `<di
 then `lib<name>` (the editor uses the client build); in static mode the same stems are looked up in
 `StaticModuleTable`; the name `null` gives the Null Object of the kind (ENG-15). `loadPlugin<I>` checks `kind()` and then `static_cast`s to `I` (no RTTI across modules).
 One game module at a time. `unloadAll` logs `unloading plugin <stem>` / `unloading game <name>` in reverse
-order. `pluginKindName(PluginKind)` gives `platform`, `audio`, `network`, `scripting`. Until ENG-15 the
-name `null` returns `PluginNotFound`.
+order. `pluginKindName(PluginKind)` gives `platform`, `audio`, `network`, `scripting`.
 
 Rules enforced here: version mismatch → `ApiMismatch`; `create_*` returning `nullptr` → `GameModuleInvalid`
 or `PluginNotFound`; every object is destroyed by the `destroy_*` of the module that created it.
