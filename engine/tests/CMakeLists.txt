@@ -118,3 +118,5 @@ engine_add_test(engine_audio_tests SOURCES
     audio/CaptionedAudioTest.cpp)
 engine_add_test(engine_script_tests SOURCES
     script/ScriptingTest.cpp)
+engine_add_test(engine_services_tests SOURCES
+    services/LoggerTest.cpp)

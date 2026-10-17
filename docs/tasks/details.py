@@ -316,7 +316,7 @@ DETAILS = {
 # ---------------------------------------------------------------- 12 Services
 'ENG-44': dict(
     goal="Thread-safe logging with tags and several sinks.",
-    todo=["Levels, `std::format` API, `tagged`", "ConsoleSink (colours), FileSink (rotating), ConsoleUiSink"],
+    todo=["Levels, `std::format` API, `tagged`", "ConsoleSink (colours), FileSink (rotating) in the private `LogSinks.hpp`; ConsoleUiSink moves to ENG-46 (needs the Console)"],
     done=["Logs from the network thread and the game thread never interleave mid-line"],
     watch=["Never a singleton"]),
 'ENG-45': dict(
@@ -326,7 +326,7 @@ DETAILS = {
     watch=["`sim_tick_rate` is read-only"]),
 'ENG-46': dict(
     goal="The developer console and its built-in commands.",
-    todo=["registerCommand, execute, print, history, complete, toggle", "Built-ins: help, set, get, cvars, quit, systems, system enable/disable, scene, entities, inspect, modules, net, bind, assets"],
+    todo=["registerCommand, execute, print, history, complete, toggle", "ConsoleUiSink: the logger sink that feeds the console (moved from ENG-44)", "Built-ins: help, set, get, cvars, quit, systems, system enable/disable, scene, entities, inspect, modules, net, bind, assets"],
     done=["Every built-in works headless through `execute`"],
     watch=["Cheat commands refused on a server unless `sv_cheats 1`"]),
 'ENG-47': dict(

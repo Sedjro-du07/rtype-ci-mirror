@@ -12,6 +12,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/services/Console.hpp`
 - `src/services/Console.cpp`
+- `src/services/ConsoleUiSink.cpp`
 
 ## Classes and methods
 
@@ -35,6 +36,16 @@ public:
 };
 ```
 
+### `src/services/ConsoleUiSink.cpp`
+
+```cpp
+class ConsoleUiSink final : public ILogSink {        // feeds the developer console (moved from ENG-44)
+public:
+    explicit ConsoleUiSink(Console& console);
+    void write(const LogRecord& r) override;
+};
+```
+
 ## Depends on
 
 - [ENG-45](ENG-45.md) — CVars: typed variables, flags, ranges, archive
@@ -52,6 +63,7 @@ public:
 ## To implement
 
 - [ ] registerCommand, execute, print, history, complete, toggle
+- [ ] ConsoleUiSink: the logger sink that feeds the console (moved from ENG-44)
 - [ ] Built-ins: help, set, get, cvars, quit, systems, system enable/disable, scene, entities, inspect, modules, net, bind, assets
 
 ## Done when

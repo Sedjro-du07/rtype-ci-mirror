@@ -523,7 +523,8 @@ struct PrefabChild {
 ]),
 # ---------------------------------------------------------------- 12 Services
 'ENG-44': dict(extra=[
-    ('src/services/Logger.cpp', 'cpp', '''class ConsoleSink final : public ILogSink {          // coloured stdout (Info and below) / stderr (Warn, Error)
+    ('src/services/LogSinks.hpp', 'cpp', '''std::string formatRecord(const LogRecord& r);       // "2026-10-17 14:02:11.120 INFO  [tag] message" (UTC)
+class ConsoleSink final : public ILogSink {          // coloured stdout (Info and below) / stderr (Warn, Error)
 public:
     explicit ConsoleSink(bool color);
     void write(const LogRecord& r) override;
@@ -534,11 +535,6 @@ public:
     FileSink(std::filesystem::path file, size_t maxBytes, int keepFiles);
     void write(const LogRecord& r) override;
     void flush() override;
-};
-class ConsoleUiSink final : public ILogSink {        // feeds the developer console
-public:
-    explicit ConsoleUiSink(Console& console);
-    void write(const LogRecord& r) override;
 };'''),
 ]),
 'ENG-45': dict(extra=[
@@ -547,6 +543,13 @@ public:
     uint32_t         flags;
     std::string      value;            // current value as text
     std::string      defaultValue;
+};'''),
+]),
+'ENG-46': dict(extra=[
+    ('src/services/ConsoleUiSink.cpp', 'cpp', '''class ConsoleUiSink final : public ILogSink {        // feeds the developer console (moved from ENG-44)
+public:
+    explicit ConsoleUiSink(Console& console);
+    void write(const LogRecord& r) override;
 };'''),
 ]),
 'ENG-47': dict(extra=[

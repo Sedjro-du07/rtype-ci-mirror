@@ -132,6 +132,7 @@ engine/
 │       │   ├── Console.hpp                               ENG-46
 │       │   ├── CVars.hpp                                 ENG-45
 │       │   ├── Logger.hpp                                ENG-44
+│       │   ├── Logger.inl                                ENG-44
 │       │   └── Metrics.hpp                               ENG-47
 │       ├── Context.hpp                                   ENG-09, SRV-09
 │       ├── Engine.hpp                                    ENG-08
@@ -265,8 +266,10 @@ engine/
 │   │   └── WorkerPool.hpp                                SRV-12
 │   ├── services/
 │   │   ├── Console.cpp                                   ENG-46
+│   │   ├── ConsoleUiSink.cpp                             ENG-46
 │   │   ├── CVars.cpp                                     ENG-45
 │   │   ├── Logger.cpp                                    ENG-44
+│   │   ├── LogSinks.hpp                                  ENG-44
 │   │   └── Metrics.cpp                                   ENG-47
 │   └── systems/
 │       ├── AnimationSystem.cpp                           ENG-52

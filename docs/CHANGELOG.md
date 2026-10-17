@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IAudio`, `AudioBus`, `PlayParams`, `VoiceId` (ENG-34) and `CaptionedAudio`, the decorator that publishes a
   `Caption` event for every sound played with a caption, whatever the backend (2 tests, fake backend).
 - `ScriptHost`, `IScripting` (ENG-48) (1 test, fake backend).
+- `Logger` (ENG-44): levels, `std::format` API, `tagged` child loggers sharing the sinks, thread-safe writes
+  (whole lines, ThreadSanitizer clean), `ConsoleSink` (colours, stderr for warnings and errors), rotating
+  `FileSink`; never a singleton. `ConsoleUiSink` moves to ENG-46 with the Console. 5 tests.
 
 ### Changed
 
