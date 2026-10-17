@@ -5,13 +5,21 @@
 ** Camera2D
 */
 
-// engine/include/engine/render/Camera2D.hpp
-// ENG-30 — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform
-// Spec: docs/engine/reference/08-rendering.md · ADR 0006, 0031 · reference 08
-// Details: docs/tasks/ENG-30.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/Export.hpp"
+#include "engine/core/math/Vec2.hpp"
+#include "engine/render/WindowDesc.hpp"
+
+namespace engine {
+
+struct ENGINE_API Camera2D {
+    Vec2 center{640, 360};
+    float zoom = 1.f;
+    float rotation = 0.f;
+
+    Vec2 screenToWorld(Vec2 screen, const WindowDesc& window) const;
+    Vec2 worldToScreen(Vec2 world, const WindowDesc& window) const;
+};
+
+}

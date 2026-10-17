@@ -7,6 +7,15 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — engine rendering API: ENG-30
+
+### Added
+
+- `Handle<Tag>` (texture, font, sound, music, script handles), `WindowDesc`, `Camera2D` (world ↔ screen with
+  zoom, rotation and the letterboxed virtual resolution), `DrawCmd`, `RenderQueue` (helpers, text arena,
+  `clear` keeps capacity), `RenderFrame`, `RenderStats`, `IRenderer`, `IPlatform` (an `IPlugin`). No SFML
+  or raylib type in the headers. 7 tests.
+
 ## [2026-10-17] — engine modules: ENG-11, ENG-13
 
 ### Added

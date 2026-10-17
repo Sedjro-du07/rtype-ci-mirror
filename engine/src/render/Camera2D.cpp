@@ -5,13 +5,52 @@
 ** Camera2D
 */
 
-// engine/src/render/Camera2D.cpp
-// ENG-30 — Render API: handles, WindowDesc, Camera2D, DrawCmd, RenderQueue, IRenderer, IPlatform
-// Spec: docs/engine/reference/08-rendering.md · ADR 0006, 0031 · reference 08
-// Details: docs/tasks/ENG-30.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #include "engine/render/Camera2D.hpp"
 
-namespace engine {}
+#include <algorithm>
+#include <cmath>
+#include <numbers>
+
+namespace engine {
+
+namespace {
+
+struct Letterbox {
+    float scale;
+    Vec2 offset;
+};
+
+Letterbox letterbox(const WindowDesc& window) {
+    const float vw = static_cast<float>(window.virtualWidth);
+    const float vh = static_cast<float>(window.virtualHeight);
+    const float scale = std::min(static_cast<float>(window.width) / vw, static_cast<float>(window.height) / vh);
+    return {scale, Vec2{(static_cast<float>(window.width) - vw * scale) / 2.f,
+                        (static_cast<float>(window.height) - vh * scale) / 2.f}};
+}
+
+Vec2 rotated(Vec2 v, float degrees) {
+    const float radians = degrees * std::numbers::pi_v<float> / 180.f;
+    const float c = std::cos(radians);
+    const float s = std::sin(radians);
+    return {v.x * c - v.y * s, v.x * s + v.y * c};
+}
+
+Vec2 virtualCenter(const WindowDesc& window) {
+    return {static_cast<float>(window.virtualWidth) / 2.f, static_cast<float>(window.virtualHeight) / 2.f};
+}
+
+}
+
+Vec2 Camera2D::worldToScreen(Vec2 world, const WindowDesc& window) const {
+    const Letterbox box = letterbox(window);
+    const Vec2 view = rotated(world - this->center, -this->rotation) * this->zoom + virtualCenter(window);
+    return view * box.scale + box.offset;
+}
+
+Vec2 Camera2D::screenToWorld(Vec2 screen, const WindowDesc& window) const {
+    const Letterbox box = letterbox(window);
+    const Vec2 view = (screen - box.offset) / box.scale;
+    return rotated((view - virtualCenter(window)) / this->zoom, this->rotation) + this->center;
+}
+
+}
