@@ -194,3 +194,28 @@ engine_add_test(engine_input_tests SOURCES
 engine_add_test(engine_config_tests SOURCES
     core/EngineConfigTest.cpp
     module/NullPluginsTest.cpp)
+
+engine_add_loadable_fixture(fixture_game_smoke games smoke smoke
+    SOURCES module/SmokeGame.cpp)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/fixtures/smoke DESTINATION ${CMAKE_BINARY_DIR}/bin)
+engine_add_test(engine_runtime_tests SOURCES
+    engine/EngineTest.cpp)
+if(ENGINE_DYNAMIC_MODULES)
+    add_dependencies(engine_runtime_tests fixture_game_smoke)
+else()
+    target_link_libraries(engine_runtime_tests PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,fixture_game_smoke>")
+endif()
+
+engine_add_launcher(smoke_launcher CONFIG fixtures/smoke.yaml)
+if(ENGINE_DYNAMIC_MODULES)
+    add_dependencies(smoke_launcher fixture_game_smoke)
+else()
+    target_link_libraries(smoke_launcher PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,fixture_game_smoke>")
+endif()
+add_test(NAME "smoke: headless client with null plugins" COMMAND smoke_launcher --ticks 1000
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+add_test(NAME "smoke: headless server with null plugins" COMMAND smoke_launcher --role server --port 0 --ticks 1000
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+add_test(NAME "smoke: a bad option exits with code 1" COMMAND smoke_launcher --colour red
+         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_tests_properties("smoke: a bad option exits with code 1" PROPERTIES WILL_FAIL TRUE)

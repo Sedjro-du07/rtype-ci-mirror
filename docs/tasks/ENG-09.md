@@ -12,6 +12,8 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/Context.hpp` (shared with [SRV-09](SRV-09.md))
 - `src/core/Context.cpp`
+- `include/engine/ServiceContext.hpp` (shared with [SRV-09](SRV-09.md))
+- `src/core/ServiceContext.cpp` (shared with [SRV-09](SRV-09.md))
 
 ## Classes and methods
 
@@ -40,6 +42,31 @@ public:
 private:
     friend class Engine;  friend class RoomRuntime;
     Context(/* engine-owned references of one room or of the client */);
+};
+```
+
+### `include/engine/ServiceContext.hpp`
+
+```cpp
+class ServiceContext {                 // everywhere: shared, thread-safe services
+public:
+    Logger&            log();          // lines tagged with the room in a room
+    const CVars&       cvars() const;  // read-only (written from the lobby or the console)
+    AssetManager&      assets();       // locked on the server
+    Metrics&           metrics();      // series tagged with the room in a room
+    Role               role() const;
+};
+
+// class Context : public ServiceContext  — declared in reference 01 (Context.hpp)
+
+class LobbyContext : public ServiceContext { // server lobby code, main thread
+public:
+    Lobby&             lobby();
+    EventBus&          events();            // the lobby's events
+    NetworkSession&    network();           // every connected player
+    Console&           console();
+    CVars&             cvars();             // read and write
+    void               requestQuit();       // stops the server
 };
 ```
 

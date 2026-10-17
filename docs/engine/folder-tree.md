@@ -142,7 +142,7 @@ engine/
 │       ├── Context.hpp                                   ENG-09, SRV-09
 │       ├── Engine.hpp                                    ENG-08
 │       ├── EngineConfig.hpp                              ENG-07
-│       └── ServiceContext.hpp                            SRV-09
+│       └── ServiceContext.hpp                            ENG-09, SRV-09
 ├── launcher/
 │   └── main.cpp                                          ENG-10
 ├── plugins/
@@ -191,7 +191,7 @@ engine/
 │   │   ├── Engine.cpp                                    ENG-08
 │   │   ├── EngineConfig.cpp                              ENG-07
 │   │   ├── Error.cpp                                     ENG-04
-│   │   ├── ServiceContext.cpp                            SRV-09
+│   │   ├── ServiceContext.cpp                            ENG-09, SRV-09
 │   │   ├── Signal.cpp                                    ENG-06
 │   │   └── Time.cpp                                      ENG-05
 │   ├── ecs/
@@ -302,11 +302,15 @@ engine/
 ├── tests/
 │   ├── core/                                             ENG-53
 │   ├── ecs/                                              ENG-54
+│   ├── engine/
+│   │   └── EngineTest.cpp                                ENG-57
 │   ├── events/                                           ENG-55
 │   ├── fixtures/                                         ENG-53
-│   ├── headless/                                         ENG-57
+│   │   ├── smoke/                                        ENG-57
+│   │   └── smoke.yaml                                    ENG-57
 │   ├── input/                                            ENG-55
 │   ├── module/                                           ENG-53
+│   │   └── SmokeGame.cpp                                 ENG-57
 │   ├── net/                                              ENG-55
 │   │   ├── fuzz/                                         SRV-18
 │   │   ├── messages/                                     SRV-07

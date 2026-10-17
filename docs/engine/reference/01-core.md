@@ -185,6 +185,26 @@ while running_:
     audio.update(); metrics_.endFrame()
 ```
 
+**Implemented for Part 1 (ENG-08):**
+
+- Members, in this order: config, logger, `CVars` (empty until ENG-45), `ModuleManager`, `TypeRegistry`,
+  `EventBus`, `AssetManager`, `InputMap`, `NetworkSession`, `Scheduler`, `SceneManager`, `Commands`,
+  `RenderQueue`, `Context`, time. Metrics and console come with ENG-47 and ENG-46.
+- `boot`: Ctrl+C / SIGTERM → `requestQuit`; plugins by kind (the server always uses the null platform and
+  audio; an empty `network` or `scripting` means `null`); `AssetManager::attach`; `NetworkSession::attach`,
+  and on the server `open(true, net.port)`; the game module; engine types, then the game's.
+- `load`: engine systems (`registerEngineSystems` with the `Context` → `SystemTargets` conversion), then
+  the game's, `Scheduler::build`; `<root>/input.yaml` if it exists; the window (client); the first scene
+  (`--scene` or `firstScene()`, none if empty); the `Context`; `onStart` (client) or `onRoomStart`
+  (server, one world until the rooms of the SRV tasks).
+- `loop`: as above; with `--ticks N` each frame advances exactly one tick (deterministic, as fast as
+  possible) and the engine stops after N ticks; the server sleeps until the next tick. After a scene switch
+  `Commands` is rebuilt for the new world.
+- `shutdown`: `onShutdown`, scene cleared, game subscriptions, systems and types removed, game module
+  unloaded, network closed, plugins unloaded in reverse order.
+- Exit codes: 1 configuration or input bindings, 2 plugin or window, 3 game module or schedule, 4 scene,
+  5 a system threw on the client (scheduler policy), 0 otherwise. `time()` exposes the clock for tests.
+
 The client runs this loop with one world. On the server, the main thread runs the **lobby** loop
 (network poll, lobby events and callbacks with a `LobbyContext`, room mailboxes) and every room runs
 the FixedUpdate / LateUpdate part of this loop with its own world, Commands, events and time on the
@@ -199,6 +219,11 @@ The door from game code into the engine (ADR 0022). Since ADR 0039 there are thr
 client) and `LobbyContext` (server lobby code). All three are declared with the lobby and rooms in
 reference 14; `Context` is repeated here because it is what every game system receives.
 Non-owning, built only by the engine, valid only during the call it was passed to.
+
+**Implemented for Part 1 (ENG-09):** `world`, `commands`, `scenes`, `events`, `time`, `input`, `inputMap`,
+`render`, `audio`, `network`, `online` (true when a `NetworkSession` exists), `requestQuit`; private
+constructor, built by `Engine` (and `RoomRuntime` later). `ServiceContext` has `log`, `assets`, `role`;
+`cvars()` and `metrics()` come with ENG-45 / ENG-47, `room()` and `lobby()` with the SRV tasks.
 
 ```cpp
 class Context : public ServiceContext {     // log(), cvars(), assets(), metrics(), role() come from ServiceContext
@@ -236,6 +261,8 @@ int main(int argc, char** argv);
 ```
 
 Games never write `main()`; CMake builds this file once per executable (ADR 0005, block 2).
+`EngineConfig::load` looks for a relative config file in the working directory, then next to the
+executable (where `engine_add_launcher` copies it). The signal handler is installed by `Engine::run`.
 
 ---
 
