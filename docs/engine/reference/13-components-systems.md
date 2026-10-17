@@ -29,7 +29,7 @@ Every game receives these without writing them. Engine components are registered
 
 All of them, the engine events (`QuitRequested`, `WindowResized`, `WindowFocusChanged`, `AppSuspended`,
 `AppResumed`, `Collision`, `SceneLoaded`, `SceneUnloading`, `Caption`, `ConsoleCommand`) and `PreviousPosition`
-(in `Position.hpp`) are registered by `registerEngineTypes(TypeRegistry&)` (`src/systems/RegisterEngineTypes.hpp`).
+(in `Position.hpp`) are registered by `registerEngineTypes(TypeRegistry&)` (`src/include/systems/RegisterEngineTypes.hpp`).
 A game type with an engine name is a boot error (`DuplicateName`, exit code 3).
 
 YAML forms that are not field by field:

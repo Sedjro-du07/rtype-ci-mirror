@@ -11,9 +11,9 @@ The Part 1 window, input and renderer on SFML 3.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `plugins/platform_sfml/CMakeLists.txt`
-- `plugins/platform_sfml/SfmlPlatform.hpp`
+- `plugins/platform_sfml/include/SfmlPlatform.hpp`
 - `plugins/platform_sfml/SfmlPlatform.cpp`
-- `plugins/platform_sfml/SfmlRenderer.hpp`
+- `plugins/platform_sfml/include/SfmlRenderer.hpp`
 - `plugins/platform_sfml/SfmlRenderer.cpp`
 - `plugins/platform_sfml/SfmlKeys.cpp`
 
@@ -21,7 +21,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `plugins/platform_sfml/SfmlPlatform.hpp`
+### `plugins/platform_sfml/include/SfmlPlatform.hpp`
 
 ```cpp
 class SfmlPlatform final : public IPlatform {
@@ -51,7 +51,7 @@ private:
 ENGINE_PLUGIN(SfmlPlatform)
 ```
 
-### `plugins/platform_sfml/SfmlRenderer.hpp`
+### `plugins/platform_sfml/include/SfmlRenderer.hpp`
 
 ```cpp
 class SfmlRenderer final : public IRenderer {

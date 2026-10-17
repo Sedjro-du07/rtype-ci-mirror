@@ -228,7 +228,7 @@ Games never write `main()`; CMake builds this file once per executable (ADR 0005
 
 ---
 
-## OS layer — `engine/src/os/Os.hpp` (private, ADR 0044)
+## OS layer — `engine/src/include/os/Os.hpp` (private, ADR 0044)
 
 The only engine code with `#ifdef _WIN32` besides `DynamicLibrary`; plugins have their own.
 

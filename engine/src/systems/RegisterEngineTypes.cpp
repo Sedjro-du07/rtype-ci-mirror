@@ -5,7 +5,7 @@
 ** RegisterEngineTypes
 */
 
-#include "RegisterEngineTypes.hpp"
+#include "systems/RegisterEngineTypes.hpp"
 
 #include "engine/assets/AssetManager.hpp"
 #include "engine/components/Animation.hpp"

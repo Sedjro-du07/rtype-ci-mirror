@@ -144,35 +144,37 @@ engine/
 │   └── main.cpp                                          ENG-10
 ├── plugins/
 │   ├── audio_miniaudio/
+│   │   ├── include/
+│   │   │   └── MiniaudioAudio.hpp                        ENG-35
 │   │   ├── CMakeLists.txt                                ENG-35
-│   │   ├── MiniaudioAudio.cpp                            ENG-35
-│   │   └── MiniaudioAudio.hpp                            ENG-35
+│   │   └── MiniaudioAudio.cpp                            ENG-35
 │   ├── network_asio/
 │   │   ├── AsioNetwork.cpp                               ENG-37
 │   │   ├── AsioNetwork.hpp                               ENG-37
 │   │   └── CMakeLists.txt                                ENG-37
 │   ├── platform_raylib/                                  ENG-58
 │   ├── platform_sfml/
+│   │   ├── include/
+│   │   │   ├── SfmlPlatform.hpp                          ENG-31
+│   │   │   └── SfmlRenderer.hpp                          ENG-31
 │   │   ├── CMakeLists.txt                                ENG-31
 │   │   ├── ColorFilter.frag                              ENG-33
 │   │   ├── SfmlImGui.cpp                                 ENG-32
 │   │   ├── SfmlKeys.cpp                                  ENG-31
 │   │   ├── SfmlPlatform.cpp                              ENG-31
-│   │   ├── SfmlPlatform.hpp                              ENG-31
-│   │   ├── SfmlRenderer.cpp                              ENG-31
-│   │   └── SfmlRenderer.hpp                              ENG-31
+│   │   └── SfmlRenderer.cpp                              ENG-31
 │   └── scripting_lua/
+│       ├── include/
+│       │   └── LuaScripting.hpp                          ENG-49
 │       ├── CMakeLists.txt                                ENG-49
 │       ├── LuaApi.cpp                                    ENG-49
 │       ├── LuaScripting.cpp                              ENG-49
-│       ├── LuaScripting.hpp                              ENG-49
 │       └── Sandbox.cpp                                   ENG-49
 ├── src/
 │   ├── assets/
 │   │   └── AssetManager.cpp                              ENG-40
 │   ├── audio/
-│   │   ├── AudioCaptions.cpp                             ENG-34
-│   │   └── AudioCaptions.hpp                             ENG-34
+│   │   └── AudioCaptions.cpp                             ENG-34
 │   ├── client/
 │   │   └── ClientLobby.cpp                               SRV-14
 │   ├── components/
@@ -196,6 +198,15 @@ engine/
 │   │   └── Registry.cpp                                  ENG-18
 │   ├── events/
 │   │   └── EventBus.cpp                                  ENG-27
+│   ├── include/
+│   │   ├── audio/
+│   │   │   └── AudioCaptions.hpp                         ENG-34
+│   │   ├── os/
+│   │   │   └── Os.hpp                                    ENG-60
+│   │   ├── services/
+│   │   │   └── LogSinks.hpp                              ENG-44
+│   │   └── systems/
+│   │       └── RegisterEngineTypes.hpp                   ENG-25
 │   ├── input/
 │   │   ├── ActionState.cpp                               ENG-29
 │   │   ├── InputMap.cpp                                  ENG-29
@@ -225,8 +236,7 @@ engine/
 │   │   ├── StreamFramer.cpp                              SRV-06
 │   │   └── StreamFramer.hpp                              SRV-06
 │   ├── os/
-│   │   ├── Os.cpp                                        ENG-60
-│   │   └── Os.hpp                                        ENG-60
+│   │   └── Os.cpp                                        ENG-60
 │   ├── reflection/
 │   │   ├── ByteStream.cpp                                ENG-24
 │   │   ├── Codec.cpp                                     SRV-04
@@ -274,7 +284,6 @@ engine/
 │   │   ├── ConsoleUiSink.cpp                             ENG-46
 │   │   ├── CVars.cpp                                     ENG-45
 │   │   ├── Logger.cpp                                    ENG-44
-│   │   ├── LogSinks.hpp                                  ENG-44
 │   │   └── Metrics.cpp                                   ENG-47
 │   └── systems/
 │       ├── AnimationSystem.cpp                           ENG-52
@@ -284,7 +293,6 @@ engine/
 │       ├── NetSystems.cpp                                ENG-39
 │       ├── RegisterEngineSystems.cpp                     ENG-50
 │       ├── RegisterEngineTypes.cpp                       ENG-25
-│       ├── RegisterEngineTypes.hpp                       ENG-25
 │       └── RenderSystems.cpp                             ENG-52
 ├── tests/
 │   ├── core/                                             ENG-53
@@ -370,7 +378,10 @@ engine/
 - A `.hpp` holds declarations only; the code goes to the `.cpp`. Code the compiler must see in every
   file that uses it (templates, `constexpr` functions) goes to a `.inl` next to the header, included at
   the end of it (`Signal.inl`, `Hash.inl`). A class with code in a `.cpp` is exported with `ENGINE_API`.
-- Includes start from `engine/include/` (`#include "engine/core/Signal.hpp"`), or name a private header next
-  to the source (`#include "PlayerTable.hpp"`); never `../`.
+- Every header lives in an `include/` folder. Public headers: `engine/include/engine/…`, included as
+  `#include "engine/core/Signal.hpp"`. Private headers of the engine: `engine/src/include/<module>/…`,
+  included as `#include "os/Os.hpp"`; private headers of a plugin: `engine/plugins/<plugin>/include/`,
+  included by name. Private folders are never installed. Never `../`. (The `net/` and `server/` headers
+  of the server tasks still sit next to their sources until their owner moves them.)
 - The tree, the task tables, the per-task pages and the folder READMEs are generated from
   `docs/tasks/tasks.py` and `docs/tasks/details.py` by `python3 docs/tasks/generate.py`.

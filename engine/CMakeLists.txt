@@ -52,7 +52,8 @@ target_include_directories(engine
     PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
             $<INSTALL_INTERFACE:include>
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Third-party libraries are linked by the task that first uses them; vcpkg.json lists them all.
 # Never let a third-party type into include/engine (reference README).

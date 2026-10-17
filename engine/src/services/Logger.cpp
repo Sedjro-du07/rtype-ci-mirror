@@ -7,7 +7,7 @@
 
 #include "engine/services/Logger.hpp"
 
-#include "LogSinks.hpp"
+#include "services/LogSinks.hpp"
 
 #include <array>
 #include <chrono>

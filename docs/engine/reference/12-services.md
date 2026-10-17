@@ -25,7 +25,7 @@ public:
     virtual void write(const LogRecord&) = 0;
     virtual void flush();                       // default: does nothing
 };
-// Provided sinks: ConsoleSink (colored stdout/stderr), FileSink (rotating file) in src/services/LogSinks.hpp,
+// Provided sinks: ConsoleSink (colored stdout/stderr), FileSink (rotating file) in src/include/services/LogSinks.hpp,
 // ConsoleUiSink (developer console, with the Console: ENG-46). Lines: "YYYY-MM-DD HH:MM:SS.mmm LEVEL [tag] message", UTC.
 
 struct LogConfig { LogLevel level = LogLevel::Info; std::filesystem::path file = "logs/engine.log"; bool color = true; };

@@ -12,7 +12,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/services/Logger.hpp`
 - `include/engine/services/Logger.inl`
-- `src/services/LogSinks.hpp`
+- `src/include/services/LogSinks.hpp`
 - `src/services/Logger.cpp`
 
 ## Classes and methods
@@ -33,7 +33,7 @@ public:
     virtual void write(const LogRecord&) = 0;
     virtual void flush();                       // default: does nothing
 };
-// Provided sinks: ConsoleSink (colored stdout/stderr), FileSink (rotating file) in src/services/LogSinks.hpp,
+// Provided sinks: ConsoleSink (colored stdout/stderr), FileSink (rotating file) in src/include/services/LogSinks.hpp,
 // ConsoleUiSink (developer console, with the Console: ENG-46). Lines: "YYYY-MM-DD HH:MM:SS.mmm LEVEL [tag] message", UTC.
 
 struct LogConfig { LogLevel level = LogLevel::Info; std::filesystem::path file = "logs/engine.log"; bool color = true; };
@@ -54,7 +54,7 @@ public:
 };
 ```
 
-### `src/services/LogSinks.hpp`
+### `src/include/services/LogSinks.hpp`
 
 ```cpp
 std::string formatRecord(const LogRecord& r);       // "2026-10-17 14:02:11.120 INFO  [tag] message" (UTC)
