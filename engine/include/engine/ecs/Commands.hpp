@@ -15,23 +15,28 @@
 
 #include <cstddef>
 #include <functional>
+#include <string_view>
 #include <vector>
 
 namespace engine {
+
+class PrefabLibrary;
 
 class ENGINE_API Commands {
 private:
     using Command = std::move_only_function<void(Registry&)>;
 
     Registry* _registry;
+    PrefabLibrary* _prefabs;
     std::vector<Command> _queue;
 
 public:
-    explicit Commands(Registry& registry);
+    explicit Commands(Registry& registry, PrefabLibrary* prefabs = nullptr);
     Commands(const Commands&) = delete;
     Commands& operator=(const Commands&) = delete;
 
     Entity spawn();
+    Entity spawn(std::string_view prefab, Vec2 position);
     void destroy(Entity e);
     template <class T>
     void add(Entity e, T value);

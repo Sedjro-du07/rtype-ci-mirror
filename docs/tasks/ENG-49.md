@@ -11,7 +11,7 @@ Lua 5.4 + sol2 implementation of IScripting.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `plugins/scripting_lua/CMakeLists.txt`
-- `plugins/scripting_lua/LuaScripting.hpp`
+- `plugins/scripting_lua/include/LuaScripting.hpp`
 - `plugins/scripting_lua/LuaScripting.cpp`
 - `plugins/scripting_lua/LuaApi.cpp`
 - `plugins/scripting_lua/Sandbox.cpp`
@@ -30,7 +30,7 @@ void scriptCollision(Context& ctx);   // "engine.script.collision": on_collision
 void registerScriptSystems(Scheduler& s, IScripting& scripting);
 ```
 
-### `plugins/scripting_lua/LuaScripting.hpp`
+### `plugins/scripting_lua/include/LuaScripting.hpp`
 
 ```cpp
 class LuaScripting final : public IScripting {

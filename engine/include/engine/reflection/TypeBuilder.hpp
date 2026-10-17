@@ -35,6 +35,9 @@ ENGINE_API EnumInfo makeEnumInfo(std::string_view names, std::span<const int64_t
 template <class E>
 const EnumInfo& enumInfoOf();
 
+template <class V>
+const ListOps& listOpsOf();
+
 template <class T>
 class FieldsBuilder {
 private:

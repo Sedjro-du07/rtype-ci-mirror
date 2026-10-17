@@ -56,7 +56,7 @@ add_subdirectory(engine)
 buildPresets and testPresets with the same names'''),
 ]),
 'ENG-60': dict(auto=False, extra=[
-    ('src/os/Os.hpp', 'cpp', '''// Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
+    ('src/include/os/Os.hpp', 'cpp', '''// Private: the only engine code with #ifdef _WIN32 besides DynamicLibrary (ADR 0044).
 namespace engine::os {
 void                  secureRandom(std::span<std::byte> out);            // getrandom / BCryptGenRandom; aborts on failure
 std::filesystem::path userDataDir(std::string_view app);                  // created if missing
@@ -349,7 +349,7 @@ std::string_view             toName(Key k);  std::string_view toName(GamepadButt
     ('include/engine/render/IRenderer.hpp', 'cpp', '''struct RenderStats { uint32_t commands = 0, batches = 0, drawCalls = 0; double submitMs = 0; };'''),
 ]),
 'ENG-31': dict(extra=[
-    ('plugins/platform_sfml/SfmlPlatform.hpp', 'cpp', '''class SfmlPlatform final : public IPlatform {
+    ('plugins/platform_sfml/include/SfmlPlatform.hpp', 'cpp', '''class SfmlPlatform final : public IPlatform {
 public:
     // IPlugin
     PluginKind kind() const override;                 // Platform
@@ -374,7 +374,7 @@ private:
     WindowDesc       desc_;
 };
 ENGINE_PLUGIN(SfmlPlatform)'''),
-    ('plugins/platform_sfml/SfmlRenderer.hpp', 'cpp', '''class SfmlRenderer final : public IRenderer {
+    ('plugins/platform_sfml/include/SfmlRenderer.hpp', 'cpp', '''class SfmlRenderer final : public IRenderer {
 public:
     explicit SfmlRenderer(sf::RenderWindow& window);
     Result<TextureHandle> createTexture(std::span<const std::byte> encodedImage, std::string_view debugName) override;
@@ -418,7 +418,7 @@ uniform float     strength;      // 0..1
 vec3 simulate(vec3 rgb, int mode);
 vec3 daltonize(vec3 rgb, int mode);
 void main();'''),
-    ('plugins/platform_sfml/SfmlRenderer.hpp', 'cpp', '''void SfmlRenderer::setColorFilter(ColorFilter f) override;   // selects the shader mode
+    ('plugins/platform_sfml/include/SfmlRenderer.hpp', 'cpp', '''void SfmlRenderer::setColorFilter(ColorFilter f) override;   // selects the shader mode
 bool SfmlRenderer::supports(Feature f) const override;        // ColorFilter: sf::Shader::isAvailable()
 // private:
 sf::Shader        filter_;
@@ -439,7 +439,7 @@ private:
 };'''),
 ]),
 'ENG-35': dict(extra=[
-    ('plugins/audio_miniaudio/MiniaudioAudio.hpp', 'cpp', '''class MiniaudioAudio final : public IAudio {
+    ('plugins/audio_miniaudio/include/MiniaudioAudio.hpp', 'cpp', '''class MiniaudioAudio final : public IAudio {
 public:
     PluginKind kind() const override; std::string_view name() const override;   // "miniaudio"
     uint32_t apiVersion() const override;
@@ -523,7 +523,7 @@ struct PrefabChild {
 ]),
 # ---------------------------------------------------------------- 12 Services
 'ENG-44': dict(extra=[
-    ('src/services/LogSinks.hpp', 'cpp', '''std::string formatRecord(const LogRecord& r);       // "2026-10-17 14:02:11.120 INFO  [tag] message" (UTC)
+    ('src/include/services/LogSinks.hpp', 'cpp', '''std::string formatRecord(const LogRecord& r);       // "2026-10-17 14:02:11.120 INFO  [tag] message" (UTC)
 class ConsoleSink final : public ILogSink {          // coloured stdout (Info and below) / stderr (Warn, Error)
 public:
     explicit ConsoleSink(bool color);
@@ -572,7 +572,7 @@ void drawLagometer(const NetworkSession& net);'''),
 void scriptUpdate(Context& ctx);      // "engine.script.update":    on_update(self, dt) for every entity with Script
 void scriptCollision(Context& ctx);   // "engine.script.collision": on_collision(self, other) from Collision events
 void registerScriptSystems(Scheduler& s, IScripting& scripting);'''),
-    ('plugins/scripting_lua/LuaScripting.hpp', 'cpp', '''class LuaScripting final : public IScripting {
+    ('plugins/scripting_lua/include/LuaScripting.hpp', 'cpp', '''class LuaScripting final : public IScripting {
 public:
     PluginKind kind() const override; std::string_view name() const override;   // "lua"
     uint32_t apiVersion() const override;

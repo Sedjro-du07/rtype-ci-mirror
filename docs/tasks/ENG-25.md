@@ -19,6 +19,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/components/Lifetime.hpp`
 - `include/engine/components/Parallax.hpp`
 - `include/engine/components/Script.hpp`
+- `src/include/systems/RegisterEngineTypes.hpp`
 - `src/systems/RegisterEngineTypes.cpp`
 
 ## Classes and methods

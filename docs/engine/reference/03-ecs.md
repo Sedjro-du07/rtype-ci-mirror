@@ -121,9 +121,11 @@ public:
     // Type-erased access (scene loader, editor, scripts, replication)
     IStorage*       storage(ComponentId id);          // nullptr if no entity ever had it
     void*           getRaw(Entity e, ComponentId id);
+    const void*     getRaw(Entity e, ComponentId id) const;
     void*           emplaceRaw(Entity e, ComponentId id, const void* src);
     void            removeRaw(Entity e, ComponentId id);
     std::vector<ComponentId> componentsOf(Entity e) const;   // for the inspector and save()
+    std::vector<Entity> entities() const;                    // alive entities with a component, by index
 
     // Identity and hierarchy (ADR 0016)
     Entity find(std::string_view name) const;         // first entity whose Name matches, or null
@@ -179,9 +181,10 @@ One per world, built with that world's `Registry` (so `spawn()` can create the e
 ```cpp
 class Commands {
 public:
-    explicit Commands(Registry& registry);                  // one per world (scene, or room on the server)
+    explicit Commands(Registry& registry, PrefabLibrary* prefabs = nullptr); // one per world (scene, or room)
     Entity spawn();                                         // entity created now, components added at apply()
-    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply(): added by ENG-41
+    Entity spawn(std::string_view prefab, Vec2 position);   // instantiate a prefab at apply() (ENG-41); null if
+                                                            // the prefab fails to load or no library was given
     void   destroy(Entity e);                               // destroyed (with children) at apply()
     template <class T> void add(Entity e, T value);         // nothing if the entity already has a T
     template <class T> void set(Entity e, T value);         // add or replace

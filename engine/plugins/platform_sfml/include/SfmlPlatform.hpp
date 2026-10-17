@@ -5,7 +5,7 @@
 ** SfmlPlatform
 */
 
-// engine/plugins/platform_sfml/SfmlPlatform.hpp
+// engine/plugins/platform_sfml/include/SfmlPlatform.hpp
 // ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
 // Spec: docs/engine/reference/08-rendering.md · ADR 0007, 0031
 // Details: docs/tasks/ENG-31.md

@@ -12,6 +12,7 @@
 #include "engine/core/math/Vec2.hpp"
 #include "engine/ecs/Entity.hpp"
 #include "engine/reflection/TypeBuilder.hpp"
+#include "engine/render/Handles.hpp"
 
 #include <array>
 #include <cassert>
@@ -100,6 +101,31 @@ struct FieldKindOf<Entity> {
     static constexpr FieldKind value = FieldKind::Entity;
 };
 
+template <>
+struct FieldKindOf<TextureHandle> {
+    static constexpr FieldKind value = FieldKind::Texture;
+};
+
+template <>
+struct FieldKindOf<SoundHandle> {
+    static constexpr FieldKind value = FieldKind::Sound;
+};
+
+template <>
+struct FieldKindOf<MusicHandle> {
+    static constexpr FieldKind value = FieldKind::Music;
+};
+
+template <>
+struct FieldKindOf<FontHandle> {
+    static constexpr FieldKind value = FieldKind::Font;
+};
+
+template <>
+struct FieldKindOf<ScriptHandle> {
+    static constexpr FieldKind value = FieldKind::Script;
+};
+
 namespace detail {
 
 template <class>
@@ -167,9 +193,28 @@ const EnumInfo& enumInfoOf() {
         std::array<int64_t, values.size()> numbers{};
         for (size_t i = 0; i < values.size(); ++i)
             numbers[i] = static_cast<int64_t>(std::to_underlying(values[i]));
-        return makeEnumInfo(TypeName<E>::valueNames, numbers);
+        EnumInfo built = makeEnumInfo(TypeName<E>::valueNames, numbers);
+        built.size = sizeof(E);
+        built.isSigned = std::is_signed_v<std::underlying_type_t<E>>;
+        return built;
     }();
     return info;
+}
+
+template <class V>
+const ListOps& listOpsOf() {
+    using Element = typename V::value_type;
+    static_assert(!std::is_same_v<Element, bool>,
+                  "std::vector<bool> has no addressable elements: use std::vector<uint8_t>");
+    static const ListOps ops{
+        [](const void* list) { return static_cast<const V*>(list)->size(); },
+        [](void* list, size_t count) { static_cast<V*>(list)->resize(count); },
+        [](void* list, size_t index) -> void* { return std::addressof((*static_cast<V*>(list))[index]); },
+        [](const void* list, size_t index) -> const void* {
+            return std::addressof((*static_cast<const V*>(list))[index]);
+        },
+    };
+    return ops;
 }
 
 template <class T>
@@ -193,6 +238,7 @@ Self&& FieldsBuilder<T>::field(this Self&& self, std::string_view name, M T::*me
         detail::describe<Element>(field);
         field.element = field.kind;
         field.kind = FieldKind::List;
+        field.list = &listOpsOf<M>();
     } else {
         detail::describe<M>(field);
     }

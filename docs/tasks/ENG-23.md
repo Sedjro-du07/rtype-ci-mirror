@@ -12,6 +12,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/reflection/Yaml.hpp`
 - `src/reflection/Yaml.cpp`
+- `src/reflection/YamlCodec.cpp`
 
 ## Classes and methods
 
@@ -20,6 +21,43 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 ### `include/engine/reflection/Yaml.hpp`
 
 ```cpp
+class YamlNode {                                   // shared, read-only view of one node of a parsed file
+public:
+    static Result<YamlNode> parse(std::string_view text, std::string file); // syntax error → file:line
+    static Result<YamlNode> load(const std::filesystem::path& path, std::string file);
+    bool defined() const; bool isNull() const; bool isScalar() const; bool isSequence() const; bool isMap() const;
+    size_t size() const;
+    YamlNode operator[](size_t index) const;       // sequences; undefined node when out of range
+    YamlNode get(std::string_view key) const;      // maps; undefined node when missing
+    std::vector<std::pair<std::string, YamlNode>> entries() const; // maps, in file order
+    std::string scalar() const;
+    std::optional<bool> asBool() const; std::optional<int64_t> asInt() const;
+    std::optional<uint64_t> asUInt() const; std::optional<double> asDouble() const;
+    std::string_view file() const; int line() const;     // 1-based line, 0 when unknown
+    std::string describe() const;                  // "\"three\"", "a list", "a map", "null": for messages
+    unexpected<Error> error(Errc code, std::string message) const; // Error with this node's file and line
+};
+
+class YamlWriter {                                 // emitter: block style at the top, flow inside components
+public:
+    void beginMap(bool flow = false); void endMap();
+    void beginSequence(bool flow = false); void endSequence();
+    void key(std::string_view name);
+    void value(std::string_view); void value(const char*); void value(bool); void value(int64_t);
+    void value(uint64_t); void value(double); void value(float);   // floats: shortest exact form
+    void null();
+    std::string str() const;
+};
+
+struct LoadContext { const TypeRegistry& types; AssetManager* assets; std::function<Entity(const Uuid&)> entityOf; };
+struct SaveContext { const TypeRegistry& types; const AssetManager* assets;
+                     std::function<std::optional<Uuid>(Entity)> uuidOf; };
+
+std::string formatUuid(const Uuid&);                    // 16 hex digits, 32 when hi != 0
+std::optional<Uuid> parseUuid(std::string_view);        // 1 to 32 hex digits, '-' ignored
+Result<void> readYaml(const TypeInfo&, void* object, const YamlNode&, LoadContext&); // TypeInfo::fromYaml if set
+void writeYaml(const TypeInfo&, const void* object, YamlWriter&, SaveContext&);       // TypeInfo::toYaml if set
+
 class YamlNode {                              // read-only view; hides yaml-cpp from game headers
 public:
     bool isMap() const; bool isSequence() const; bool isScalar() const; bool isNull() const;

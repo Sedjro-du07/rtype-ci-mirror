@@ -8,8 +8,10 @@
 #include "engine/ecs/Commands.hpp"
 
 #include "engine/reflection/TypeInfo.hpp"
+#include "engine/scene/Prefab.hpp"
 
 #include <cassert>
+#include <string>
 #include <utility>
 
 namespace engine {
@@ -36,10 +38,20 @@ public:
 
 }
 
-Commands::Commands(Registry& registry) : _registry(&registry) {}
+Commands::Commands(Registry& registry, PrefabLibrary* prefabs) : _registry(&registry), _prefabs(prefabs) {}
 
 Entity Commands::spawn() {
     return this->_registry->create();
+}
+
+Entity Commands::spawn(std::string_view prefab, Vec2 position) {
+    if (!this->_prefabs || !this->_prefabs->get(prefab)) return Entity::null();
+    const Entity e = this->_registry->create();
+    this->_queue.emplace_back([library = this->_prefabs, path = std::string(prefab), e, position](Registry& registry) {
+        const auto found = library->get(path);
+        if (found && registry.alive(e)) library->instantiateInto(registry, e, **found, position);
+    });
+    return e;
 }
 
 void Commands::destroy(Entity e) {

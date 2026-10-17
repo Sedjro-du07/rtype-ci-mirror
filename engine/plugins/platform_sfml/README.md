@@ -9,8 +9,6 @@ Placeholder created from the architecture. Replace this file's list as files are
 | `SfmlImGui.cpp` | ENG-32 — Dear ImGui and ImPlot in platform_sfml (debug UI hooks) | `docs/tasks/ENG-32.md` |
 | `SfmlKeys.cpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
 | `SfmlPlatform.cpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
-| `SfmlPlatform.hpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
 | `SfmlRenderer.cpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
-| `SfmlRenderer.hpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
 
 Design: `docs/engine/reference/`. Rules: `docs/engine/folder-tree.md`.

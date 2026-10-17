@@ -58,6 +58,15 @@ enum class FieldKind : uint8_t {
 
 struct EnumInfo {
     std::vector<std::pair<std::string, int64_t>> values;
+    uint8_t size = sizeof(int32_t);
+    bool isSigned = true;
+};
+
+struct ListOps {
+    size_t (*size)(const void* list) = nullptr;
+    void (*resize)(void* list, size_t count) = nullptr;
+    void* (*at)(void* list, size_t index) = nullptr;
+    const void* (*constAt)(const void* list, size_t index) = nullptr;
 };
 
 struct FieldInfo {
@@ -67,6 +76,7 @@ struct FieldInfo {
     const EnumInfo* enumInfo = nullptr;
     FieldKind element{};
     uint64_t elementType = 0;
+    const ListOps* list = nullptr;
     uint32_t maxLength = 0;
     float quantMin = 0, quantMax = 0;
     std::string tooltip;

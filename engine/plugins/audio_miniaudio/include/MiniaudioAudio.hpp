@@ -2,13 +2,13 @@
 ** EPITECH PROJECT, 2026
 ** G-ING-500-COT-5-1-rtype-2
 ** File description:
-** SfmlRenderer
+** MiniaudioAudio
 */
 
-// engine/plugins/platform_sfml/SfmlRenderer.hpp
-// ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
-// Spec: docs/engine/reference/08-rendering.md · ADR 0007, 0031
-// Details: docs/tasks/ENG-31.md
+// engine/plugins/audio_miniaudio/include/MiniaudioAudio.hpp
+// ENG-35 — audio_miniaudio plugin
+// Spec: docs/engine/reference/09-audio.md · ADR 0008, 0032
+// Details: docs/tasks/ENG-35.md
 // Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
 // Status: not implemented yet. Claim the task on the board before editing this file.
 
