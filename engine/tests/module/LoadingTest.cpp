@@ -37,11 +37,11 @@ public:
 struct Loader {
     std::shared_ptr<LineSink> sink = std::make_shared<LineSink>();
     Logger log{[] {
-        LogConfig config;
-        config.file.clear();
-        config.color = false;
-        config.level = LogLevel::Error;
-        return config;
+        LogConfig settings;
+        settings.file.clear();
+        settings.color = false;
+        settings.level = LogLevel::Error;
+        return settings;
     }()};
     CVars cvars;
     EngineConfig config;
