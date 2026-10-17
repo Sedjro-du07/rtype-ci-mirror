@@ -13,6 +13,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/module/Export.hpp`
 - `include/engine/module/IPlugin.hpp`
 - `include/engine/module/IGameModule.hpp`
+- `src/module/IGameModule.cpp`
 
 ## Classes and methods
 
@@ -24,7 +25,10 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 inline constexpr uint32_t ENGINE_PLUGIN_API_VERSION = 1;  // bumped when any plugin interface changes
 inline constexpr uint32_t ENGINE_GAME_API_VERSION   = 1;  // bumped when IGameModule or Context changes
 
-#define ENGINE_EXPORT /* __declspec(dllexport) on Windows, visibility("default") elsewhere */
+#define ENGINE_EXPORT /* __declspec(dllexport) on Windows, visibility("default") elsewhere: defined by the CMake
+                         functions on each module target, empty in static mode */
+#define ENGINE_MODULE_NAME /* "rtype", "platform_sfml": defined by engine_add_game_module / engine_add_plugin;
+                              the key of the module in StaticModuleTable */
 
 // Placed once at the end of the game's module .cpp. Dynamic mode: defines
 //   extern "C" ENGINE_EXPORT IGameModule* create_game() noexcept;   (try/catch → nullptr)

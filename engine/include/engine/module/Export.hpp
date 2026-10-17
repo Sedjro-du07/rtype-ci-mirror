@@ -5,13 +5,78 @@
 ** Export
 */
 
-// engine/include/engine/module/Export.hpp
-// ENG-11 — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE
-// Spec: docs/engine/reference/02-modules.md · ADR 0020, 0025 · reference 02
-// Details: docs/tasks/ENG-11.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/module/IGameModule.hpp"
+#include "engine/module/IPlugin.hpp"
+#include "engine/module/StaticModuleTable.hpp"
+
+#include <cstdint>
+
+namespace engine {
+
+inline constexpr uint32_t ENGINE_PLUGIN_API_VERSION = 1;
+inline constexpr uint32_t ENGINE_GAME_API_VERSION = 1;
+
+}
+
+#if !defined(ENGINE_EXPORT)
+#define ENGINE_EXPORT
+#endif
+
+#if !defined(ENGINE_MODULE_NAME)
+#define ENGINE_MODULE_NAME ""
+#endif
+
+#define ENGINE_DETAIL_CREATE(Interface, ClassName)                                                                     \
+    []() noexcept -> ::engine::Interface* {                                                                            \
+        try {                                                                                                          \
+            return new ClassName();                                                                                    \
+        } catch (...) {                                                                                                \
+            return nullptr;                                                                                            \
+        }                                                                                                              \
+    }
+
+#if defined(ENGINE_STATIC_MODULES)
+
+#define ENGINE_GAME_MODULE(ClassName)                                                                                  \
+    namespace {                                                                                                        \
+    const bool engineGameRegistered =                                                                                  \
+        (::engine::StaticModuleTable::addGame(ENGINE_MODULE_NAME, ENGINE_DETAIL_CREATE(IGameModule, ClassName),        \
+                                              [](::engine::IGameModule* game) noexcept { delete game; }),              \
+         true);                                                                                                        \
+    }
+
+#define ENGINE_PLUGIN(ClassName)                                                                                       \
+    namespace {                                                                                                        \
+    const bool enginePluginRegistered =                                                                                \
+        (::engine::StaticModuleTable::addPlugin(ENGINE_MODULE_NAME, ENGINE_DETAIL_CREATE(IPlugin, ClassName),          \
+                                                [](::engine::IPlugin* plugin) noexcept { delete plugin; }),            \
+         true);                                                                                                        \
+    }
+
+#else
+
+#define ENGINE_GAME_MODULE(ClassName)                                                                                  \
+    extern "C" ENGINE_EXPORT ::engine::IGameModule* create_game() noexcept {                                           \
+        return ENGINE_DETAIL_CREATE(IGameModule, ClassName)();                                                         \
+    }                                                                                                                  \
+    extern "C" ENGINE_EXPORT void destroy_game(::engine::IGameModule* game) noexcept {                                 \
+        delete game;                                                                                                   \
+    }                                                                                                                  \
+    extern "C" ENGINE_EXPORT uint32_t game_api_version() noexcept {                                                    \
+        return ::engine::ENGINE_GAME_API_VERSION;                                                                      \
+    }
+
+#define ENGINE_PLUGIN(ClassName)                                                                                       \
+    extern "C" ENGINE_EXPORT ::engine::IPlugin* create_plugin() noexcept {                                             \
+        return ENGINE_DETAIL_CREATE(IPlugin, ClassName)();                                                             \
+    }                                                                                                                  \
+    extern "C" ENGINE_EXPORT void destroy_plugin(::engine::IPlugin* plugin) noexcept {                                 \
+        delete plugin;                                                                                                 \
+    }                                                                                                                  \
+    extern "C" ENGINE_EXPORT uint32_t plugin_api_version() noexcept {                                                  \
+        return ::engine::ENGINE_PLUGIN_API_VERSION;                                                                    \
+    }
+
+#endif

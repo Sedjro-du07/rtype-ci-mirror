@@ -69,3 +69,41 @@ add_test(NAME "unregistered component is reported" COMMAND engine_unregistered_c
          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_tests_properties("unregistered component is reported" PROPERTIES
     PASS_REGULAR_EXPRESSION "component 'Unregistered' is not registered")
+
+function(engine_add_test_module target)
+    cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "SOURCES")
+    if(ENGINE_DYNAMIC_MODULES)
+        add_library(${target} SHARED ${ARG_SOURCES})
+        target_compile_definitions(${target} PRIVATE
+            "ENGINE_EXPORT=$<IF:$<CXX_COMPILER_ID:MSVC>,__declspec(dllexport),__attribute__((visibility(\"default\")))>")
+    else()
+        add_library(${target} STATIC ${ARG_SOURCES})
+    endif()
+    target_link_libraries(${target} PUBLIC rtype_engine::engine)
+    target_compile_definitions(${target} PRIVATE ENGINE_MODULE_NAME="${target}")
+    engine_configure_target(${target})
+    set_target_properties(${target} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        BUILD_RPATH "$ORIGIN")
+endfunction()
+
+engine_add_test_module(game_fixture SOURCES module/FixtureGame.cpp)
+engine_add_test_module(game_fixture_throw SOURCES module/ThrowingGame.cpp)
+engine_add_test_module(network_fixture SOURCES module/FixturePlugin.cpp)
+
+engine_add_test(engine_module_tests SOURCES
+    module/ModuleTest.cpp)
+engine_add_test(engine_module_throw_tests SOURCES
+    module/ThrowingModuleTest.cpp)
+foreach(pair IN ITEMS "engine_module_tests:game_fixture" "engine_module_tests:network_fixture"
+                      "engine_module_throw_tests:game_fixture_throw")
+    string(REPLACE ":" ";" pair "${pair}")
+    list(GET pair 0 test)
+    list(GET pair 1 module)
+    if(ENGINE_DYNAMIC_MODULES)
+        target_link_libraries(${test} PRIVATE ${module})
+    else()
+        target_link_libraries(${test} PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,${module}>")
+    endif()
+endforeach()

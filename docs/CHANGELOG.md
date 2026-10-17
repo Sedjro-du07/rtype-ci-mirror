@@ -7,6 +7,22 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — engine modules: ENG-11, ENG-13
+
+### Added
+
+- `IGameModule` (default `onStart`, `onLobbyStart`, `onRoomStart`, `onShutdown` in the engine library),
+  `IPlugin`, `PluginKind`, `PluginContext`, the API versions and the macros `ENGINE_GAME_MODULE` /
+  `ENGINE_PLUGIN` (ENG-11): `extern "C"` create / destroy / version in dynamic mode, a constructor that
+  throws gives `nullptr`; a registrar in static mode.
+- `StaticModuleTable` (ENG-13): plugin and game factories filled by the registrars, `findPlugin`, `findGame`.
+- Test modules (a game, a game that throws, a plugin) and 2 test executables, built in both modes.
+
+### Changed
+
+- The CMake functions define `ENGINE_MODULE_NAME` (key in the static table) and `ENGINE_EXPORT` on each
+  module target, so no public header needs `#ifdef _WIN32` (ADR 0044).
+
 ## [2026-10-17] — reflection: small integer fields
 
 ### Changed
