@@ -123,9 +123,11 @@ TEST_CASE("the file sink writes lines and rotates", "[logger]") {
     CHECK(std::filesystem::exists(folder / "engine.2.log"));
     CHECK_FALSE(std::filesystem::exists(folder / "engine.3.log"));
     CHECK(std::filesystem::file_size(file) <= 200);
-    std::ifstream in(file);
     std::string first;
-    std::getline(in, first);
+    {
+        std::ifstream in(file);
+        std::getline(in, first);
+    }
     CHECK(first.ends_with("[test] a line of about forty characters"));
     std::filesystem::remove_all(folder);
 }
@@ -140,9 +142,11 @@ TEST_CASE("the logger opens its file from the configuration", "[logger]") {
         log.info("started");
         log.flush();
     }
-    std::ifstream in(config.file);
     std::string line;
-    std::getline(in, line);
+    {
+        std::ifstream in(config.file);
+        std::getline(in, line);
+    }
     CHECK(line.ends_with("INFO  started"));
     std::filesystem::remove_all(folder);
 }
