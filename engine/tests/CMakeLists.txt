@@ -141,3 +141,5 @@ engine_add_test(engine_room_tests SOURCES
     room/PartyRoomTest.cpp)
 engine_add_test(engine_systems_tests SOURCES
     systems/EngineSystemsTest.cpp)
+engine_add_test(engine_net_session_tests SOURCES
+    net/NetworkSessionTest.cpp)

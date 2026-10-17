@@ -238,6 +238,8 @@ void                  secureRandom(std::span<std::byte> out);            // getr
 std::filesystem::path userDataDir(std::string_view app);                  // $XDG_DATA_HOME / %APPDATA%; settings, logs
 std::filesystem::path executableDir();                                    // /proc/self/exe / GetModuleFileNameW
 void                  onQuitSignal(std::move_only_function<void()> fn);  // SIGINT, SIGTERM / console control handler
+struct HostAddress { std::array<uint8_t, 16> bytes; bool v6; };
+Result<std::vector<HostAddress>> resolveHost(std::string_view host);       // getaddrinfo (Winsock started once)
 }
 ```
 

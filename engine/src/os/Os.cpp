@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <system_error>
 #include <utility>
@@ -18,8 +19,13 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <bcrypt.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #else
+#include <netdb.h>
+#include <netinet/in.h>
 #include <sys/random.h>
+#include <sys/socket.h>
 
 #include <cerrno>
 #include <csignal>
@@ -149,5 +155,40 @@ void onQuitSignal(std::move_only_function<void()> fn) {
 }
 
 #endif
+
+Result<std::vector<HostAddress>> resolveHost(std::string_view host) {
+#if defined(_WIN32)
+    static const bool started = [] {
+        WSADATA data;
+        return WSAStartup(MAKEWORD(2, 2), &data) == 0;
+    }();
+    if (!started) return fail(Errc::NetworkError, "the network stack could not start");
+#endif
+    addrinfo hints{};
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+    addrinfo* list = nullptr;
+    const std::string name(host);
+    if (getaddrinfo(name.c_str(), nullptr, &hints, &list) != 0 || !list)
+        return fail(Errc::NetworkError, "cannot resolve host '" + name + "'");
+    std::vector<HostAddress> found;
+    for (addrinfo* it = list; it; it = it->ai_next) {
+        HostAddress address;
+        if (it->ai_family == AF_INET) {
+            const auto* in = reinterpret_cast<const sockaddr_in*>(it->ai_addr);
+            std::memcpy(address.bytes.data(), &in->sin_addr, 4);
+        } else if (it->ai_family == AF_INET6) {
+            const auto* in = reinterpret_cast<const sockaddr_in6*>(it->ai_addr);
+            std::memcpy(address.bytes.data(), &in->sin6_addr, 16);
+            address.v6 = true;
+        } else {
+            continue;
+        }
+        found.push_back(address);
+    }
+    freeaddrinfo(list);
+    if (found.empty()) return fail(Errc::NetworkError, "host '" + name + "' has no IPv4 or IPv6 address");
+    return found;
+}
 
 }

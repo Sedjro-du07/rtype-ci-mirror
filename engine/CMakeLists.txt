@@ -45,7 +45,7 @@ if(NOT ENGINE_DYNAMIC_MODULES)
 endif()
 
 if(WIN32)
-    target_link_libraries(engine PRIVATE bcrypt)
+    target_link_libraries(engine PRIVATE bcrypt ws2_32)
 endif()
 
 target_include_directories(engine

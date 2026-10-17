@@ -156,6 +156,21 @@ void registerEngineTypes(TypeRegistry& types) {
     types.add<SceneUnloading>().field("name", &SceneUnloading::name);
     types.add<Caption>().field("text", &Caption::text).field("seconds", &Caption::seconds);
     types.add<ConsoleCommand>().field("line", &ConsoleCommand::line);
+
+    types.add<DisconnectReason>();
+    types.add<PlayerJoined>().field("player", &PlayerJoined::player);
+    types.add<PlayerLeft>()
+        .field("player", &PlayerLeft::player)
+        .field("reason", &PlayerLeft::reason)
+        .field("message", &PlayerLeft::message);
+    types.add<PlayerDisconnected>()
+        .field("player", &PlayerDisconnected::player)
+        .field("reason", &PlayerDisconnected::reason);
+    types.add<PlayerReconnected>().field("player", &PlayerReconnected::player);
+    types.add<JoinedServer>().field("me", &JoinedServer::me);
+    types.add<LeftServer>().field("reason", &LeftServer::reason).field("message", &LeftServer::message);
+    types.add<ConnectionInterrupted>().field("reason", &ConnectionInterrupted::reason);
+    types.add<Reconnected>();
 }
 
 }
