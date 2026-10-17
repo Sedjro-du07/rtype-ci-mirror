@@ -5,13 +5,60 @@
 ** EngineEvents
 */
 
-// engine/include/engine/events/EngineEvents.hpp
-// ENG-27 — EventBus: queued, immediate, thread inbox; engine events
-// Spec: docs/engine/reference/06-events.md · ADR 0029, 0044 · reference 06
-// Details: docs/tasks/ENG-27.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/ecs/Entity.hpp"
+#include "engine/reflection/TypeKey.hpp"
+
+#include <cstdint>
+#include <string>
+
+namespace engine {
+
+struct QuitRequested {};
+
+struct WindowResized {
+    uint32_t width = 0, height = 0;
+};
+
+struct WindowFocusChanged {
+    bool focused = true;
+};
+
+struct AppSuspended {};
+
+struct AppResumed {};
+
+struct Collision {
+    Entity a, b;
+};
+
+struct SceneLoaded {
+    std::string name;
+};
+
+struct SceneUnloading {
+    std::string name;
+};
+
+struct Caption {
+    std::string text;
+    float seconds = 0;
+};
+
+struct ConsoleCommand {
+    std::string line;
+};
+
+}
+
+ENGINE_EVENT(engine::QuitRequested)
+ENGINE_EVENT(engine::WindowResized)
+ENGINE_EVENT(engine::WindowFocusChanged)
+ENGINE_EVENT(engine::AppSuspended)
+ENGINE_EVENT(engine::AppResumed)
+ENGINE_EVENT(engine::Collision)
+ENGINE_EVENT(engine::SceneLoaded)
+ENGINE_EVENT(engine::SceneUnloading)
+ENGINE_EVENT(engine::Caption)
+ENGINE_EVENT(engine::ConsoleCommand)

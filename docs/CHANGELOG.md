@@ -7,6 +7,19 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — engine events: ENG-27
+
+### Added
+
+- `EventBus`: typed `subscribe` (RAII `Subscription`), queued `publish`, immediate `emit`,
+  `publishFromAnyThread` through a mutex inbox, `dispatch` in publish order (events published during a
+  dispatch wait for the next one), `beginGameSubscriptions` / `clearGameSubscriptions`. Channels are
+  engine code; only the listener's cast comes from the subscribing module, so unloading a game leaves no
+  engine object pointing into it.
+- Engine events without network types: `QuitRequested`, `WindowResized`, `WindowFocusChanged`,
+  `AppSuspended`, `AppResumed`, `Collision`, `SceneLoaded`, `SceneUnloading`, `Caption`, `ConsoleCommand`.
+  The network events move to ENG-36 with `PlayerId` and `DisconnectReason`. 8 tests (ThreadSanitizer clean).
+
 ## [2026-10-17] — engine rendering API: ENG-30
 
 ### Added

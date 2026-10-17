@@ -73,6 +73,16 @@ public:
 };
 ```
 
+### `include/engine/events/EngineEvents.hpp`
+
+```cpp
+// network events, declared here with PlayerId and DisconnectReason (moved from ENG-27)
+struct PlayerJoined       { PlayerId player; };                                         ENGINE_EVENT(PlayerJoined)
+struct PlayerLeft         { PlayerId player; DisconnectReason reason; std::string message; }; ENGINE_EVENT(PlayerLeft)
+struct JoinedServer       { PlayerId me; };                                             ENGINE_EVENT(JoinedServer)
+struct LeftServer         { DisconnectReason reason; std::string message; };            ENGINE_EVENT(LeftServer)
+```
+
 ## Depends on
 
 - [ENG-11](ENG-11.md) — IPlugin, IGameModule, export macros ENGINE_PLUGIN / ENGINE_GAME_MODULE
@@ -93,6 +103,7 @@ public:
 
 - [ ] `PlayerId`, `ConnectionId`, `Endpoint` (`resolve`, `toString`), `Datagram`, `DisconnectReason`, `NetConfig`, `ConnectionStats`
 - [ ] `INetwork` (UDP and TCP)
+- [ ] Network events `PlayerJoined`, `PlayerLeft`, `JoinedServer`, `LeftServer` in `EngineEvents.hpp` (moved from ENG-27)
 
 ## Done when
 
