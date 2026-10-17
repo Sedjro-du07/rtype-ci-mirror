@@ -196,6 +196,7 @@ engine/
 │   │   └── Keys.cpp                                      ENG-28
 │   ├── module/
 │   │   ├── DynamicLibrary.cpp                            ENG-12
+│   │   ├── IGameModule.cpp                               ENG-11
 │   │   ├── ModuleManager.cpp                             ENG-14
 │   │   ├── NullPlugins.cpp                               ENG-15
 │   │   └── StaticModuleTable.cpp                         ENG-13

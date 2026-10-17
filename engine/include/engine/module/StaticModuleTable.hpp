@@ -5,13 +5,42 @@
 ** StaticModuleTable
 */
 
-// engine/include/engine/module/StaticModuleTable.hpp
-// ENG-13 — StaticModuleTable for ENGINE_DYNAMIC_MODULES=OFF
-// Spec: docs/engine/reference/02-modules.md · ADR 0009
-// Details: docs/tasks/ENG-13.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/Export.hpp"
+
+#include <string_view>
+
+namespace engine {
+
+class IPlugin;
+class IGameModule;
+struct PluginEntry;
+struct GameEntry;
+
+class ENGINE_API StaticModuleTable {
+public:
+    using CreatePlugin = IPlugin* (*)() noexcept;
+    using DestroyPlugin = void (*)(IPlugin*) noexcept;
+    using CreateGame = IGameModule* (*)() noexcept;
+    using DestroyGame = void (*)(IGameModule*) noexcept;
+
+    static void addPlugin(std::string_view stem, CreatePlugin create, DestroyPlugin destroy);
+    static void addGame(std::string_view name, CreateGame create, DestroyGame destroy);
+    static const PluginEntry* findPlugin(std::string_view stem);
+    static const GameEntry* findGame(std::string_view name);
+};
+
+struct PluginEntry {
+    std::string_view stem;
+    StaticModuleTable::CreatePlugin create;
+    StaticModuleTable::DestroyPlugin destroy;
+};
+
+struct GameEntry {
+    std::string_view name;
+    StaticModuleTable::CreateGame create;
+    StaticModuleTable::DestroyGame destroy;
+};
+
+}
