@@ -47,7 +47,7 @@ template <class T> constexpr uint64_t typeKey() noexcept;   // TypeName<T>::key
 
 ```cpp
 enum class FieldKind : uint8_t {
-    Bool, Int32, UInt32, Int64, Float, Double, String,
+    Bool, Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, Float, Double, String,
     Vec2, Rect, Color, Entity,                          // Entity: written as the target's Uuid in files
     Texture, Sound, Music, Font, Script,                // asset handles: written as paths in files
     Enum,                                               // a type registered with ENGINE_ENUM

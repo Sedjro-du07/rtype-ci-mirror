@@ -31,6 +31,26 @@ struct FieldKindOf<bool> {
 };
 
 template <>
+struct FieldKindOf<int8_t> {
+    static constexpr FieldKind value = FieldKind::Int8;
+};
+
+template <>
+struct FieldKindOf<uint8_t> {
+    static constexpr FieldKind value = FieldKind::UInt8;
+};
+
+template <>
+struct FieldKindOf<int16_t> {
+    static constexpr FieldKind value = FieldKind::Int16;
+};
+
+template <>
+struct FieldKindOf<uint16_t> {
+    static constexpr FieldKind value = FieldKind::UInt16;
+};
+
+template <>
 struct FieldKindOf<int32_t> {
     static constexpr FieldKind value = FieldKind::Int32;
 };
@@ -113,9 +133,12 @@ constexpr FieldKind kindOf() {
     else if constexpr (isRegistered<M>(TypeCategory::Struct))
         return FieldKind::Struct;
     else
-        static_assert(alwaysFalse<M>, "unsupported field type: use bool, int32_t, uint32_t, int64_t, float, double, "
-                                      "std::string, Vec2, Rect, Color, Entity, an asset handle, a type registered "
-                                      "with ENGINE_STRUCT or ENGINE_ENUM, or a std::vector of one of them");
+        static_assert(
+            alwaysFalse<M>,
+            "unsupported field type: use bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, "
+            "float, double, "
+            "std::string, Vec2, Rect, Color, Entity, an asset handle, a type registered "
+            "with ENGINE_STRUCT or ENGINE_ENUM, or a std::vector of one of them");
 }
 
 template <class M>

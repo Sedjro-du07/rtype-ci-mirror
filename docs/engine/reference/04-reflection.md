@@ -48,8 +48,9 @@ Rules:
   last part (`Health`), so files stay readable.
 - `ENGINE_ENUM(rtype::EnemyKind, Grunt, Boss)` lists the enumerators by name only (the macro reads
   them with `using enum`).
-- Integer fields are `int32_t`, `uint32_t` or `int64_t`: other widths are a compile error until a
-  `FieldKind` exists for them.
+- Integer fields use the fixed-width types `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`,
+  `int64_t`. Writing `char`, `short`, `long` or `long long` directly may not match them on every platform
+  and then fails to compile.
 - A second registration with the same name, or two names with the same hash, is a boot error
   (`DuplicateName`, exit code 3).
 
@@ -59,7 +60,7 @@ Module macros (`ENGINE_GAME_MODULE`, `ENGINE_PLUGIN`, `ENGINE_EXPORT`) are in bl
 
 ```cpp
 enum class FieldKind : uint8_t {
-    Bool, Int32, UInt32, Int64, Float, Double, String,
+    Bool, Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, Float, Double, String,
     Vec2, Rect, Color, Entity,                          // Entity: written as the target's Uuid in files
     Texture, Sound, Music, Font, Script,                // asset handles: written as paths in files
     Enum,                                               // a type registered with ENGINE_ENUM

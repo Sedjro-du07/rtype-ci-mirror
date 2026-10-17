@@ -57,6 +57,17 @@ struct Move {
     float x = 0;
 };
 
+enum class Slot : uint8_t { P1, P2, P3, P4 };
+
+struct Ship {
+    int8_t tilt = 0;
+    uint8_t lives = 3;
+    int16_t health = 100;
+    uint16_t score = 0;
+    Slot slot = Slot::P1;
+    std::vector<uint8_t> flags;
+};
+
 }
 
 ENGINE_COMPONENT(game::Health)
@@ -68,6 +79,8 @@ ENGINE_STRUCT(game::RoomInfo)
 ENGINE_MESSAGE(game::RoomList)
 ENGINE_MESSAGE(game::Chat)
 ENGINE_MESSAGE(game::Move)
+ENGINE_ENUM(game::Slot, P1, P2, P3, P4)
+ENGINE_COMPONENT(game::Ship)
 
 using namespace engine;
 
@@ -229,4 +242,27 @@ TEST_CASE("clearGameTypes keeps the engine types", "[reflection]") {
 
     types.add<game::Health>();
     CHECK(types.find("Health")->id == 1);
+}
+
+TEST_CASE("small integer fields and an enum on one byte", "[reflection]") {
+    TypeRegistry types;
+    types.add<game::Slot>();
+    types.add<game::Ship>()
+        .field("tilt", &game::Ship::tilt)
+        .field("lives", &game::Ship::lives)
+        .field("health", &game::Ship::health)
+        .field("score", &game::Ship::score)
+        .field("slot", &game::Ship::slot)
+        .field("flags", &game::Ship::flags);
+
+    const auto& fields = types.find("Ship")->fields;
+    CHECK(fields[0].kind == FieldKind::Int8);
+    CHECK(fields[1].kind == FieldKind::UInt8);
+    CHECK(fields[2].kind == FieldKind::Int16);
+    CHECK(fields[3].kind == FieldKind::UInt16);
+    CHECK(fields[2].offset == offsetof(game::Ship, health));
+    CHECK(fields[4].kind == FieldKind::Enum);
+    CHECK(fields[4].enumInfo->values[3].first == "P4");
+    CHECK(fields[5].kind == FieldKind::List);
+    CHECK(fields[5].element == FieldKind::UInt8);
 }

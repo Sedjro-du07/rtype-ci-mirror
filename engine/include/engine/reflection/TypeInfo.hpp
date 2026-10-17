@@ -31,6 +31,10 @@ class ByteReader;
 
 enum class FieldKind : uint8_t {
     Bool,
+    Int8,
+    UInt8,
+    Int16,
+    UInt16,
     Int32,
     UInt32,
     Int64,
