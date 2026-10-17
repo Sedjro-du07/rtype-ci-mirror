@@ -79,10 +79,12 @@ engine/
 │       │   └── RawInputEvent.hpp                         ENG-28
 │       ├── module/
 │       │   ├── DynamicLibrary.hpp                        ENG-12
+│       │   ├── DynamicLibrary.inl                        ENG-12
 │       │   ├── Export.hpp                                ENG-11
 │       │   ├── IGameModule.hpp                           ENG-11
 │       │   ├── IPlugin.hpp                               ENG-11
 │       │   ├── ModuleManager.hpp                         ENG-14
+│       │   ├── ModuleManager.inl                         ENG-14
 │       │   ├── NullPlugins.hpp                           ENG-15
 │       │   └── StaticModuleTable.hpp                     ENG-13
 │       ├── net/

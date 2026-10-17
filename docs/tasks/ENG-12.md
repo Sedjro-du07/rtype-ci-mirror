@@ -11,6 +11,7 @@ The only OS-specific loading code.
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/module/DynamicLibrary.hpp`
+- `include/engine/module/DynamicLibrary.inl`
 - `src/module/DynamicLibrary.cpp`
 
 ## Classes and methods
@@ -23,7 +24,8 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 class DynamicLibrary {
 public:
     static Result<DynamicLibrary> open(const std::filesystem::path& file); // FileNotFound / SymbolNotFound with the OS message
-    static std::string decorate(std::string_view stem);  // "platform_sfml" → "libplatform_sfml.so" / "platform_sfml.dll"
+    static std::string decorate(std::string_view stem);  // "platform_sfml" → "libplatform_sfml.so" / "libplatform_sfml.dll"
+                                                         // (the CMake functions use the lib prefix on every OS)
     DynamicLibrary(DynamicLibrary&&) noexcept; DynamicLibrary& operator=(DynamicLibrary&&) noexcept;
     ~DynamicLibrary();                                   // dlclose / FreeLibrary
     void* rawSymbol(std::string_view name) const;        // nullptr if absent

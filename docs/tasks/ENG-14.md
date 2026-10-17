@@ -11,6 +11,7 @@ Load plugins by kind and name and the game module, check versions, unload in rev
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `include/engine/module/ModuleManager.hpp`
+- `include/engine/module/ModuleManager.inl`
 - `src/module/ModuleManager.cpp`
 
 ## Classes and methods

@@ -47,6 +47,7 @@ endif()
 if(WIN32)
     target_link_libraries(engine PRIVATE bcrypt)
 endif()
+target_link_libraries(engine PRIVATE ${CMAKE_DL_LIBS})
 
 target_include_directories(engine
     PUBLIC  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

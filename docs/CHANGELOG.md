@@ -7,6 +7,21 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-17] — module loading: ENG-12, ENG-14
+
+### Added
+
+- `DynamicLibrary` (ENG-12): `dlopen` with `RTLD_NOW | RTLD_LOCAL` / `LoadLibraryW`, the OS error text,
+  `rawSymbol`, typed `symbol<Fn>`, `decorate`, RAII and move-only. The engine links `${CMAKE_DL_LIBS}`.
+- `ModuleManager` (ENG-14): plugins by kind and name, games by name and role (`lib<name>_<role>` then
+  `lib<name>`), version and kind checks, `init`, one game at a time, reverse unloading with a log line
+  each, `loaded()`; the static table in static builds. 6 tests with real libraries built under
+  `bin/plugins` and `bin/games` (3 in static mode).
+
+### Deviations
+
+- `null` plugins return `PluginNotFound` until the Null Objects exist (ENG-15).
+
 ## [2026-10-17] — engine components and scheduler: ENG-25, ENG-26
 
 ### Added
