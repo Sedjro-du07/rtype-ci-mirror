@@ -5,13 +5,29 @@
 ** NetworkIdMap
 */
 
-// engine/include/engine/net/NetworkIdMap.hpp
-// ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems
-// Spec: docs/engine/reference/10-network.md · ADR 0033, 0041 · reference 10 · RFC §9
-// Details: docs/tasks/ENG-39.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/Export.hpp"
+#include "engine/ecs/Entity.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <unordered_map>
+
+namespace engine {
+
+class ENGINE_API NetworkIdMap {
+private:
+    std::unordered_map<uint32_t, Entity> _entities;
+    uint32_t _next = 1;
+
+public:
+    uint32_t allocate();
+    void bind(uint32_t id, Entity e);
+    void unbind(uint32_t id);
+    Entity find(uint32_t id) const;
+    size_t size() const;
+    void clear();
+};
+
+}

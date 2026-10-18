@@ -19,6 +19,9 @@ Placeholder created from the architecture. Replace this file's list as files are
 | `Reconnection.hpp` | SRV-16 — Reconnection: grace period, single-use tokens, client auto-reconnect, UDP relink | `docs/tasks/SRV-16.md` |
 | `ReliableChannel.cpp` | SRV-05 — ReliableChannel: packet acks, RTT and loss, reliable ordered messages | `docs/tasks/SRV-05.md` |
 | `ReliableChannel.hpp` | SRV-05 — ReliableChannel: packet acks, RTT and loss, reliable ordered messages | `docs/tasks/SRV-05.md` |
+| `Replication.cpp` | ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems | `docs/tasks/ENG-39.md` |
+| `ReplicationClient.cpp` | ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems | `docs/tasks/ENG-39.md` |
+| `ReplicationServer.cpp` | ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems | `docs/tasks/ENG-39.md` |
 | `ReplicationState.cpp` | SRV-17 — Replication v1: send until acknowledged, budget, NetPriority, relevance, quantize | `docs/tasks/SRV-17.md` |
 | `ReplicationState.hpp` | SRV-17 — Replication v1: send until acknowledged, budget, NetPriority, relevance, quantize | `docs/tasks/SRV-17.md` |
 | `RoomNetwork.cpp` | SRV-14 — Routing per room: PlayerRouting, RoomNetwork, ClientLobby, replication reset | `docs/tasks/SRV-14.md` |

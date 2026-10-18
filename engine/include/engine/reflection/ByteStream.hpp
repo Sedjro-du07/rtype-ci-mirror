@@ -71,6 +71,8 @@ public:
     std::optional<double> f64(); // IEEE 754 big-endian
     /// Reads a u16-length-prefixed string; fails if length > maxLength or bytes missing.
     std::optional<std::string> string(size_t maxLength);
+    /// Reads count raw bytes and returns a view into the input span.
+    std::optional<std::span<const std::byte>> bytes(size_t count);
     /// Bit-packing: reads bitCount bits into the low bits of the result.
     std::optional<uint32_t> bits(uint8_t bitCount);
 

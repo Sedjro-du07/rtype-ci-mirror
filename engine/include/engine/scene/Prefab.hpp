@@ -86,6 +86,7 @@ private:
                std::span<const ComponentData> overrides, Vec2 position);
     void spawnChildren(Registry& registry, Entity parent, std::span<const PrefabChild> children, Vec2 position);
     void place(Registry& registry, Entity e, Vec2 position);
+    void markNetworked(Registry& registry, Entity e, const Prefab& prefab) const;
 
 public:
     PrefabLibrary(const TypeRegistry& types, AssetManager& assets);
@@ -93,6 +94,7 @@ public:
     PrefabLibrary& operator=(const PrefabLibrary&) = delete;
 
     Result<const Prefab*> get(std::string_view path);
+    Result<size_t> preload(std::string_view folder);
     const Prefab* findByKey(uint32_t key) const;
     Entity instantiate(Registry& registry, const Prefab& prefab, Vec2 position,
                        std::span<const ComponentData> overrides = {});

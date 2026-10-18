@@ -253,16 +253,19 @@ TEST_CASE("engine systems are registered with their names, stages and roles", "[
     std::vector<std::string> names;
     for (const SystemStats& stats : client.stats())
         names.emplace_back(stats.name);
-    CHECK(names == std::vector<std::string>{"engine.previous_position", "engine.movement", "engine.hierarchy",
-                                            "engine.parallax", "engine.lifetime", "engine.animation",
-                                            "engine.collision", "engine.render.sprites", "engine.render.text",
+    CHECK(names == std::vector<std::string>{"engine.net.apply_snapshot", "engine.previous_position", "engine.movement",
+                                            "engine.hierarchy", "engine.parallax", "engine.lifetime",
+                                            "engine.animation", "engine.collision", "engine.net.send_input",
+                                            "engine.net.interpolate", "engine.render.sprites", "engine.render.text",
                                             "engine.render.debug"});
 
     Scheduler server(Role::Server, log);
     registerEngineSystems(server, targets);
     REQUIRE(server.build());
-    CHECK(server.stats().size() == 5);
+    CHECK(server.stats().size() == 8);
     CHECK_FALSE(server.enabled("engine.render.sprites"));
+    CHECK(server.enabled("engine.net.snapshot"));
+    CHECK_FALSE(server.enabled("engine.net.interpolate"));
 
     const Entity ship = w.at(0, 0);
     w.registry.emplace<Velocity>(ship, 10.f, 0.f);

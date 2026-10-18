@@ -289,6 +289,10 @@ const InputOptions& InputMap::options() const {
     return this->_options;
 }
 
+std::span<const ActionId> InputMap::order() const {
+    return this->_order;
+}
+
 float InputMap::level(const Binding& binding) const {
     if (const auto* key = std::get_if<Key>(&binding)) return this->_keys.contains(*key) ? 1.f : 0.f;
     if (const auto* mouse = std::get_if<MouseButton>(&binding)) return this->_mouse.contains(*mouse) ? 1.f : 0.f;

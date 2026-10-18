@@ -411,6 +411,11 @@ std::vector<ConnectionId> NetworkSession::connections() const {
     return ids;
 }
 
+PlayerId NetworkSession::player(ConnectionId connection) const {
+    const auto it = this->_connections.find(connection);
+    return it == this->_connections.end() ? 0 : it->second.player;
+}
+
 ConnectionStats NetworkSession::stats(ConnectionId id) const {
     const auto it = this->_connections.find(id);
     if (it == this->_connections.end()) return {};

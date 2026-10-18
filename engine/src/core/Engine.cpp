@@ -13,6 +13,7 @@
 #include "engine/net/INetwork.hpp"
 #include "engine/render/IPlatform.hpp"
 #include "engine/script/IScripting.hpp"
+#include "net/Replication.hpp"
 #include "os/Os.hpp"
 #include "systems/EngineSystems.hpp"
 #include "systems/RegisterEngineTypes.hpp"
@@ -104,11 +105,25 @@ void Engine::boot() {
     this->_booted = true;
 }
 
+void Engine::startReplication() {
+    ReplicationParts parts{*this->_network, this->_types, this->_input, &this->_scenes.prefabs(), &this->_assets};
+    this->_replication = std::make_unique<Replication>(parts, this->_config.net, this->_log);
+    this->_network->onMessage([this](const InboundMessage& message) {
+        if (this->_replication) this->_replication->receive(message);
+    });
+    if (this->_config.role != Role::Client) return;
+    if (auto loaded = this->_scenes.prefabs().preload("prefabs"); !loaded)
+        this->_log.warn("prefabs for replication: {}", loaded.error().toString());
+}
+
 void Engine::buildSchedule() {
     registerEngineSystems(this->_scheduler, [this](Context& ctx) {
         const bool drawing = this->_config.role != Role::Server;
-        return SystemTargets{ctx.world(), ctx.commands(), ctx.events(), ctx.time(), drawing ? &ctx.render() : nullptr,
-                             64.f,        false};
+        SystemTargets targets{ctx.world(), ctx.commands(), ctx.events(), ctx.time(), drawing ? &ctx.render() : nullptr,
+                              64.f,        false};
+        targets.replication = this->_replication.get();
+        targets.input = &ctx.input();
+        return targets;
     });
     this->_scheduler.beginGameSystems();
     this->_game->registerSystems(this->_config.role, this->_scheduler);
@@ -133,6 +148,7 @@ void Engine::makeContext() {
 
 void Engine::load() {
     this->_time.fixedDelta = 1.0 / this->_config.tickRate;
+    this->startReplication();
     this->buildSchedule();
     const std::filesystem::path bindings = this->_config.root / "input.yaml";
     if (std::error_code error; std::filesystem::is_regular_file(bindings, error))
@@ -227,6 +243,7 @@ void Engine::shutdown() {
     this->_types.clearGameTypes();
     this->_modules.unloadGame();
     this->_game = nullptr;
+    this->_replication.reset();
     this->_network.reset();
     this->_modules.unloadAll();
     this->_log.flush();

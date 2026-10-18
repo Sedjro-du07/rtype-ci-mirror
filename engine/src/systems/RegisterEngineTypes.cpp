@@ -21,6 +21,7 @@
 #include "engine/components/Velocity.hpp"
 #include "engine/core/Hash.hpp"
 #include "engine/events/EngineEvents.hpp"
+#include "engine/net/NetComponents.hpp"
 #include "engine/reflection/TypeRegistry.hpp"
 #include "engine/reflection/Yaml.hpp"
 
@@ -145,6 +146,12 @@ void registerEngineTypes(TypeRegistry& types) {
     types.add<Lifetime>().field("seconds", &Lifetime::seconds);
     types.add<Parallax>().field("factor", &Parallax::factor).field("wrapWidth", &Parallax::wrapWidth);
     types.add<Script>().field("file", &Script::file).yaml(readScript, writeScript);
+    types.add<NetworkId>().field("value", &NetworkId::value).flags(Transient | EditorHidden);
+    types.add<NetPrefab>().field("prefabKey", &NetPrefab::prefabKey).flags(EditorHidden);
+    types.add<NetOwner>().field("owner", &NetOwner::owner).flags(Replicated);
+    types.add<RemoteInput>().flags(Transient | EditorHidden);
+    types.add<NetInterpolation>().flags(Transient | EditorHidden);
+    types.add<NetPriority>().field("weight", &NetPriority::weight);
 
     types.add<QuitRequested>();
     types.add<WindowResized>().field("width", &WindowResized::width).field("height", &WindowResized::height);

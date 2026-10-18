@@ -22,6 +22,7 @@
 
 namespace engine {
 
+class AssetManager;
 class YamlNode;
 class YamlWriter;
 struct LoadContext;
@@ -95,6 +96,7 @@ enum class Transport : uint8_t { Unreliable, Reliable, Stream };
 struct WireContext {
     std::function<uint32_t(Entity)> networkIdOf;
     std::function<Entity(uint32_t)> entityOf;
+    AssetManager* assets = nullptr;
 };
 
 struct TypeInfo {

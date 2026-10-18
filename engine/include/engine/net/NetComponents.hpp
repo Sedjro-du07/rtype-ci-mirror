@@ -5,13 +5,49 @@
 ** NetComponents
 */
 
-// engine/include/engine/net/NetComponents.hpp
-// ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems
-// Spec: docs/engine/reference/10-network.md · ADR 0033, 0041 · reference 10 · RFC §9
-// Details: docs/tasks/ENG-39.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "engine/core/math/Vec2.hpp"
+#include "engine/input/ActionState.hpp"
+#include "engine/net/NetTypes.hpp"
+#include "engine/reflection/TypeKey.hpp"
+
+#include <cstdint>
+
+namespace engine {
+
+struct NetworkId {
+    uint32_t value = 0;
+};
+
+struct NetPrefab {
+    uint32_t prefabKey = 0;
+};
+
+struct NetOwner {
+    PlayerId owner = 0;
+};
+
+struct RemoteInput {
+    ActionState state;
+    uint64_t lastMask = 0;
+    uint32_t lastTick = 0;
+};
+
+struct NetInterpolation {
+    Vec2 from, to;
+    double fromTime = 0, toTime = 0;
+};
+
+struct NetPriority {
+    float weight = 1.0f;
+};
+
+}
+
+ENGINE_COMPONENT(engine::NetworkId)
+ENGINE_COMPONENT(engine::NetPrefab)
+ENGINE_COMPONENT(engine::NetOwner)
+ENGINE_COMPONENT(engine::RemoteInput)
+ENGINE_COMPONENT(engine::NetInterpolation)
+ENGINE_COMPONENT(engine::NetPriority)

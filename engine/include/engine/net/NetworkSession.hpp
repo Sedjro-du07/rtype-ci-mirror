@@ -132,6 +132,7 @@ public:
     bool isServer() const;
     bool connected() const;
     std::vector<ConnectionId> connections() const;
+    PlayerId player(ConnectionId connection) const;
     ConnectionStats stats(ConnectionId connection) const;
     const NetCounters& counters() const;
 };
