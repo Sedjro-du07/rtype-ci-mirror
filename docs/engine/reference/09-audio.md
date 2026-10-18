@@ -59,3 +59,18 @@ gets them.
 | Plugin | Implements | Notes |
 |---|---|---|
 | `audio_miniaudio` | `MiniaudioAudio : IAudio` | one `ma_engine`, one sound group per bus, spatialisation by miniaudio |
+
+`MiniaudioAudio` (ENG-35), `engine/plugins/audio_miniaudio/`, miniaudio 0.11 (one header from vcpkg; its
+implementation is compiled in `MiniaudioImplementation.cpp` with warnings off):
+
+- One `ma_engine`; four sound groups, Music, Effects and Interface under Master. `setBusVolume` clamps to
+  [0, 1] and applies at once to every voice of the bus.
+- `createSound` checks the bytes decode, keeps them and registers them with miniaudio's resource manager:
+  each `play` is a new voice decoded once and shared. `play` returns 0 for an unknown sound or when silent.
+- A voice without `position` uses `pan`; with `position` it is spatialised around the listener
+  (`setListener`, linear attenuation up to `hearingRadius`). `update` releases the voices that ended
+  (looping voices stay until `stop`); `destroySound` stops the voices of that sound.
+- Music is streamed from the file, looping; one track plays at a time; `playMusic` restarts it with a
+  fade-in, `stopMusic` fades out.
+- No audio device: a warning in the log and the plugin stays loaded but silent (no exit code 2).
+- Tests build it with `MiniaudioAudio(false)`: miniaudio's engine without a device, driven by `advance(frames)`.

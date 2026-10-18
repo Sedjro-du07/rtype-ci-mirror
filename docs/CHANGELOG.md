@@ -7,6 +7,15 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-18] — audio_miniaudio plugin: ENG-35
+
+### Added
+
+- `MiniaudioAudio` (ENG-35): one `ma_engine`, a sound group per bus under Master, sounds decoded from
+  memory once and shared by their voices, pan or positional sound around the listener, streamed looping
+  music with fade in and out, voices released when they end, silent with a warning when there is no audio
+  device. 6 tests on miniaudio's device-less engine; the launcher loads it on a real device.
+
 ## [2026-10-18] — platform_sfml plugin: ENG-31
 
 ### Added
