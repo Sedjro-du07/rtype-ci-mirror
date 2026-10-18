@@ -4,6 +4,7 @@ Placeholder created from the architecture. Replace this file's list as files are
 
 | File to create | Task | Details |
 |---|---|---|
+| `SfmlKeys.hpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
 | `SfmlPlatform.hpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
 | `SfmlRenderer.hpp` | ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer | `docs/tasks/ENG-31.md` |
 

@@ -156,5 +156,23 @@ public:
 
 | Plugin | Part | Implements | Notes |
 |---|---|---|---|
-| `platform_sfml` | 1 | `SfmlPlatform : IPlatform`, `SfmlRenderer : IRenderer` | `sf::RenderWindow`, batching through `sf::VertexArray` per texture and layer, ImGui-SFML, color filters through a fragment shader |
+| `platform_sfml` | 1 | `SfmlPlatform : IPlatform`, `SfmlRenderer : IRenderer` | `sf::RenderWindow`, batching through `sf::VertexArray` per texture and layer; ImGui-SFML (ENG-32) and color filters through a fragment shader (ENG-33) later |
 | `platform_raylib` | 2 | `RaylibPlatform`, `RaylibRenderer` | polling converted to `RawInputEvent`; `supports(Render3D)` true, 3D commands added then; rlImGui |
+
+`platform_sfml` (ENG-31, Part 1), `engine/plugins/platform_sfml/`:
+
+- `SfmlPlatform`: window from `WindowDesc` (key repeat off, so a held key gives one `KeyDown`); close →
+  `QuitRequested`, resize → `WindowResized`, focus → `WindowFocusChanged`; every other SFML event goes
+  through `toRawInputEvents` to `InputMap::feed`.
+- `SfmlKeys`: keys by scancode (physical position); mouse and touch positions converted to the virtual
+  resolution through the same letterbox; gamepad buttons in the Xbox layout (A, B, X, Y, LB, RB, Back,
+  Start); sticks −100..100 → −1..1, triggers → 0..1; the d-pad hat (`PovX`, `PovY`, up positive) becomes
+  `DPadLeft` / `DPadRight` / `DPadUp` / `DPadDown` presses and releases.
+- `SfmlRenderer`: clears black, fills the virtual screen with the clear colour (letterbox bars), sorts by
+  layer, then world before screen space, shapes and sprites before text, then texture; consecutive
+  sprites of one texture are one `sf::VertexArray` draw, all shapes share an untextured batch, each text is
+  one draw. Unknown textures are skipped. Sprites of different textures on the **same layer** may be drawn
+  in texture order: put what must overlap on a higher layer. Colour filters arrive with ENG-33
+  (`supports` returns false); no ImGui yet (ENG-32).
+- Tests compile the sources directly; the drawing cases need an OpenGL context and skip without one
+  (the Linux CI runs `ctest` under `xvfb-run`).

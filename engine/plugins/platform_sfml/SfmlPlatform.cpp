@@ -5,10 +5,6 @@
 ** SfmlPlatform
 */
 
-// engine/plugins/platform_sfml/SfmlPlatform.cpp
-// ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
-// Spec: docs/engine/reference/08-rendering.md · ADR 0007, 0031
-
 #include "SfmlPlatform.hpp"
 
 #include "SfmlKeys.hpp"
@@ -52,7 +48,7 @@ void SfmlPlatform::create(const WindowDesc& desc) {
     if (desc.fullscreen) mode = sf::VideoMode::getDesktopMode();
     this->_window.create(mode, sf::String::fromUtf8(desc.title.begin(), desc.title.end()), sf::Style::Default, state);
     this->_window.setVerticalSyncEnabled(desc.vsync);
-    this->_window.setKeyRepeatEnabled(false); // actions see one KeyDown per press (reference 07)
+    this->_window.setKeyRepeatEnabled(false);
     this->_desc = desc;
     const sf::Vector2u size = this->_window.getSize();
     this->_desc.width = size.x;
@@ -80,23 +76,31 @@ bool SfmlPlatform::windowOpen() const {
     return this->_window.isOpen();
 }
 
+bool SfmlPlatform::windowEvent(const sf::Event& event, EventBus& events) {
+    if (event.is<sf::Event::Closed>()) {
+        events.publish(QuitRequested{});
+        return true;
+    }
+    if (const auto* resized = event.getIf<sf::Event::Resized>()) {
+        this->_desc.width = resized->size.x;
+        this->_desc.height = resized->size.y;
+        this->_renderer.setWindowDesc(this->_desc);
+        events.publish(WindowResized{resized->size.x, resized->size.y});
+        return true;
+    }
+    if (event.is<sf::Event::FocusLost>() || event.is<sf::Event::FocusGained>()) {
+        events.publish(WindowFocusChanged{event.is<sf::Event::FocusGained>()});
+        return true;
+    }
+    return false;
+}
+
 void SfmlPlatform::pollEvents(InputMap& input, EventBus& events) {
     if (!this->_window.isOpen()) return;
     while (const std::optional<sf::Event> event = this->_window.pollEvent()) {
-        if (event->is<sf::Event::Closed>()) {
-            events.publish(QuitRequested{});
-        } else if (const auto* resized = event->getIf<sf::Event::Resized>()) {
-            this->_desc.width = resized->size.x;
-            this->_desc.height = resized->size.y;
-            this->_renderer.setWindowDesc(this->_desc);
-            events.publish(WindowResized{resized->size.x, resized->size.y});
-        } else if (event->is<sf::Event::FocusLost>()) {
-            events.publish(WindowFocusChanged{false});
-        } else if (event->is<sf::Event::FocusGained>()) {
-            events.publish(WindowFocusChanged{true});
-        } else if (const std::optional<RawInputEvent> raw = toRawInputEvent(*event, this->_desc)) {
-            input.feed(*raw);
-        }
+        if (this->windowEvent(*event, events)) continue;
+        for (const RawInputEvent& raw : toRawInputEvents(*event, this->_desc, this->_dpad))
+            input.feed(raw);
     }
 }
 

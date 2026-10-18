@@ -5,9 +5,6 @@
 ** SfmlKeys
 */
 
-// engine/plugins/platform_sfml/include/SfmlKeys.hpp
-// ENG-31 — SFML 3 events and codes to engine RawInputEvent (reference 07, 08)
-
 #pragma once
 
 #include "engine/input/Keys.hpp"
@@ -16,19 +13,25 @@
 
 #include <SFML/Window.hpp>
 
+#include <array>
+#include <map>
 #include <optional>
+#include <vector>
 
 namespace engine {
 
-// Physical keys (scancodes): bindings follow the key position, whatever the keyboard layout (ADR 0030).
 Key toKey(sf::Keyboard::Scancode code);
 std::optional<MouseButton> toMouseButton(sf::Mouse::Button button);
-// Xbox-style layout as SFML reports it on Linux and Windows: 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 Back, 7 Start.
 std::optional<GamepadButton> toGamepadButton(unsigned int sfmlButton);
 std::optional<GamepadAxis> toGamepadAxis(sf::Joystick::Axis axis);
-// Window pixels to virtual-resolution pixels, through the same letterbox as Camera2D.
 Vec2 toVirtual(sf::Vector2i windowPixel, const WindowDesc& desc);
-// One SFML event to one engine event; window events (close, resize, focus) and unmapped input give nullopt.
 std::optional<RawInputEvent> toRawInputEvent(const sf::Event& event, const WindowDesc& desc);
+
+struct DPadState {
+    std::map<unsigned int, std::array<int, 2>> directions;
+};
+
+std::vector<RawInputEvent> dpadEvents(const sf::Event::JoystickMoved& moved, DPadState& state);
+std::vector<RawInputEvent> toRawInputEvents(const sf::Event& event, const WindowDesc& desc, DPadState& dpad);
 
 }

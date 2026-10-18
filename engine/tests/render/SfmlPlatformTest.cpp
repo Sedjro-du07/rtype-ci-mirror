@@ -5,10 +5,6 @@
 ** SfmlPlatformTest
 */
 
-// ENG-31 — platform_sfml: key mapping, event conversion, letterbox, batching.
-// The renderer tests need an OpenGL context: on a machine without a display they are skipped
-// (run them with `xvfb-run ctest` on Linux).
-
 #include "SfmlKeys.hpp"
 #include "SfmlRenderer.hpp"
 #include "engine/render/RenderQueue.hpp"
@@ -45,12 +41,15 @@ std::vector<std::byte> png(sf::Color color, unsigned size = 8) {
     return out;
 }
 
-bool hasDisplay() {
+bool canRender() {
 #if defined(__linux__)
-    return std::getenv("DISPLAY") != nullptr || std::getenv("WAYLAND_DISPLAY") != nullptr;
-#else
-    return true;
+    if (std::getenv("DISPLAY") == nullptr && std::getenv("WAYLAND_DISPLAY") == nullptr) return false;
 #endif
+    static const bool available = [] {
+        sf::RenderTexture probe;
+        return probe.resize({1, 1});
+    }();
+    return available;
 }
 
 struct Target {
@@ -103,7 +102,6 @@ TEST_CASE("SFML events become RawInputEvent; window events do not", "[platform_s
     REQUIRE(text.has_value());
     CHECK(text->text == U'é');
 
-    // 1600x720 window, 1280x720 virtual: 160 px bars on each side.
     const auto click =
         toRawInputEvent(sf::Event(sf::Event::MouseButtonPressed{sf::Mouse::Button::Left, {160, 0}}), desc);
     REQUIRE(click.has_value());
@@ -124,7 +122,7 @@ TEST_CASE("SFML events become RawInputEvent; window events do not", "[platform_s
 }
 
 TEST_CASE("the renderer letterboxes the virtual resolution", "[platform_sfml][gl]") {
-    if (!hasDisplay()) SKIP("no display: run under xvfb-run");
+    if (!canRender()) SKIP("no OpenGL context: run under xvfb-run on Linux");
     Target target(wideWindow());
     const auto red = target.renderer.createTexture(png(sf::Color::Red), "red");
     REQUIRE(red.has_value());
@@ -132,19 +130,19 @@ TEST_CASE("the renderer letterboxes the virtual resolution", "[platform_sfml][gl
 
     RenderQueue queue;
     queue.setClearColor(Color::blue());
-    Camera2D camera; // centre (640, 360): world (0, 0) is the top-left of the virtual screen
+    Camera2D camera;
     queue.setCamera(camera);
     queue.sprite(*red, {}, {0.f, 0.f}, 0, {4.f, 4.f});
     target.renderer.submit(queue.frame());
 
-    CHECK(target.pixel(10, 360) == sf::Color::Black);   // left bar
-    CHECK(target.pixel(1590, 360) == sf::Color::Black); // right bar
-    CHECK(target.pixel(162, 2) == sf::Color::Red);      // sprite, 32x32 from the virtual origin
-    CHECK(target.pixel(800, 700) == sf::Color::Blue);   // clear colour inside the virtual screen
+    CHECK(target.pixel(10, 360) == sf::Color::Black);
+    CHECK(target.pixel(1590, 360) == sf::Color::Black);
+    CHECK(target.pixel(162, 2) == sf::Color::Red);
+    CHECK(target.pixel(800, 700) == sf::Color::Blue);
 }
 
 TEST_CASE("one draw call per texture and layer", "[platform_sfml][gl]") {
-    if (!hasDisplay()) SKIP("no display: run under xvfb-run");
+    if (!canRender()) SKIP("no OpenGL context: run under xvfb-run on Linux");
     Target target(wideWindow());
     const TextureHandle a = *target.renderer.createTexture(png(sf::Color::Red), "a");
     const TextureHandle b = *target.renderer.createTexture(png(sf::Color::Green), "b");
@@ -170,11 +168,11 @@ TEST_CASE("one draw call per texture and layer", "[platform_sfml][gl]") {
     queue.line({0, 0}, {100, 100}, Color::white(), 0);
     queue.rect({0, 0, 10, 10}, Color::white(), 0, false);
     target.renderer.submit(queue.frame());
-    CHECK(target.renderer.stats().drawCalls == 1); // every shape shares the untextured batch
+    CHECK(target.renderer.stats().drawCalls == 1);
 }
 
 TEST_CASE("bad input never crashes the renderer", "[platform_sfml][gl]") {
-    if (!hasDisplay()) SKIP("no display: run under xvfb-run");
+    if (!canRender()) SKIP("no OpenGL context: run under xvfb-run on Linux");
     Target target(wideWindow());
     CHECK_FALSE(target.renderer.createTexture({}, "empty").has_value());
     const std::vector<std::byte> junk(64, std::byte{0x42});
@@ -185,17 +183,17 @@ TEST_CASE("bad input never crashes the renderer", "[platform_sfml][gl]") {
     target.renderer.destroyTexture(t);
     target.renderer.destroyTexture(TextureHandle{99});
     RenderQueue queue;
-    queue.sprite(t, {}, {0, 0}, 0);                    // destroyed: skipped
-    queue.text("hello", FontHandle{7}, 16, {0, 0}, 0); // unknown font: skipped
+    queue.sprite(t, {}, {0, 0}, 0);
+    queue.text("hello", FontHandle{7}, 16, {0, 0}, 0);
     target.renderer.submit(queue.frame());
     CHECK(target.renderer.stats().drawCalls == 0);
 
     const TextureHandle reused = *target.renderer.createTexture(png(sf::Color::Green), "reused");
-    CHECK(reused.id == t.id); // freed slots are reused
+    CHECK(reused.id == t.id);
 }
 
 TEST_CASE("text is drawn from the queue's text arena", "[platform_sfml][gl]") {
-    if (!hasDisplay()) SKIP("no display: run under xvfb-run");
+    if (!canRender()) SKIP("no OpenGL context: run under xvfb-run on Linux");
     const std::filesystem::path path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
     if (!std::filesystem::exists(path)) SKIP("no test font");
     std::ifstream file(path, std::ios::binary);
@@ -216,4 +214,38 @@ TEST_CASE("text is drawn from the queue's text arena", "[platform_sfml][gl]") {
         for (unsigned y = 0; y < 70; ++y)
             if (image.getPixel({x, y}).r > 128) ++lit;
     CHECK(lit > 200);
+}
+
+TEST_CASE("the d-pad hat becomes d-pad button presses and releases", "[platform_sfml]") {
+    DPadState state;
+    const auto moved = [](sf::Joystick::Axis axis, float position) {
+        return sf::Event::JoystickMoved{0, axis, position};
+    };
+    auto events = dpadEvents(moved(sf::Joystick::Axis::PovX, 100.f), state);
+    REQUIRE(events.size() == 1);
+    CHECK(events[0].type == RawInputEvent::Type::GamepadDown);
+    CHECK(events[0].button == GamepadButton::DPadRight);
+
+    events = dpadEvents(moved(sf::Joystick::Axis::PovX, -100.f), state);
+    REQUIRE(events.size() == 2);
+    CHECK(events[0].type == RawInputEvent::Type::GamepadUp);
+    CHECK(events[0].button == GamepadButton::DPadRight);
+    CHECK(events[1].type == RawInputEvent::Type::GamepadDown);
+    CHECK(events[1].button == GamepadButton::DPadLeft);
+
+    CHECK(dpadEvents(moved(sf::Joystick::Axis::PovX, -90.f), state).empty());
+    events = dpadEvents(moved(sf::Joystick::Axis::PovX, 0.f), state);
+    REQUIRE(events.size() == 1);
+    CHECK(events[0].type == RawInputEvent::Type::GamepadUp);
+
+    events = dpadEvents(moved(sf::Joystick::Axis::PovY, 100.f), state);
+    REQUIRE(events.size() == 1);
+    CHECK(events[0].button == GamepadButton::DPadUp);
+    CHECK(dpadEvents(moved(sf::Joystick::Axis::X, 100.f), state).empty());
+
+    WindowDesc desc;
+    const sf::Event stick = sf::Event::JoystickMoved{0, sf::Joystick::Axis::X, 50.f};
+    const auto raw = toRawInputEvents(stick, desc, state);
+    REQUIRE(raw.size() == 1);
+    CHECK(raw[0].type == RawInputEvent::Type::GamepadAxis);
 }

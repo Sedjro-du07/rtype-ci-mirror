@@ -7,6 +7,22 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-18] — platform_sfml plugin: ENG-31
+
+### Added
+
+- `platform_sfml` (ENG-31), by Yan, taken alone from `feature/pulsar-tools` (the Pulsar language, the
+  code editor and ADR 0046 wait for a team decision): window, events to `InputMap`, window events to
+  `EventBus`, keys by scancode, mouse and touch in virtual coordinates, gamepad, and a renderer sorting by
+  layer and batching by texture inside the letterbox of the virtual resolution. 7 tests.
+
+### Changed
+
+- The d-pad hat of gamepads that report it as `PovX` / `PovY` axes now gives d-pad button presses.
+- The drawing tests skip when no OpenGL context can be created (not only without `DISPLAY`), and the
+  Linux CI runs `ctest` under `xvfb-run` so they run there.
+- No comments in the plugin code, `pollEvents` split into small functions (team code style).
+
 ## [2026-10-18] — network_asio plugin: ENG-37
 
 ### Added

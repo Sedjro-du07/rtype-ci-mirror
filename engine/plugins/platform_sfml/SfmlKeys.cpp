@@ -5,10 +5,6 @@
 ** SfmlKeys
 */
 
-// engine/plugins/platform_sfml/SfmlKeys.cpp
-// ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
-// Spec: docs/engine/reference/08-rendering.md · reference 07 · ADR 0030
-
 #include "SfmlKeys.hpp"
 
 #include <algorithm>
@@ -131,7 +127,7 @@ std::optional<GamepadAxis> toGamepadAxis(sf::Joystick::Axis axis) {
     case sf::Joystick::Axis::R:
         return GamepadAxis::RightTrigger;
     default:
-        return std::nullopt; // PovX / PovY: the d-pad, sent as buttons by most drivers
+        return std::nullopt;
     }
 }
 
@@ -162,7 +158,7 @@ std::optional<RawInputEvent> toRawInputEvent(const sf::Event& event, const Windo
         return out;
     }
     if (const auto* e = event.getIf<sf::Event::TextEntered>()) {
-        if (e->unicode < 0x20 || e->unicode == 0x7F) return std::nullopt; // control characters
+        if (e->unicode < 0x20 || e->unicode == 0x7F) return std::nullopt;
         out.type = T::TextEntered;
         out.text = e->unicode;
         return out;
@@ -217,7 +213,6 @@ std::optional<RawInputEvent> toRawInputEvent(const sf::Event& event, const Windo
         out.type = T::GamepadAxis;
         out.device = static_cast<uint8_t>(e->joystickId);
         out.axis = *axis;
-        // SFML reports -100..100. Sticks become -1..1; triggers rest at -100 and become 0..1.
         const bool trigger = *axis == GamepadAxis::LeftTrigger || *axis == GamepadAxis::RightTrigger;
         out.value = trigger ? (e->position + 100.f) / 200.f : e->position / 100.f;
         out.value = std::clamp(out.value, trigger ? 0.f : -1.f, 1.f);
@@ -252,6 +247,52 @@ std::optional<RawInputEvent> toRawInputEvent(const sf::Event& event, const Windo
         return out;
     }
     return std::nullopt;
+}
+
+namespace {
+
+constexpr float DPadThreshold = 50.f;
+
+RawInputEvent dpadEvent(unsigned int joystick, bool horizontal, int direction, bool down) {
+    RawInputEvent out;
+    out.type = down ? RawInputEvent::Type::GamepadDown : RawInputEvent::Type::GamepadUp;
+    out.device = static_cast<uint8_t>(joystick);
+    if (horizontal)
+        out.button = direction > 0 ? GamepadButton::DPadRight : GamepadButton::DPadLeft;
+    else
+        out.button = direction > 0 ? GamepadButton::DPadUp : GamepadButton::DPadDown;
+    return out;
+}
+
+int directionOf(float position) {
+    if (position > DPadThreshold) return 1;
+    if (position < -DPadThreshold) return -1;
+    return 0;
+}
+
+}
+
+std::vector<RawInputEvent> dpadEvents(const sf::Event::JoystickMoved& moved, DPadState& state) {
+    const bool horizontal = moved.axis == sf::Joystick::Axis::PovX;
+    if (!horizontal && moved.axis != sf::Joystick::Axis::PovY) return {};
+    const int direction = directionOf(moved.position);
+    int& previous = state.directions[moved.joystickId][horizontal ? 0 : 1];
+    if (direction == previous) return {};
+    std::vector<RawInputEvent> out;
+    if (previous != 0) out.push_back(dpadEvent(moved.joystickId, horizontal, previous, false));
+    if (direction != 0) out.push_back(dpadEvent(moved.joystickId, horizontal, direction, true));
+    previous = direction;
+    return out;
+}
+
+std::vector<RawInputEvent> toRawInputEvents(const sf::Event& event, const WindowDesc& desc, DPadState& dpad) {
+    if (const auto* moved = event.getIf<sf::Event::JoystickMoved>()) {
+        auto pressed = dpadEvents(*moved, dpad);
+        if (!pressed.empty()) return pressed;
+    }
+    if (const auto* gone = event.getIf<sf::Event::JoystickDisconnected>()) dpad.directions.erase(gone->joystickId);
+    if (auto single = toRawInputEvent(event, desc)) return {*single};
+    return {};
 }
 
 }

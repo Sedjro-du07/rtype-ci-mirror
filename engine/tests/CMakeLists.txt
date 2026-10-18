@@ -231,8 +231,6 @@ if(WIN32)
     target_link_libraries(engine_asio_tests PRIVATE ws2_32 mswsock)
 endif()
 
-# ENG-31: platform_sfml sources compiled into the test, like the asio plugin above. The renderer cases
-# need an OpenGL context and skip themselves without a display (Linux CI: run ctest under xvfb-run).
 find_package(SFML 3 COMPONENTS Graphics CONFIG REQUIRED)
 engine_add_test(engine_platform_sfml_tests SOURCES
     render/SfmlPlatformTest.cpp

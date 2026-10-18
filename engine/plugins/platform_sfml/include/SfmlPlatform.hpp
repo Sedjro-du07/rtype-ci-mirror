@@ -5,12 +5,9 @@
 ** SfmlPlatform
 */
 
-// engine/plugins/platform_sfml/include/SfmlPlatform.hpp
-// ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
-// Spec: docs/engine/reference/08-rendering.md · ADR 0007, 0031
-
 #pragma once
 
+#include "SfmlKeys.hpp"
 #include "SfmlRenderer.hpp"
 #include "engine/render/IPlatform.hpp"
 #include "engine/render/WindowDesc.hpp"
@@ -26,32 +23,32 @@ class Logger;
 
 class SfmlPlatform final : public IPlatform {
 private:
-    sf::RenderWindow _window; // declared before the renderer, which keeps a reference to it
+    sf::RenderWindow _window;
     SfmlRenderer _renderer;
     WindowDesc _desc;
+    DPadState _dpad;
     Logger* _log = nullptr;
 
     void create(const WindowDesc& desc);
+    bool windowEvent(const sf::Event& event, EventBus& events);
 
 public:
     SfmlPlatform();
 
-    // IPlugin
-    PluginKind kind() const override;       // Platform
-    std::string_view name() const override; // "sfml"
+    PluginKind kind() const override;
+    std::string_view name() const override;
     uint32_t apiVersion() const override;
     Result<void> init(const PluginContext& ctx) override;
     void shutdown() noexcept override;
 
-    // IPlatform
     Result<void> openWindow(const WindowDesc& desc) override;
     void closeWindow() override;
     bool windowOpen() const override;
-    void pollEvents(InputMap& input, EventBus& events) override; // input → InputMap::feed, window → EventBus
+    void pollEvents(InputMap& input, EventBus& events) override;
     IRenderer& renderer() override;
     void setWindow(const WindowDesc& desc) override;
-    void beginDebugUi() override; // no-op (ADR 0046)
-    void endDebugUi() override;   // no-op (ADR 0046)
+    void beginDebugUi() override;
+    void endDebugUi() override;
     void setClipboard(std::string_view text) override;
     std::string clipboard() const override;
 };

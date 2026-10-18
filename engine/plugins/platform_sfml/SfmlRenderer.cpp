@@ -5,10 +5,6 @@
 ** SfmlRenderer
 */
 
-// engine/plugins/platform_sfml/SfmlRenderer.cpp
-// ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
-// Spec: docs/engine/reference/08-rendering.md · ADR 0007, 0031
-
 #include "SfmlRenderer.hpp"
 
 #include <algorithm>
@@ -40,7 +36,6 @@ sf::Vector2f rotate(sf::Vector2f v, float degrees) {
     return {v.x * c - v.y * s, v.x * s + v.y * c};
 }
 
-// Handles are 1-based indices into a slot vector; 0 stays invalid (reference 08).
 template <class Slot>
 uint32_t firstFree(std::vector<Slot>& slots, auto&& isFree) {
     for (size_t i = 0; i < slots.size(); ++i)
@@ -49,8 +44,6 @@ uint32_t firstFree(std::vector<Slot>& slots, auto&& isFree) {
     return static_cast<uint32_t>(slots.size() - 1);
 }
 
-// Sort key: layer first (the contract), then world before screen space, shapes and sprites before text,
-// then texture so that one layer costs one draw call per texture.
 auto sortKey(const DrawCmd& cmd) {
     const bool text = cmd.kind == DrawCmd::Kind::Text;
     const uint32_t texture = cmd.kind == DrawCmd::Kind::Sprite ? cmd.texture.id : 0;
@@ -112,7 +105,7 @@ void SfmlRenderer::destroyFont(FontHandle font) {
 
 bool SfmlRenderer::supports(Feature feature) const {
     (void)feature;
-    return false; // ColorFilter and Shaders arrive with ENG-33; Render3D is raylib only (ADR 0007)
+    return false;
 }
 
 void SfmlRenderer::setColorFilter(ColorFilter filter) {
@@ -123,7 +116,6 @@ RenderStats SfmlRenderer::stats() const {
     return this->_stats;
 }
 
-// Virtual resolution scaled by min(width / vw, height / vh), centred: the same letterbox as Camera2D.
 void SfmlRenderer::applyView(const Camera2D& camera, bool screenSpace) {
     const sf::Vector2u size = this->_target.getSize();
     const float vw = static_cast<float>(std::max(1u, this->_desc.virtualWidth));
@@ -239,7 +231,6 @@ void SfmlRenderer::submit(const RenderFrame& frame) {
     this->_stats = RenderStats{};
     this->_stats.commands = static_cast<uint32_t>(frame.commands.size());
 
-    // Bars outside the virtual resolution stay black; the clear colour fills the virtual screen only.
     this->_target.clear(sf::Color::Black);
     this->applyView(frame.camera, true);
     const float vw = static_cast<float>(this->_desc.virtualWidth);
@@ -264,7 +255,7 @@ void SfmlRenderer::submit(const RenderFrame& frame) {
         const sf::Texture* wanted = nullptr;
         if (cmd.kind == DrawCmd::Kind::Sprite) {
             wanted = this->texture(cmd.texture);
-            if (wanted == nullptr) continue; // unknown or destroyed texture: skipped, never a crash
+            if (wanted == nullptr) continue;
         }
         if (!haveView || viewScreenSpace != cmd.screenSpace) {
             this->flushBatch();
