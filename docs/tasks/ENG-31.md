@@ -15,6 +15,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `plugins/platform_sfml/SfmlPlatform.cpp`
 - `plugins/platform_sfml/include/SfmlRenderer.hpp`
 - `plugins/platform_sfml/SfmlRenderer.cpp`
+- `plugins/platform_sfml/include/SfmlKeys.hpp`
 - `plugins/platform_sfml/SfmlKeys.cpp`
 
 ## Classes and methods

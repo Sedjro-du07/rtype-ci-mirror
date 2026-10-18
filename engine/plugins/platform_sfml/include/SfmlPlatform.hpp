@@ -5,13 +5,52 @@
 ** SfmlPlatform
 */
 
-// engine/plugins/platform_sfml/include/SfmlPlatform.hpp
-// ENG-31 — platform_sfml plugin: window, events to InputMap, batching renderer
-// Spec: docs/engine/reference/08-rendering.md · ADR 0007, 0031
-// Details: docs/tasks/ENG-31.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #pragma once
 
-namespace engine {}
+#include "SfmlKeys.hpp"
+#include "SfmlRenderer.hpp"
+#include "engine/render/IPlatform.hpp"
+#include "engine/render/WindowDesc.hpp"
+
+#include <SFML/Graphics.hpp>
+
+#include <string>
+#include <string_view>
+
+namespace engine {
+
+class Logger;
+
+class SfmlPlatform final : public IPlatform {
+private:
+    sf::RenderWindow _window;
+    SfmlRenderer _renderer;
+    WindowDesc _desc;
+    DPadState _dpad;
+    Logger* _log = nullptr;
+
+    void create(const WindowDesc& desc);
+    bool windowEvent(const sf::Event& event, EventBus& events);
+
+public:
+    SfmlPlatform();
+
+    PluginKind kind() const override;
+    std::string_view name() const override;
+    uint32_t apiVersion() const override;
+    Result<void> init(const PluginContext& ctx) override;
+    void shutdown() noexcept override;
+
+    Result<void> openWindow(const WindowDesc& desc) override;
+    void closeWindow() override;
+    bool windowOpen() const override;
+    void pollEvents(InputMap& input, EventBus& events) override;
+    IRenderer& renderer() override;
+    void setWindow(const WindowDesc& desc) override;
+    void beginDebugUi() override;
+    void endDebugUi() override;
+    void setClipboard(std::string_view text) override;
+    std::string clipboard() const override;
+};
+
+}
