@@ -13,6 +13,7 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `plugins/audio_miniaudio/CMakeLists.txt`
 - `plugins/audio_miniaudio/include/MiniaudioAudio.hpp`
 - `plugins/audio_miniaudio/MiniaudioAudio.cpp`
+- `plugins/audio_miniaudio/MiniaudioImplementation.cpp`
 
 ## Classes and methods
 

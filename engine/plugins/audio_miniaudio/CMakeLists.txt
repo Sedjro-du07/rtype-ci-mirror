@@ -5,9 +5,14 @@
 ## CMakeLists
 ##
 
-# engine/plugins/audio_miniaudio/CMakeLists.txt
-# ENG-35 — audio_miniaudio plugin
-# Spec: docs/engine/reference/09-audio.md · ADR 0008, 0032
-# Details: docs/tasks/ENG-35.md
-# Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-# Status: not implemented yet. Claim the task on the board before editing this file.
+find_path(MINIAUDIO_INCLUDE_DIR miniaudio.h REQUIRED)
+find_package(Threads REQUIRED)
+
+set_source_files_properties(MiniaudioImplementation.cpp PROPERTIES
+    COMPILE_OPTIONS $<IF:$<CXX_COMPILER_ID:MSVC>,/W0,-w>)
+engine_add_plugin(audio_miniaudio SOURCES MiniaudioAudio.cpp MiniaudioImplementation.cpp
+                  DEPENDS Threads::Threads ${CMAKE_DL_LIBS})
+target_include_directories(audio_miniaudio SYSTEM PRIVATE ${MINIAUDIO_INCLUDE_DIR})
+if(UNIX)
+    target_link_libraries(audio_miniaudio PRIVATE m)
+endif()
