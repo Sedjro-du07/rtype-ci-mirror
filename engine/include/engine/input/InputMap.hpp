@@ -93,6 +93,7 @@ public:
     std::optional<ActionId> boundTo(const Binding& b) const;
     void setOptions(InputOptions o);
     const InputOptions& options() const;
+    std::span<const ActionId> order() const;
 
     void feed(const RawInputEvent& e);
     void beginTick(double dt);

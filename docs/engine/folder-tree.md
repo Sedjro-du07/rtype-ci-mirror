@@ -207,6 +207,8 @@ engine/
 │   ├── include/
 │   │   ├── audio/
 │   │   │   └── AudioCaptions.hpp                         ENG-34
+│   │   ├── net/
+│   │   │   └── Replication.hpp                           ENG-39
 │   │   ├── os/
 │   │   │   └── Os.hpp                                    ENG-60
 │   │   ├── services/
@@ -238,6 +240,9 @@ engine/
 │   │   ├── Reconnection.hpp                              SRV-16
 │   │   ├── ReliableChannel.cpp                           SRV-05
 │   │   ├── ReliableChannel.hpp                           SRV-05
+│   │   ├── Replication.cpp                               ENG-39
+│   │   ├── ReplicationClient.cpp                         ENG-39
+│   │   ├── ReplicationServer.cpp                         ENG-39
 │   │   ├── ReplicationState.cpp                          SRV-17
 │   │   ├── ReplicationState.hpp                          SRV-17
 │   │   ├── RoomNetwork.cpp                               SRV-14

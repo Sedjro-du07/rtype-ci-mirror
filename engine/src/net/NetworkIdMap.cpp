@@ -5,13 +5,34 @@
 ** NetworkIdMap
 */
 
-// engine/src/net/NetworkIdMap.cpp
-// ENG-39 — Replication: NetworkIdMap, net components, snapshot and input systems
-// Spec: docs/engine/reference/10-network.md · ADR 0033, 0041 · reference 10 · RFC §9
-// Details: docs/tasks/ENG-39.md
-// Board: Notion › R-Type — Architecture › Engine — folder tree & tasks (self-assign)
-// Status: not implemented yet. Claim the task on the board before editing this file.
-
 #include "engine/net/NetworkIdMap.hpp"
 
-namespace engine {}
+namespace engine {
+
+uint32_t NetworkIdMap::allocate() {
+    return this->_next++;
+}
+
+void NetworkIdMap::bind(uint32_t id, Entity e) {
+    if (id == 0) return;
+    this->_entities[id] = e;
+}
+
+void NetworkIdMap::unbind(uint32_t id) {
+    this->_entities.erase(id);
+}
+
+Entity NetworkIdMap::find(uint32_t id) const {
+    const auto it = this->_entities.find(id);
+    return it == this->_entities.end() ? Entity::null() : it->second;
+}
+
+size_t NetworkIdMap::size() const {
+    return this->_entities.size();
+}
+
+void NetworkIdMap::clear() {
+    this->_entities.clear();
+}
+
+}

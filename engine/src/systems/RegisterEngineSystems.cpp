@@ -23,6 +23,8 @@ void registerEngineSystems(Scheduler& scheduler, TargetsOf targetsOf) {
     };
     const uint8_t drawing = ClientRole | EditorRole;
 
+    registerNetSystems(scheduler, of);
+
     scheduler.add(Stage::FixedUpdate, "engine.previous_position",
                   system([](SystemTargets& t) { previousPosition(t.world); }));
     scheduler

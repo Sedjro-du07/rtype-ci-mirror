@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <random>
 #include <set>
 #include <string>
 #include <vector>
@@ -109,7 +110,7 @@ public:
 };
 
 struct Fixture {
-    fs::path root = fs::temp_directory_path() / "rtype-assets-test";
+    fs::path root = fs::temp_directory_path() / ("rtype-assets-test-" + std::to_string(std::random_device{}()));
     Logger log{[] {
         LogConfig config;
         config.file.clear();

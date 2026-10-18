@@ -209,6 +209,14 @@ std::optional<double> ByteReader::f64() {
     return v;
 }
 
+std::optional<std::span<const std::byte>> ByteReader::bytes(size_t count) {
+    flushBits();
+    if (!check(count)) return std::nullopt;
+    const auto view = in_.subspan(pos_, count);
+    pos_ += count;
+    return view;
+}
+
 std::optional<std::string> ByteReader::string(size_t maxLength) {
     flushBits();
     auto len = u16();

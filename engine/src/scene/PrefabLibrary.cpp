@@ -10,6 +10,7 @@
 #include "engine/components/Position.hpp"
 #include "engine/core/Hash.hpp"
 #include "engine/ecs/Registry.hpp"
+#include "engine/net/NetComponents.hpp"
 #include "engine/reflection/TypeRegistry.hpp"
 #include "engine/scene/Prefab.hpp"
 
@@ -187,6 +188,28 @@ void PrefabLibrary::instantiateInto(Registry& registry, Entity e, const Prefab& 
                                     std::span<const ComponentData> overrides) {
     this->build(registry, e, prefab.components, overrides, position);
     this->spawnChildren(registry, e, prefab.children, position);
+    this->markNetworked(registry, e, prefab);
+}
+
+void PrefabLibrary::markNetworked(Registry& registry, Entity e, const Prefab& prefab) const {
+    const TypeInfo* net = this->_types->findByKey(typeKey<NetPrefab>());
+    if (!net) return;
+    if (void* raw = registry.getRaw(e, net->id)) static_cast<NetPrefab*>(raw)->prefabKey = prefab.key;
+}
+
+Result<size_t> PrefabLibrary::preload(std::string_view folder) {
+    const std::filesystem::path root = this->_assets->resolve(folder);
+    std::error_code ec;
+    if (root.empty() || !std::filesystem::is_directory(root, ec)) return size_t{0};
+    size_t loaded = 0;
+    for (const auto& file : std::filesystem::recursive_directory_iterator(root, ec)) {
+        if (!file.is_regular_file() || file.path().extension() != ".yaml") continue;
+        const std::string path =
+            (std::filesystem::path(folder) / file.path().lexically_relative(root)).generic_string();
+        if (auto prefab = this->get(path); !prefab) return unexpected(prefab.error());
+        ++loaded;
+    }
+    return loaded;
 }
 
 void PrefabLibrary::clear() {

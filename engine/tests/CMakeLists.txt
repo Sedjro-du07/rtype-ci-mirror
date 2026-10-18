@@ -143,6 +143,9 @@ engine_add_test(engine_systems_tests SOURCES
     systems/EngineSystemsTest.cpp)
 engine_add_test(engine_net_session_tests SOURCES
     net/NetworkSessionTest.cpp)
+engine_add_test(engine_replication_tests SOURCES
+    net/ReplicationTest.cpp)
+target_include_directories(engine_replication_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 function(engine_add_loadable_fixture target folder output module)
     cmake_parse_arguments(PARSE_ARGV 4 ARG "" "" "SOURCES;DEFINITIONS")

@@ -14,6 +14,10 @@ Relative to `engine/`. Each file already exists as a skeleton naming this task.
 - `include/engine/net/NetComponents.hpp`
 - `src/net/NetworkIdMap.cpp`
 - `src/systems/NetSystems.cpp`
+- `src/include/net/Replication.hpp`
+- `src/net/Replication.cpp`
+- `src/net/ReplicationServer.cpp`
+- `src/net/ReplicationClient.cpp`
 
 ## Classes and methods
 
@@ -39,7 +43,8 @@ public:
     void     bind(uint32_t id, Entity e);
     void     unbind(uint32_t id);
     Entity   find(uint32_t id) const;                 // client: unknown id → Entity::null(), never a crash
-    void     clear();
+    size_t   size() const;
+    void     clear();                                 // bindings only: ids are never handed out twice
 };
 ```
 

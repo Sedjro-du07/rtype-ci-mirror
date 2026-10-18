@@ -26,6 +26,7 @@
 #include "engine/services/Logger.hpp"
 
 #include <atomic>
+#include <memory>
 #include <optional>
 #include <string_view>
 
@@ -36,6 +37,7 @@ class IGameModule;
 class INetwork;
 class IPlatform;
 class IScripting;
+class Replication;
 
 class ENGINE_API Engine {
 private:
@@ -48,6 +50,7 @@ private:
     AssetManager _assets;
     InputMap _input;
     std::optional<NetworkSession> _network;
+    std::unique_ptr<Replication> _replication;
     Scheduler _scheduler;
     SceneManager _scenes;
     std::optional<Commands> _commands;
@@ -73,6 +76,7 @@ private:
     void loadPlugins();
     void loadGame();
     void load();
+    void startReplication();
     void buildSchedule();
     void openFirstScene();
     void makeContext();

@@ -204,7 +204,7 @@ packets in 10 s close the connection (`ProtocolError`); more than 300 packets in
 Until the server tasks build on it: `poll` takes the time instead of `Context` (messages reach
 `onMessage`, not `on<T>`, SRV-03); a timeout publishes `PlayerLeft{Timeout}` / `LeftServer{Timeout}`
 (the grace period with `PlayerDisconnected` comes with SRV-16); reliable messages get their
-`messageSeq` but are sent once (resends with SRV-05); `attach` has no `NetworkIdMap` yet (ENG-39);
+`messageSeq` but are sent once (resends with SRV-05); replication sits next to the session (ENG-39, below) rather than inside `attach`;
 `startServer`, `connectTo`, players and typed messages are SRV-01 to SRV-03.
 
 ## Internal structure (engine only) — `engine/src/net/`
@@ -295,7 +295,8 @@ public:
     void     bind(uint32_t id, Entity e);
     void     unbind(uint32_t id);
     Entity   find(uint32_t id) const;                 // client: unknown id → Entity::null(), never a crash
-    void     clear();
+    size_t   size() const;
+    void     clear();                                 // bindings only: ids are never handed out twice
 };
 ```
 
@@ -316,6 +317,50 @@ input processed, settings, extension points), and the game team writes its predi
 reconciliation and tunes rates and precision. Settings (ADR 0043, RFC §9.6): `net.snapshotRate`,
 `net.sendBudgetBytesPerSecond`, `NetPriority{weight}`, `RoomNetwork::setRelevance`, `.quantize(min, max)`,
 `net.interpolationDelay`, `net.inputRedundancy`, and the `engine.net.interpolate` switch.
+
+### What ENG-39 provides
+
+The state and the protocol live in an engine-private class, `Replication`
+(`src/include/net/Replication.hpp`, sources `src/net/Replication*.cpp`); the six systems in
+`src/systems/NetSystems.cpp` only call it. The engine owns one `Replication` next to its
+`NetworkSession` and gives it every Snapshot (`0x0060`) and Input (`0x0061`) message through
+`NetworkSession::onMessage`. The systems are registered before the other engine systems, so they run
+first in their stage, and they do nothing offline (no connection).
+
+- **Networked entities.** A prefab opts in with an empty `NetPrefab: {}`: `PrefabLibrary::instantiate`
+  fills its `prefabKey`. Children of a prefab are not networked: the client builds them from the same
+  prefab. `engine.net.assign_ids` gives a `NetworkId` to every entity with `NetPrefab` and none yet.
+  An entity created by a scene on both sides must not have `NetPrefab`, or the client gets it twice.
+- **Snapshots (server).** At `net.snapshotRate`, each connection gets the room tick, its player's
+  `lastInputProcessed`, a **spawn** entry with every `Replicated` component of each networked entity,
+  and a **destroy** entry for each entity gone during the last second (sent again for
+  `snapshotRate` snapshots). Entries are packed into messages of at most 1024 bytes. Sending only what
+  is not yet acknowledged, the budget, `NetPriority`, relevance and quantization are SRV-17: until
+  then every snapshot carries the full state, which is correct but uses more bandwidth.
+- **Snapshots (client).** `engine.net.apply_snapshot` follows RFC §9.2: other room sessions are
+  dropped; an entry is applied only if its tick is newer than the last one applied to that entity; an
+  update for an unknown entity is ignored; a spawn for a known entity is an update; destroyed ids are
+  remembered and every later entry for them is ignored. A spawn instantiates the prefab of its key
+  (the client preloads every prefab under `prefabs/` at start; an unknown key gives an empty entity
+  and one warning), then writes the components. `Entity` fields travel as `NetworkId`; asset fields
+  travel as their path and the client loads the asset itself.
+- **Interpolation (client).** Each `Position` received keeps the two latest states in
+  `NetInterpolation`. The server time is estimated as `tick × fixedDelta + rtt / 2`, plus the time
+  since that snapshot; `engine.net.interpolate` draws `Position` (and `PreviousPosition`)
+  `net.interpolationDelay` in the past, between the two states.
+- **Inputs.** `engine.net.send_input` sends, every frame, the action mask of the local
+  `ActionState` with the `net.inputRedundancy` previous ones (at most 4, newest first). The server
+  keeps at most 4 pending inputs per player, ignores those already processed and bits beyond the
+  actions, and `engine.net.receive_input` applies one per tick, oldest first, into the `RemoteInput`
+  of each entity whose `NetOwner` is that player (`held`, `pressed` and `released` as for local input).
+  Both sides need the same `input.yaml`: the mask follows the order of its actions.
+- **Room session.** `Replication::setRoomSession` and `reset` are for SRV-14; until rooms exist the
+  room session is 0.
+
+Turning a system off: `scheduler.setEnabled("engine.net.interpolate", false)` in
+`IGameModule::registerSystems` (any engine or game system, by name; reference 05). The game then
+draws its own interpolation and prediction from `NetInterpolation`, `RemoteInput` and
+`lastInputProcessed` (ADR 0041).
 
 ## Plugin
 

@@ -7,6 +7,28 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-18] — Replication: ENG-39
+
+### Added
+
+- Replication (ENG-39): `NetworkIdMap`, the net components (`NetworkId`, `NetPrefab`, `NetOwner`,
+  `RemoteInput`, `NetInterpolation`, `NetPriority`) and the six `engine.net.*` systems, over an
+  engine-private `Replication` class. The server sends full snapshots (spawns and destroys) at
+  `net.snapshotRate`, the client applies them with the rules of RFC §9.2 and interpolates positions,
+  and inputs go from client to server with redundancy into `RemoteInput`, with
+  `lastInputProcessed` coming back. A prefab opts in with `NetPrefab: {}`; the client preloads
+  `prefabs/`. 9 tests, among them a server and two headless clients over an in-memory network.
+- `PrefabLibrary::preload(folder)`, `InputMap::order()`, `NetworkSession::player(connection)` and
+  `ByteReader::bytes(count)`.
+
+### Fixed
+
+- The binary codec wrote and read asset fields (`TextureHandle`, `SoundHandle`, …) as `std::string`,
+  which corrupted memory: they now travel as the asset path (`WireContext::assets`) and the receiver
+  loads the asset.
+- The asset manager tests used one temporary folder for every test case, which broke when ctest ran
+  them in parallel.
+
 ## [2026-10-18] — audio_miniaudio plugin: ENG-35
 
 ### Added

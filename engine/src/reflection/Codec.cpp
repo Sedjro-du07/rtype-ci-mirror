@@ -27,11 +27,13 @@
 
 #include "Codec.hpp"
 
+#include "engine/assets/AssetManager.hpp"
 #include "engine/core/Hash.hpp"
 #include "engine/core/math/Color.hpp"
 #include "engine/core/math/Rect.hpp"
 #include "engine/core/math/Vec2.hpp"
 #include "engine/ecs/Entity.hpp"
+#include "engine/render/Handles.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -80,6 +82,38 @@ static uint16_t quantizeFloat(float v, float mn, float mx) noexcept {
 // Decode a u16 quantized value back to float
 static float dequantizeFloat(uint16_t raw, float mn, float mx) noexcept {
     return mn + (static_cast<float>(raw) / 65535.0f) * (mx - mn);
+}
+
+static std::string_view assetPath(FieldKind kind, uint32_t id, const AssetManager* assets) {
+    if (!assets || id == 0) return {};
+    switch (kind) {
+    case FieldKind::Texture:
+        return assets->pathOf(TextureHandle{id});
+    case FieldKind::Sound:
+        return assets->pathOf(SoundHandle{id});
+    case FieldKind::Music:
+        return assets->pathOf(MusicHandle{id});
+    case FieldKind::Font:
+        return assets->pathOf(FontHandle{id});
+    default:
+        return assets->pathOf(ScriptHandle{id});
+    }
+}
+
+static uint32_t assetHandle(FieldKind kind, std::string_view path, AssetManager* assets) {
+    if (!assets || path.empty()) return 0;
+    switch (kind) {
+    case FieldKind::Texture:
+        return assets->texture(path).id;
+    case FieldKind::Sound:
+        return assets->sound(path).id;
+    case FieldKind::Music:
+        return assets->music(path).id;
+    case FieldKind::Font:
+        return assets->font(path).id;
+    default:
+        return assets->script(path).id;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -142,14 +176,19 @@ static void encodeValue(FieldKind kind, const FieldInfo& field, const std::byte*
         out.write(v);
         break;
     }
-    case FieldKind::String:
+    case FieldKind::String: {
+        const std::string* s = reinterpret_cast<const std::string*>(ptr);
+        out.write(std::string_view(*s));
+        break;
+    }
     case FieldKind::Texture:
     case FieldKind::Sound:
     case FieldKind::Music:
     case FieldKind::Font:
     case FieldKind::Script: {
-        const std::string* s = reinterpret_cast<const std::string*>(ptr);
-        out.write(std::string_view(*s));
+        uint32_t id;
+        std::memcpy(&id, ptr, sizeof(id));
+        out.write(assetPath(kind, id, wire.assets));
         break;
     }
     case FieldKind::Vec2: {
@@ -280,12 +319,13 @@ void encodeField(const FieldInfo& field, const std::byte* base, ByteWriter& out,
             case FieldKind::Entity:
                 return sizeof(Entity);
             case FieldKind::String:
+                return sizeof(std::string);
             case FieldKind::Texture:
             case FieldKind::Sound:
             case FieldKind::Music:
             case FieldKind::Font:
             case FieldKind::Script:
-                return sizeof(std::string);
+                return sizeof(uint32_t);
             default:
                 return 0;
             }
@@ -381,15 +421,21 @@ static Result<void> decodeValue(FieldKind kind, const FieldInfo& field, std::byt
         std::memcpy(ptr, &*v, 8);
         break;
     }
-    case FieldKind::String:
+    case FieldKind::String: {
+        auto s = in.string(stringLimit(field));
+        if (!s) return fail(Errc::NetworkError, "String: missing or too long");
+        new (ptr) std::string(std::move(*s));
+        break;
+    }
     case FieldKind::Texture:
     case FieldKind::Sound:
     case FieldKind::Music:
     case FieldKind::Font:
     case FieldKind::Script: {
         auto s = in.string(stringLimit(field));
-        if (!s) return fail(Errc::NetworkError, "String: missing or too long");
-        new (ptr) std::string(std::move(*s));
+        if (!s) return fail(Errc::NetworkError, "asset path: missing or too long");
+        const uint32_t id = assetHandle(kind, *s, wire.assets);
+        std::memcpy(ptr, &id, sizeof(id));
         break;
     }
     case FieldKind::Vec2: {
@@ -503,12 +549,13 @@ Result<void> decodeField(const FieldInfo& field, std::byte* base, ByteReader& in
             case FieldKind::Entity:
                 return sizeof(Entity);
             case FieldKind::String:
+                return sizeof(std::string);
             case FieldKind::Texture:
             case FieldKind::Sound:
             case FieldKind::Music:
             case FieldKind::Font:
             case FieldKind::Script:
-                return sizeof(std::string);
+                return sizeof(uint32_t);
             default:
                 return 0;
             }
