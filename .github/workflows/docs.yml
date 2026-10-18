@@ -1,0 +1,66 @@
+##
+## EPITECH PROJECT, 2026
+## G-ING-500-COT-5-1-rtype-2
+## File description:
+## docs
+##
+
+# Publishes the documentation site (index.html, app.js, docs/) on GitHub Pages (ENG-64).
+# Where Pages is not available (private repository on a free plan), the same files are kept as
+# the "documentation-site" artifact of each run: download it and serve it with any static server.
+
+name: docs
+
+on:
+  push:
+    branches: [main, develop]
+    paths: [docs/**, index.html, app.js, README.md, .github/workflows/docs.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the page list
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          pages = json.load(open("docs/index.json"))
+          missing = [p["file"] for p in pages if not os.path.isfile(os.path.join("docs", p["file"]))]
+          if missing:
+              sys.exit("docs/index.json lists missing pages: " + ", ".join(missing))
+          print(f"{len(pages)} pages")
+          PY
+      - name: Assemble the site
+        run: |
+          mkdir -p site
+          cp -r index.html app.js docs benchmark-graphics-rtype.md site/
+          touch site/.nojekyll
+      - uses: actions/upload-artifact@v4
+        with:
+          name: documentation-site
+          path: site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -7,6 +7,30 @@ person writing the section.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-10-18] — Technical study, legal page, README and documentation site: ENG-63, ENG-64
+
+### Added
+
+- Technical and comparative study (ENG-63), in `docs/study/`: a summary of every choice with its
+  alternatives and ADR, then one page each for libraries, algorithms, storage, security and
+  accessibility, next to the existing ECS storage benchmark. Each page says what is done and what is
+  still to do.
+- Legal and privacy page (`docs/study/legal-and-privacy.md`): the personal data the engine handles
+  (IP address, player name, tokens) and how GDPR principles are met, rules for the team, licences of
+  every dependency, and the R-Type intellectual property caveat.
+- `README.md` (ENG-64): what the project is, requirements, build on Linux and Windows, how to run,
+  links into the documentation.
+- `.github/workflows/docs.yml` (ENG-64): checks that every page of `docs/index.json` exists, publishes
+  the site on GitHub Pages and keeps it as a downloadable artifact where Pages is not available.
+
+### Changed
+
+- The documentation viewer (`index.html`, `app.js`) now has a skip link, real links in the menu
+  (keyboard and screen readers), pages grouped by section, full-text search (`/` to focus, arrows to
+  move, Escape to clear), light and dark themes, a pinned `marked` version, and no confetti or
+  cursor trail when the system asks for reduced motion. `docs/index.json` gains a `section` per page
+  and the study pages.
+
 ## [2026-10-18] — Replication: ENG-39
 
 ### Added
