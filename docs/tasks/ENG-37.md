@@ -11,14 +11,14 @@ The transport plugin: UDP and TCP on an I/O thread with standalone Asio (ADR 003
 Relative to `engine/`. Each file already exists as a skeleton naming this task.
 
 - `plugins/network_asio/CMakeLists.txt`
-- `plugins/network_asio/AsioNetwork.hpp`
+- `plugins/network_asio/include/AsioNetwork.hpp`
 - `plugins/network_asio/AsioNetwork.cpp`
 
 ## Classes and methods
 
 **Declarations only**: what this task must write, without the bodies. Write the implementation in the matching `.cpp`; templates and `constexpr` functions go to a `.inl` next to the header. Behaviour of each method: the comments here and the pages in *Read first*.
 
-### `plugins/network_asio/AsioNetwork.hpp`
+### `plugins/network_asio/include/AsioNetwork.hpp`
 
 ```cpp
 class AsioNetwork final : public INetwork {

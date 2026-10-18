@@ -468,7 +468,7 @@ ENGINE_PLUGIN(MiniaudioAudio)'''),
 ]),
 # ---------------------------------------------------------------- 10 Network
 'ENG-37': dict(extra=[
-    ('plugins/network_asio/AsioNetwork.hpp', 'cpp', '''class AsioNetwork final : public INetwork {
+    ('plugins/network_asio/include/AsioNetwork.hpp', 'cpp', '''class AsioNetwork final : public INetwork {
 public:
     PluginKind kind() const override; std::string_view name() const override;   // "asio"
     uint32_t apiVersion() const override;

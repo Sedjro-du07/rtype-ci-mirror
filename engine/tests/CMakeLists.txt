@@ -219,3 +219,14 @@ add_test(NAME "smoke: headless server with null plugins" COMMAND smoke_launcher 
 add_test(NAME "smoke: a bad option exits with code 1" COMMAND smoke_launcher --colour red
          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_tests_properties("smoke: a bad option exits with code 1" PROPERTIES WILL_FAIL TRUE)
+
+find_package(asio CONFIG REQUIRED)
+engine_add_test(engine_asio_tests SOURCES
+    net/AsioNetworkTest.cpp
+    ${PROJECT_SOURCE_DIR}/plugins/network_asio/AsioNetwork.cpp)
+target_include_directories(engine_asio_tests PRIVATE ${PROJECT_SOURCE_DIR}/plugins/network_asio/include)
+target_link_libraries(engine_asio_tests PRIVATE asio::asio)
+if(WIN32)
+    target_compile_definitions(engine_asio_tests PRIVATE _WIN32_WINNT=0x0A00)
+    target_link_libraries(engine_asio_tests PRIVATE ws2_32 mswsock)
+endif()
