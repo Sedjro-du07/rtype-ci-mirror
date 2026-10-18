@@ -57,7 +57,8 @@ struct Target {
     SfmlRenderer renderer{texture, [this] { this->texture.display(); }};
 
     explicit Target(const WindowDesc& desc) {
-        REQUIRE(this->texture.resize({desc.width, desc.height}));
+        if (!this->texture.resize({desc.width, desc.height}))
+            SKIP("this OpenGL context cannot create the render target");
         this->renderer.setWindowDesc(desc);
     }
 
