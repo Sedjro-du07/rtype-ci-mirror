@@ -231,6 +231,14 @@ if(WIN32)
     target_link_libraries(engine_asio_tests PRIVATE ws2_32 mswsock)
 endif()
 
+find_package(SFML 3 COMPONENTS Graphics CONFIG REQUIRED)
+engine_add_test(engine_platform_sfml_tests SOURCES
+    render/SfmlPlatformTest.cpp
+    ${PROJECT_SOURCE_DIR}/plugins/platform_sfml/SfmlKeys.cpp
+    ${PROJECT_SOURCE_DIR}/plugins/platform_sfml/SfmlRenderer.cpp)
+target_include_directories(engine_platform_sfml_tests PRIVATE ${PROJECT_SOURCE_DIR}/plugins/platform_sfml/include)
+target_link_libraries(engine_platform_sfml_tests PRIVATE SFML::Graphics)
+
 find_path(MINIAUDIO_INCLUDE_DIR miniaudio.h REQUIRED)
 set_source_files_properties(${PROJECT_SOURCE_DIR}/plugins/audio_miniaudio/MiniaudioImplementation.cpp PROPERTIES
     COMPILE_OPTIONS $<IF:$<CXX_COMPILER_ID:MSVC>,/W0,-w>)

@@ -48,6 +48,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ninja-build g++-14 clang-18 \
             libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev libgl1-mesa-dev \
+            xvfb libgl1-mesa-dri fonts-dejavu-core \
             autoconf autoconf-archive automake libtool pkg-config
 
       - name: MSVC environment (Windows)
@@ -77,7 +78,13 @@ jobs:
         run: cmake --build --preset ${{ matrix.preset }}
 
       - name: Test
-        run: ctest --preset ${{ matrix.preset }} --no-tests=ignore
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            xvfb-run -a ctest --preset ${{ matrix.preset }} --no-tests=ignore
+          else
+            ctest --preset ${{ matrix.preset }} --no-tests=ignore
+          fi
 
   format:
     name: clang-format
